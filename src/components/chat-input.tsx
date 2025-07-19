@@ -6,7 +6,7 @@ import { Card, CardDescription, CardHeader } from "./ui/card"
 
 import { useState, useEffect, useRef, useCallback, Dispatch, SetStateAction } from "react"
 import { Pose, MovableBones } from "@/lib/pose"
-import { MPLTranslate } from "@/lib/mpl"
+import { MPLInterpreter } from "@/lib/mpl"
 
 const suggestedPoses: string[] = [
   "left hand thumb up",
@@ -51,7 +51,10 @@ export default function ChatInput({
       setWaitingPoseResult(true)
       setShowSuggestions(false)
 
-      const poseData = MPLTranslate(description)
+      const poseData = MPLInterpreter(description)
+      if (!poseData) {
+        return
+      }
       setDescription("")
       setSmoothUpdate(true)
 
