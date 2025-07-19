@@ -1,5 +1,7 @@
-export const BONES = {
-  all_parents: "全ての親",
+import { Morphs, MovableBones, Pose, RotatableBones } from "./pose"
+
+export const BONES: Record<string, string> = {
+  base: "全ての親",
   center: "センター",
   upper_body: "上半身",
   lower_body: "下半身",
@@ -60,13 +62,13 @@ export const BONES = {
   pinky_r_2: "右小指３",
 }
 
-export const ACTIONS = ["bend", "turn", "twist"]
+export const ACTIONS: string[] = ["bend", "turn", "twist"]
 
-export const DIRECTIONS = ["inward", "outward", "left", "right"]
+export const DIRECTIONS: string[] = ["inward", "outward", "left", "right"]
 
-export const BONE_ACTIONS = {
+export const BONE_ACTIONS: Record<string, string[]> = {
   // Core body
-  all_parents: ["bend", "turn", "twist"],
+  base: ["bend", "turn", "twist"],
   center: ["bend", "turn", "twist"],
   head: ["bend", "turn", "twist"],
   neck: ["bend", "turn", "twist"],
@@ -139,7 +141,7 @@ export const BONE_ACTIONS = {
   pinky_r_2: ["bend"],
 }
 
-export const BONE_LIMITS = {
+export const BONE_LIMITS: Record<string, Record<string, Record<string, number>>> = {
   // Core body
   head: {
     bend: { inward: 60, outward: 90 }, // nod down/up
@@ -238,14 +240,104 @@ export const BONE_LIMITS = {
   thumb_r_1: {
     bend: { inward: 90, outward: 0 },
   },
+  index_l_0: {
+    bend: { inward: 60, outward: 15 },
+    turn: { left: 45, right: 45 },
+  },
+  index_r_0: {
+    bend: { inward: 60, outward: 15 },
+  },
+  index_l_1: {
+    bend: { inward: 90, outward: 0 },
+  },
+  index_r_1: {
+    bend: { inward: 90, outward: 0 },
+  },
+  index_l_2: {
+    bend: { inward: 90, outward: 0 },
+  },
+  index_r_2: {
+    bend: { inward: 90, outward: 0 },
+  },
+  middle_l_0: {
+    bend: { inward: 60, outward: 15 },
+  },
+  middle_r_0: {
+    bend: { inward: 60, outward: 15 },
+  },
+  middle_l_1: {
+    bend: { inward: 90, outward: 0 },
+  },
+  middle_r_1: {
+    bend: { inward: 90, outward: 0 },
+  },
+  middle_l_2: {
+    bend: { inward: 90, outward: 0 },
+  },
+  middle_r_2: {
+    bend: { inward: 90, outward: 0 },
+  },
+  ring_l_0: {
+    bend: { inward: 60, outward: 15 },
+  },
+  ring_r_0: {
+    bend: { inward: 60, outward: 15 },
+  },
+  ring_l_1: {
+    bend: { inward: 90, outward: 0 },
+  },
+  ring_r_1: {
+    bend: { inward: 90, outward: 0 },
+  },
+  ring_l_2: {
+    bend: { inward: 90, outward: 0 },
+  },
+  ring_r_2: {
+    bend: { inward: 90, outward: 0 },
+  },
+  pinky_l_0: {
+    bend: { inward: 60, outward: 15 },
+  },
+  pinky_r_0: {
+    bend: { inward: 60, outward: 15 },
+  },
+  pinky_l_1: {
+    bend: { inward: 90, outward: 0 },
+  },
+  pinky_r_1: {
+    bend: { inward: 90, outward: 0 },
+  },
+  pinky_l_2: {
+    bend: { inward: 90, outward: 0 },
+  },
+  pinky_r_2: {
+    bend: { inward: 90, outward: 0 },
+  },
 }
 
-export const MPLTranslate = (description: string) => {
-  console.log(description)
-  return {
-    description: "test",
-    face: {},
-    movableBones: {},
-    rotatableBones: {},
+export const MPLInterpreter = (description: string): Pose | null => {
+  if (description === "") {
+    return null
   }
+  const segments = description.split(" ")
+  if (segments.length !== 4) {
+    return null
+  }
+  const bone = segments[0] as string
+  const action = segments[1] as string
+  const direction = segments[2] as string
+  const degrees = Number(segments[3])
+  if (!BONES[bone] || !ACTIONS.includes(action) || !DIRECTIONS.includes(direction) || isNaN(degrees)) {
+    return null
+  }
+  if (degrees > BONE_LIMITS[bone][action][direction]) {
+    return null
+  }
+  const pose: Pose = {
+    description: description,
+    face: {} as Morphs,
+    movableBones: {} as MovableBones,
+    rotatableBones: {} as RotatableBones,
+  }
+  return pose
 }
