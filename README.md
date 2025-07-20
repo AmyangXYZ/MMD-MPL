@@ -1,6 +1,6 @@
-# PoPo
+# MPL - MMD Pose Language
 
-**MPL (MMD Pose Language)** - A rule-based DSL for controlling MMD bones using natural language commands.
+MPL is a rule-based Domain-Specific Language for controlling MMD bones using natural language commands.
 
 ## Why MPL?
 
