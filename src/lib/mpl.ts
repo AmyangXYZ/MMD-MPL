@@ -116,38 +116,86 @@ export const BONE_ACTION_RULES: Record<string, Record<string, Record<string, Act
   knee_l: { bend: { backward: { sign: -1, axis: "x", limit: 135 } } },
   knee_r: { bend: { backward: { sign: -1, axis: "x", limit: 135 } } },
 
-  // Fingers: bend=curl, sway=sideways
   index_l_0: {
     bend: { forward: { sign: -1, axis: "z", limit: 60 }, backward: { sign: 1, axis: "z", limit: 15 } },
     sway: { left: { sign: -1, axis: "x", limit: 15 }, right: { sign: 1, axis: "x", limit: 15 } },
   },
+  index_l_1: {
+    bend: { forward: { sign: -1, axis: "z", limit: 60 }, backward: { sign: 1, axis: "z", limit: 15 } },
+  },
+  index_l_2: {
+    bend: { forward: { sign: -1, axis: "z", limit: 60 }, backward: { sign: 1, axis: "z", limit: 15 } },
+  },
+  middle_l_0: {
+    bend: { forward: { sign: -1, axis: "z", limit: 60 }, backward: { sign: 1, axis: "z", limit: 15 } },
+    sway: { left: { sign: -1, axis: "x", limit: 45 }, right: { sign: 1, axis: "x", limit: 45 } },
+  },
+  middle_l_1: {
+    bend: { forward: { sign: -1, axis: "z", limit: 60 }, backward: { sign: 1, axis: "z", limit: 15 } },
+  },
+  middle_l_2: {
+    bend: { forward: { sign: -1, axis: "z", limit: 60 }, backward: { sign: 1, axis: "z", limit: 15 } },
+  },
+  ring_l_0: {
+    bend: { forward: { sign: -1, axis: "z", limit: 60 }, backward: { sign: 1, axis: "z", limit: 15 } },
+    sway: { left: { sign: -1, axis: "x", limit: 45 }, right: { sign: 1, axis: "x", limit: 45 } },
+  },
+  ring_l_1: {
+    bend: { forward: { sign: -1, axis: "z", limit: 60 }, backward: { sign: 1, axis: "z", limit: 15 } },
+  },
+  ring_l_2: {
+    bend: { forward: { sign: -1, axis: "z", limit: 60 }, backward: { sign: 1, axis: "z", limit: 15 } },
+  },
+  pinky_l_0: {
+    bend: { forward: { sign: -1, axis: "z", limit: 60 }, backward: { sign: 1, axis: "z", limit: 15 } },
+    sway: { left: { sign: -1, axis: "x", limit: 45 }, right: { sign: 1, axis: "x", limit: 45 } },
+  },
+  pinky_l_1: {
+    bend: { forward: { sign: -1, axis: "z", limit: 60 }, backward: { sign: 1, axis: "z", limit: 15 } },
+  },
+  pinky_l_2: {
+    bend: { forward: { sign: -1, axis: "z", limit: 60 }, backward: { sign: 1, axis: "z", limit: 15 } },
+  },
+
   index_r_0: {
     bend: { forward: { sign: 1, axis: "z", limit: 60 }, backward: { sign: -1, axis: "z", limit: 15 } },
     sway: { left: { sign: 1, axis: "x", limit: 15 }, right: { sign: -1, axis: "x", limit: 15 } },
   },
-  middle_l_0: {
-    bend: { forward: { sign: 1, axis: "x", limit: 60 }, backward: { sign: -1, axis: "x", limit: 15 } },
-    sway: { left: { sign: 1, axis: "z", limit: 45 }, right: { sign: -1, axis: "z", limit: 45 } },
+  index_r_1: {
+    bend: { forward: { sign: 1, axis: "z", limit: 60 }, backward: { sign: -1, axis: "z", limit: 15 } },
+  },
+  index_r_2: {
+    bend: { forward: { sign: 1, axis: "z", limit: 60 }, backward: { sign: -1, axis: "z", limit: 15 } },
   },
   middle_r_0: {
-    bend: { forward: { sign: 1, axis: "x", limit: 60 }, backward: { sign: -1, axis: "x", limit: 15 } },
-    sway: { left: { sign: -1, axis: "z", limit: 45 }, right: { sign: 1, axis: "z", limit: 45 } },
+    bend: { forward: { sign: 1, axis: "z", limit: 60 }, backward: { sign: -1, axis: "z", limit: 15 } },
+    sway: { left: { sign: 1, axis: "x", limit: 45 }, right: { sign: -1, axis: "x", limit: 45 } },
   },
-  ring_l_0: {
-    bend: { forward: { sign: 1, axis: "x", limit: 60 }, backward: { sign: -1, axis: "x", limit: 15 } },
-    sway: { left: { sign: 1, axis: "z", limit: 45 }, right: { sign: -1, axis: "z", limit: 45 } },
+  middle_r_1: {
+    bend: { forward: { sign: 1, axis: "z", limit: 60 }, backward: { sign: -1, axis: "z", limit: 15 } },
+  },
+  middle_r_2: {
+    bend: { forward: { sign: 1, axis: "z", limit: 60 }, backward: { sign: -1, axis: "z", limit: 15 } },
   },
   ring_r_0: {
-    bend: { forward: { sign: 1, axis: "x", limit: 60 }, backward: { sign: -1, axis: "x", limit: 15 } },
-    sway: { left: { sign: -1, axis: "z", limit: 45 }, right: { sign: 1, axis: "z", limit: 45 } },
+    bend: { forward: { sign: 1, axis: "z", limit: 60 }, backward: { sign: -1, axis: "z", limit: 15 } },
+    sway: { left: { sign: 1, axis: "x", limit: 45 }, right: { sign: -1, axis: "x", limit: 45 } },
   },
-  pinky_l_0: {
-    bend: { forward: { sign: 1, axis: "x", limit: 60 }, backward: { sign: -1, axis: "x", limit: 15 } },
-    sway: { left: { sign: 1, axis: "z", limit: 45 }, right: { sign: -1, axis: "z", limit: 45 } },
+  ring_r_1: {
+    bend: { forward: { sign: 1, axis: "z", limit: 60 }, backward: { sign: -1, axis: "z", limit: 15 } },
+  },
+  ring_r_2: {
+    bend: { forward: { sign: 1, axis: "z", limit: 60 }, backward: { sign: -1, axis: "z", limit: 15 } },
   },
   pinky_r_0: {
-    bend: { forward: { sign: 1, axis: "x", limit: 60 }, backward: { sign: -1, axis: "x", limit: 15 } },
-    sway: { left: { sign: -1, axis: "z", limit: 45 }, right: { sign: 1, axis: "z", limit: 45 } },
+    bend: { forward: { sign: 1, axis: "z", limit: 60 }, backward: { sign: -1, axis: "z", limit: 15 } },
+    sway: { left: { sign: 1, axis: "x", limit: 45 }, right: { sign: -1, axis: "x", limit: 45 } },
+  },
+  pinky_r_1: {
+    bend: { forward: { sign: 1, axis: "z", limit: 60 }, backward: { sign: -1, axis: "z", limit: 15 } },
+  },
+  pinky_r_2: {
+    bend: { forward: { sign: 1, axis: "z", limit: 60 }, backward: { sign: -1, axis: "z", limit: 15 } },
   },
 }
 
@@ -201,13 +249,6 @@ export const MPLInterpreter = (input: string): Pose | null => {
   }
   const { bone, action, direction, degrees } = statement
 
-  const pose: Pose = {
-    description: input,
-    face: {} as Morphs,
-    movableBones: {} as MovableBones,
-    rotatableBones: {} as RotatableBones,
-  }
-
   // Convert MPL directly to quaternion
   const boneRules = BONE_ACTION_RULES[bone]
   const actionRules = boneRules?.[action]
@@ -227,7 +268,6 @@ export const MPLInterpreter = (input: string): Pose | null => {
 
   // Create quaternion based on the specified axis
   let quaternion: [number, number, number, number] = [0, 0, 0, 1]
-  // Quaternion format: [x, y, z, w]
   if (rule.axis === "x") {
     quaternion = [sin, 0, 0, cos] // Rotation around X axis
   } else if (rule.axis === "y") {
@@ -235,10 +275,16 @@ export const MPLInterpreter = (input: string): Pose | null => {
   } else if (rule.axis === "z") {
     quaternion = [0, 0, sin, cos] // Rotation around Z axis
   } else {
-    return pose
+    return null
   }
 
-  // Apply to the bone
+  const pose: Pose = {
+    description: input,
+    face: {} as Morphs,
+    movableBones: {} as MovableBones,
+    rotatableBones: {} as RotatableBones,
+  }
+
   pose.rotatableBones[BONES[bone] as keyof RotatableBones] = quaternion
   console.log(pose)
   return pose
