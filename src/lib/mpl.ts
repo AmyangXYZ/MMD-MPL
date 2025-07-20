@@ -1,6 +1,7 @@
 import { Morphs, MovableBones, Pose, RotatableBones } from "./pose"
 
 export const BONES: Record<string, string> = {
+  base: "全ての親",
   center: "センター",
   upper_body: "上半身",
   waist: "腰",
@@ -24,10 +25,8 @@ export const BONES: Record<string, string> = {
   knee_r: "右ひざ",
   ankle_l: "左足首",
   ankle_r: "右足首",
-  ankle_ex_l: "左足先EX",
-  ankle_ex_r: "右足先EX",
-  eye_l: "左目",
-  eye_r: "右目",
+  forefoot_l: "左足先EX",
+  forefoot_r: "右足先EX",
   thumb_l_0: "左親指０",
   thumb_r_0: "右親指０",
   thumb_l_1: "左親指１",
@@ -71,6 +70,16 @@ interface ActionRule {
 }
 
 export const BONE_ACTION_RULES: Record<string, Record<string, Record<string, ActionRule>>> = {
+  base: {
+    bend: { forward: { sign: -1, axis: "x", limit: 90 }, backward: { sign: 1, axis: "x", limit: 90 } },
+    turn: { left: { sign: -1, axis: "y", limit: 180 }, right: { sign: 1, axis: "y", limit: 180 } },
+    sway: { left: { sign: -1, axis: "z", limit: 180 }, right: { sign: 1, axis: "z", limit: 180 } },
+  },
+  center: {
+    bend: { forward: { sign: -1, axis: "x", limit: 90 }, backward: { sign: 1, axis: "x", limit: 90 } },
+    turn: { left: { sign: -1, axis: "y", limit: 180 }, right: { sign: 1, axis: "y", limit: 180 } },
+    sway: { left: { sign: -1, axis: "z", limit: 180 }, right: { sign: 1, axis: "z", limit: 180 } },
+  },
   head: {
     bend: { forward: { sign: -1, axis: "x", limit: 60 }, backward: { sign: 1, axis: "x", limit: 90 } },
     turn: { left: { sign: -1, axis: "y", limit: 90 }, right: { sign: 1, axis: "y", limit: 90 } },
@@ -92,15 +101,27 @@ export const BONE_ACTION_RULES: Record<string, Record<string, Record<string, Act
     sway: { left: { sign: -1, axis: "z", limit: 30 }, right: { sign: 1, axis: "z", limit: 30 } },
   },
 
-  arm_l: {
-    bend: { forward: { sign: -1, axis: "z", limit: 45 }, backward: { sign: 1, axis: "z", limit: 45 } },
-    turn: { left: { sign: -1, axis: "x", limit: 90 }, right: { sign: 1, axis: "x", limit: 90 } },
+  shoulder_l: {
+    bend: { forward: { sign: -1, axis: "z", limit: 90 }, backward: { sign: 1, axis: "z", limit: 90 } },
+    sway: { left: { sign: -1, axis: "y", limit: 90 }, right: { sign: 1, axis: "y", limit: 90 } },
+  },
+  shoulder_r: {
+    bend: { forward: { sign: 1, axis: "z", limit: 90 }, backward: { sign: -1, axis: "z", limit: 90 } },
     sway: { left: { sign: 1, axis: "y", limit: 90 }, right: { sign: -1, axis: "y", limit: 90 } },
+  },
+  arm_l: {
+    bend: { forward: { sign: -1, axis: "z", limit: 90 }, backward: { sign: 1, axis: "z", limit: 90 } },
+    sway: { left: { sign: -1, axis: "y", limit: 90 }, right: { sign: 1, axis: "y", limit: 90 } },
   },
   arm_r: {
     bend: { forward: { sign: 1, axis: "x", limit: 45 }, backward: { sign: -1, axis: "x", limit: 180 } },
-    turn: { left: { sign: -1, axis: "y", limit: 45 }, right: { sign: 1, axis: "y", limit: 90 } },
-    sway: { left: { sign: 1, axis: "z", limit: 90 }, right: { sign: 1, axis: "z", limit: 90 } },
+    sway: { left: { sign: -1, axis: "y", limit: 90 }, right: { sign: 1, axis: "y", limit: 90 } },
+  },
+  arm_twist_l: {
+    turn: { left: { sign: -1, axis: "y", limit: 90 }, right: { sign: 1, axis: "y", limit: 90 } },
+  },
+  arm_twist_r: {
+    turn: { left: { sign: -1, axis: "y", limit: 90 }, right: { sign: 1, axis: "y", limit: 90 } },
   },
   elbow_l: {
     bend: {
@@ -132,6 +153,12 @@ export const BONE_ACTION_RULES: Record<string, Record<string, Record<string, Act
       left: { sign: 1, axis: "x-y", limit: 15 },
     },
   },
+  wrist_twist_l: {
+    turn: { left: { sign: -1, axis: "y", limit: 90 }, right: { sign: 1, axis: "y", limit: 90 } },
+  },
+  wrist_twist_r: {
+    turn: { left: { sign: -1, axis: "y", limit: 90 }, right: { sign: 1, axis: "y", limit: 90 } },
+  },
 
   leg_l: {
     bend: { forward: { sign: 1, axis: "x", limit: 90 }, backward: { sign: -1, axis: "x", limit: 90 } },
@@ -145,6 +172,18 @@ export const BONE_ACTION_RULES: Record<string, Record<string, Record<string, Act
   },
   knee_l: { bend: { backward: { sign: -1, axis: "x", limit: 135 } } },
   knee_r: { bend: { backward: { sign: -1, axis: "x", limit: 135 } } },
+  ankle_l: {
+    bend: { forward: { sign: -1, axis: "x", limit: 45 }, backward: { sign: 1, axis: "x", limit: 45 } },
+    turn: { left: { sign: -1, axis: "y", limit: 90 }, right: { sign: 1, axis: "y", limit: 90 } },
+    sway: { left: { sign: 1, axis: "z", limit: 30 }, right: { sign: -1, axis: "z", limit: 30 } },
+  },
+  ankle_r: {
+    bend: { forward: { sign: -1, axis: "x", limit: 45 }, backward: { sign: 1, axis: "x", limit: 45 } },
+    turn: { left: { sign: -1, axis: "y", limit: 90 }, right: { sign: 1, axis: "y", limit: 90 } },
+    sway: { left: { sign: 1, axis: "z", limit: 30 }, right: { sign: -1, axis: "z", limit: 30 } },
+  },
+  forefoot_l: { bend: { forward: { sign: -1, axis: "x", limit: 30 }, backward: { sign: 1, axis: "x", limit: 30 } } },
+  forefoot_r: { bend: { forward: { sign: -1, axis: "x", limit: 30 }, backward: { sign: 1, axis: "x", limit: 30 } } },
 
   thumb_l_0: {
     bend: { forward: { sign: -1, axis: "xy", limit: 90 }, backward: { sign: 1, axis: "xy", limit: 15 } },
