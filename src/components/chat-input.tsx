@@ -9,10 +9,22 @@ import { Pose, MovableBones } from "@/lib/pose"
 import { MPLInterpreter } from "@/lib/mpl"
 
 const suggestedPoses: string[] = [
-  "leg_l turn left 30",
-  "leg_l bend backward 40",
-  "leg_l sway left 40",
-  "leg_l bend forward 40",
+  "index_r_0 bend forward 90",
+  "arm_l bend forward 40",
+  "head turn right 30; head bend backward 20",
+  "knee_l bend backward 20; leg_r bend forward 30; leg_l turn left 30",
+  "thumb_l_0 bend forward 60",
+  "neck bend forward 25",
+  "arm_r bend forward 45; arm_r sway right 20; wrist_r bend forward 30",
+  "head turn left 20; neck turn left 15; upper_body turn left 10",
+  "middle_l_0 bend forward 75",
+  "waist bend forward 30",
+  "leg_l bend forward 45; leg_l sway left 25; ankle_l bend forward 15",
+  "shoulder_l bend forward 30; arm_l bend forward 50; arm_l sway left 20",
+  "pinky_r_0 bend forward 60",
+  "center bend forward 20",
+  "head bend forward 25; neck bend forward 20; upper_body bend forward 15",
+  "arm_l bend forward 40; arm_r bend forward 40; head turn right 15",
 ] as const
 
 export default function ChatInput({
@@ -36,7 +48,7 @@ export default function ChatInput({
     setDisplayedPoses(getRandomPoses())
   }, [])
 
-  const [description, setDescription] = useState("head tUrn left 40")
+  const [description, setDescription] = useState("")
 
   const generatePose = useCallback(
     async (description: string) => {
@@ -124,7 +136,7 @@ export default function ChatInput({
               }
             }}
             disabled={false}
-            placeholder={"NECK TURN LEFT"}
+            placeholder={"<bone> <action> <direction> <degree>"}
           />
         </div>
 

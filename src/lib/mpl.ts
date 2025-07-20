@@ -196,44 +196,44 @@ export const BONE_ACTION_RULES: Record<string, Record<string, Record<string, Act
     bend: { forward: { sign: -1, axis: "xy", limit: 90 }, backward: { sign: 1, axis: "xy", limit: 15 } },
   },
   index_l_0: {
-    bend: { forward: { sign: -1, axis: "z", limit: 60 }, backward: { sign: 1, axis: "z", limit: 15 } },
+    bend: { forward: { sign: -1, axis: "z", limit: 90 }, backward: { sign: 1, axis: "z", limit: 15 } },
     sway: { left: { sign: -1, axis: "x", limit: 15 }, right: { sign: 1, axis: "x", limit: 15 } },
   },
   index_l_1: {
-    bend: { forward: { sign: -1, axis: "z", limit: 60 }, backward: { sign: 1, axis: "z", limit: 15 } },
+    bend: { forward: { sign: -1, axis: "z", limit: 90 }, backward: { sign: 1, axis: "z", limit: 15 } },
   },
   index_l_2: {
-    bend: { forward: { sign: -1, axis: "z", limit: 60 }, backward: { sign: 1, axis: "z", limit: 15 } },
+    bend: { forward: { sign: -1, axis: "z", limit: 90 }, backward: { sign: 1, axis: "z", limit: 15 } },
   },
   middle_l_0: {
-    bend: { forward: { sign: -1, axis: "z", limit: 60 }, backward: { sign: 1, axis: "z", limit: 15 } },
+    bend: { forward: { sign: -1, axis: "z", limit: 90 }, backward: { sign: 1, axis: "z", limit: 15 } },
     sway: { left: { sign: -1, axis: "x", limit: 45 }, right: { sign: 1, axis: "x", limit: 45 } },
   },
   middle_l_1: {
-    bend: { forward: { sign: -1, axis: "z", limit: 60 }, backward: { sign: 1, axis: "z", limit: 15 } },
+    bend: { forward: { sign: -1, axis: "z", limit: 90 }, backward: { sign: 1, axis: "z", limit: 15 } },
   },
   middle_l_2: {
-    bend: { forward: { sign: -1, axis: "z", limit: 60 }, backward: { sign: 1, axis: "z", limit: 15 } },
+    bend: { forward: { sign: -1, axis: "z", limit: 90 }, backward: { sign: 1, axis: "z", limit: 15 } },
   },
   ring_l_0: {
-    bend: { forward: { sign: -1, axis: "z", limit: 60 }, backward: { sign: 1, axis: "z", limit: 15 } },
+    bend: { forward: { sign: -1, axis: "z", limit: 90 }, backward: { sign: 1, axis: "z", limit: 15 } },
     sway: { left: { sign: -1, axis: "x", limit: 45 }, right: { sign: 1, axis: "x", limit: 45 } },
   },
   ring_l_1: {
-    bend: { forward: { sign: -1, axis: "z", limit: 60 }, backward: { sign: 1, axis: "z", limit: 15 } },
+    bend: { forward: { sign: -1, axis: "z", limit: 90 }, backward: { sign: 1, axis: "z", limit: 15 } },
   },
   ring_l_2: {
-    bend: { forward: { sign: -1, axis: "z", limit: 60 }, backward: { sign: 1, axis: "z", limit: 15 } },
+    bend: { forward: { sign: -1, axis: "z", limit: 90 }, backward: { sign: 1, axis: "z", limit: 15 } },
   },
   pinky_l_0: {
-    bend: { forward: { sign: -1, axis: "z", limit: 60 }, backward: { sign: 1, axis: "z", limit: 15 } },
+    bend: { forward: { sign: -1, axis: "z", limit: 90 }, backward: { sign: 1, axis: "z", limit: 15 } },
     sway: { left: { sign: -1, axis: "x", limit: 45 }, right: { sign: 1, axis: "x", limit: 45 } },
   },
   pinky_l_1: {
-    bend: { forward: { sign: -1, axis: "z", limit: 60 }, backward: { sign: 1, axis: "z", limit: 15 } },
+    bend: { forward: { sign: -1, axis: "z", limit: 90 }, backward: { sign: 1, axis: "z", limit: 15 } },
   },
   pinky_l_2: {
-    bend: { forward: { sign: -1, axis: "z", limit: 60 }, backward: { sign: 1, axis: "z", limit: 15 } },
+    bend: { forward: { sign: -1, axis: "z", limit: 90 }, backward: { sign: 1, axis: "z", limit: 15 } },
   },
 
   thumb_r_0: {
@@ -247,44 +247,44 @@ export const BONE_ACTION_RULES: Record<string, Record<string, Record<string, Act
     bend: { forward: { sign: -1, axis: "x-y", limit: 90 }, backward: { sign: 1, axis: "x-y", limit: 15 } },
   },
   index_r_0: {
-    bend: { forward: { sign: 1, axis: "z", limit: 60 }, backward: { sign: -1, axis: "z", limit: 15 } },
+    bend: { forward: { sign: 1, axis: "z", limit: 90 }, backward: { sign: -1, axis: "z", limit: 15 } },
     sway: { left: { sign: 1, axis: "x", limit: 15 }, right: { sign: -1, axis: "x", limit: 15 } },
   },
   index_r_1: {
-    bend: { forward: { sign: 1, axis: "z", limit: 60 }, backward: { sign: -1, axis: "z", limit: 15 } },
+    bend: { forward: { sign: 1, axis: "z", limit: 90 }, backward: { sign: -1, axis: "z", limit: 15 } },
   },
   index_r_2: {
-    bend: { forward: { sign: 1, axis: "z", limit: 60 }, backward: { sign: -1, axis: "z", limit: 15 } },
+    bend: { forward: { sign: 1, axis: "z", limit: 90 }, backward: { sign: -1, axis: "z", limit: 15 } },
   },
   middle_r_0: {
-    bend: { forward: { sign: 1, axis: "z", limit: 60 }, backward: { sign: -1, axis: "z", limit: 15 } },
+    bend: { forward: { sign: 1, axis: "z", limit: 90 }, backward: { sign: -1, axis: "z", limit: 15 } },
     sway: { left: { sign: 1, axis: "x", limit: 45 }, right: { sign: -1, axis: "x", limit: 45 } },
   },
   middle_r_1: {
-    bend: { forward: { sign: 1, axis: "z", limit: 60 }, backward: { sign: -1, axis: "z", limit: 15 } },
+    bend: { forward: { sign: 1, axis: "z", limit: 90 }, backward: { sign: -1, axis: "z", limit: 15 } },
   },
   middle_r_2: {
-    bend: { forward: { sign: 1, axis: "z", limit: 60 }, backward: { sign: -1, axis: "z", limit: 15 } },
+    bend: { forward: { sign: 1, axis: "z", limit: 90 }, backward: { sign: -1, axis: "z", limit: 15 } },
   },
   ring_r_0: {
-    bend: { forward: { sign: 1, axis: "z", limit: 60 }, backward: { sign: -1, axis: "z", limit: 15 } },
+    bend: { forward: { sign: 1, axis: "z", limit: 90 }, backward: { sign: -1, axis: "z", limit: 15 } },
     sway: { left: { sign: 1, axis: "x", limit: 45 }, right: { sign: -1, axis: "x", limit: 45 } },
   },
   ring_r_1: {
-    bend: { forward: { sign: 1, axis: "z", limit: 60 }, backward: { sign: -1, axis: "z", limit: 15 } },
+    bend: { forward: { sign: 1, axis: "z", limit: 90 }, backward: { sign: -1, axis: "z", limit: 15 } },
   },
   ring_r_2: {
-    bend: { forward: { sign: 1, axis: "z", limit: 60 }, backward: { sign: -1, axis: "z", limit: 15 } },
+    bend: { forward: { sign: 1, axis: "z", limit: 90 }, backward: { sign: -1, axis: "z", limit: 15 } },
   },
   pinky_r_0: {
-    bend: { forward: { sign: 1, axis: "z", limit: 60 }, backward: { sign: -1, axis: "z", limit: 15 } },
+    bend: { forward: { sign: 1, axis: "z", limit: 90 }, backward: { sign: -1, axis: "z", limit: 15 } },
     sway: { left: { sign: 1, axis: "x", limit: 45 }, right: { sign: -1, axis: "x", limit: 45 } },
   },
   pinky_r_1: {
-    bend: { forward: { sign: 1, axis: "z", limit: 60 }, backward: { sign: -1, axis: "z", limit: 15 } },
+    bend: { forward: { sign: 1, axis: "z", limit: 90 }, backward: { sign: -1, axis: "z", limit: 15 } },
   },
   pinky_r_2: {
-    bend: { forward: { sign: 1, axis: "z", limit: 60 }, backward: { sign: -1, axis: "z", limit: 15 } },
+    bend: { forward: { sign: 1, axis: "z", limit: 90 }, backward: { sign: -1, axis: "z", limit: 15 } },
   },
 }
 
@@ -331,14 +331,26 @@ export const validateStatement = (input: string): MPLStatement | null => {
   } as MPLStatement
 }
 
-export const MPLInterpreter = (input: string): Pose | null => {
-  const statement = validateStatement(input)
-  if (!statement) {
-    return null
-  }
+// Helper function to multiply two quaternions
+const multiplyQuaternions = (
+  q1: [number, number, number, number],
+  q2: [number, number, number, number]
+): [number, number, number, number] => {
+  const [x1, y1, z1, w1] = q1
+  const [x2, y2, z2, w2] = q2
+
+  return [
+    w1 * x2 + x1 * w2 + y1 * z2 - z1 * y2,
+    w1 * y2 - x1 * z2 + y1 * w2 + z1 * x2,
+    w1 * z2 + x1 * y2 - y1 * x2 + z1 * w2,
+    w1 * w2 - x1 * x2 - y1 * y2 - z1 * z2,
+  ]
+}
+
+// Helper function to process a single statement and return quaternion
+const processSingleStatement = (statement: MPLStatement): [number, number, number, number] | null => {
   const { bone, action, direction, degrees } = statement
 
-  // Convert MPL directly to quaternion
   const boneRules = BONE_ACTION_RULES[bone]
   const actionRules = boneRules?.[action]
   const rule = actionRules?.[direction]
@@ -391,6 +403,30 @@ export const MPLInterpreter = (input: string): Pose | null => {
     return null
   }
 
+  return quaternion
+}
+
+export const MPLInterpreter = (input: string): Pose | null => {
+  // Split input by semicolons and trim whitespace
+  const statements = input
+    .split(";")
+    .map((s) => s.trim())
+    .filter((s) => s !== "")
+
+  if (statements.length === 0) {
+    return null
+  }
+
+  // Validate all statements first
+  const validStatements: MPLStatement[] = []
+  for (const statement of statements) {
+    const validStatement = validateStatement(statement)
+    if (!validStatement) {
+      return null // If any statement is invalid, return null
+    }
+    validStatements.push(validStatement)
+  }
+
   const pose: Pose = {
     description: input,
     face: {} as Morphs,
@@ -398,7 +434,32 @@ export const MPLInterpreter = (input: string): Pose | null => {
     rotatableBones: {} as RotatableBones,
   }
 
-  pose.rotatableBones[BONES[bone] as keyof RotatableBones] = quaternion
+  // Group statements by bone to handle multiple rotations on the same bone
+  const boneGroups: Record<string, MPLStatement[]> = {}
+  for (const statement of validStatements) {
+    if (!boneGroups[statement.bone]) {
+      boneGroups[statement.bone] = []
+    }
+    boneGroups[statement.bone].push(statement)
+  }
+
+  // Process each bone group
+  for (const [bone, boneStatements] of Object.entries(boneGroups)) {
+    let combinedQuaternion: [number, number, number, number] = [0, 0, 0, 1] // Identity quaternion
+
+    // Process all statements for this bone
+    for (const statement of boneStatements) {
+      const quaternion = processSingleStatement(statement)
+      if (quaternion) {
+        // Multiply quaternions to combine rotations
+        combinedQuaternion = multiplyQuaternions(combinedQuaternion, quaternion)
+      }
+    }
+
+    // Apply the combined quaternion to the bone
+    pose.rotatableBones[BONES[bone] as keyof RotatableBones] = combinedQuaternion
+  }
+
   console.log(pose)
   return pose
 }
