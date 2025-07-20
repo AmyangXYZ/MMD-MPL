@@ -1,10 +1,8 @@
 import { Morphs, MovableBones, Pose, RotatableBones } from "./pose"
 
 export const BONES: Record<string, string> = {
-  base: "全ての親",
   center: "センター",
   upper_body: "上半身",
-  lower_body: "下半身",
   waist: "腰",
   neck: "首",
   head: "頭",
@@ -12,14 +10,14 @@ export const BONES: Record<string, string> = {
   shoulder_r: "右肩",
   arm_l: "左腕",
   arm_r: "右腕",
-  arm_twist_l: "左腕捩",
-  arm_twist_r: "右腕捩",
+  arm_sway_l: "左腕捩",
+  arm_sway_r: "右腕捩",
   elbow_l: "左ひじ",
   elbow_r: "右ひじ",
   wrist_l: "左手首",
   wrist_r: "右手首",
-  wrist_twist_l: "左手捩",
-  wrist_twist_r: "右手捩",
+  wrist_sway_l: "左手捩",
+  wrist_sway_r: "右手捩",
   leg_l: "左足",
   leg_r: "右足",
   knee_l: "左ひざ",
@@ -62,282 +60,186 @@ export const BONES: Record<string, string> = {
   pinky_r_2: "右小指３",
 }
 
-export const ACTIONS: string[] = ["bend", "turn", "twist"]
+export const ACTIONS: string[] = ["bend", "turn", "sway"]
 
-export const DIRECTIONS: string[] = ["inward", "outward", "left", "right"]
+export const DIRECTIONS: string[] = ["forward", "backward", "left", "right"]
 
-export const BONE_ACTIONS: Record<string, string[]> = {
-  // Core body
-  base: ["bend", "turn", "twist"],
-  center: ["bend", "turn", "twist"],
-  head: ["bend", "turn", "twist"],
-  neck: ["bend", "turn", "twist"],
-  upper_body: ["bend", "turn", "twist"],
-  lower_body: ["bend", "turn", "twist"],
-  waist: ["bend", "turn", "twist"],
-
-  // Arms & shoulders
-  shoulder_l: ["bend", "turn", "twist"],
-  shoulder_r: ["bend", "turn", "twist"],
-  arm_l: ["bend", "turn", "twist"],
-  arm_r: ["bend", "turn", "twist"],
-  arm_twist_l: ["twist"],
-  arm_twist_r: ["twist"],
-  elbow_l: ["bend"],
-  elbow_r: ["bend"],
-  wrist_l: ["bend", "turn"],
-  wrist_r: ["bend", "turn"],
-  wrist_twist_l: ["twist"],
-  wrist_twist_r: ["twist"],
-
-  // Legs
-  leg_l: ["bend", "turn", "twist"],
-  leg_r: ["bend", "turn", "twist"],
-  knee_l: ["bend"],
-  knee_r: ["bend"],
-  ankle_l: ["bend", "turn"],
-  ankle_r: ["bend", "turn"],
-  ankle_ex_l: ["bend"],
-  ankle_ex_r: ["bend"],
-
-  // Eyes
-  eye_l: ["turn"],
-  eye_r: ["turn"],
-
-  // Fingers - mainly bend, limited turn/twist
-  thumb_l_0: ["bend", "turn"],
-  thumb_r_0: ["bend", "turn"],
-  thumb_l_1: ["bend"],
-  thumb_r_1: ["bend"],
-  thumb_l_2: ["bend"],
-  thumb_r_2: ["bend"],
-
-  index_l_0: ["bend", "turn"],
-  index_r_0: ["bend", "turn"],
-  index_l_1: ["bend"],
-  index_r_1: ["bend"],
-  index_l_2: ["bend"],
-  index_r_2: ["bend"],
-
-  middle_l_0: ["bend", "turn"],
-  middle_r_0: ["bend", "turn"],
-  middle_l_1: ["bend"],
-  middle_r_1: ["bend"],
-  middle_l_2: ["bend"],
-  middle_r_2: ["bend"],
-
-  ring_l_0: ["bend", "turn"],
-  ring_r_0: ["bend", "turn"],
-  ring_l_1: ["bend"],
-  ring_r_1: ["bend"],
-  ring_l_2: ["bend"],
-  ring_r_2: ["bend"],
-
-  pinky_l_0: ["bend", "turn"],
-  pinky_r_0: ["bend", "turn"],
-  pinky_l_1: ["bend"],
-  pinky_r_1: ["bend"],
-  pinky_l_2: ["bend"],
-  pinky_r_2: ["bend"],
+interface ActionRule {
+  sign: number
+  axis: "x" | "y" | "z"
+  limit: number
 }
 
-export const BONE_LIMITS: Record<string, Record<string, Record<string, number>>> = {
-  // Core body
+export const BONE_ACTION_RULES: Record<string, Record<string, Record<string, ActionRule>>> = {
   head: {
-    bend: { inward: 60, outward: 90 }, // nod down/up
-    turn: { left: 90, right: 90 }, // look left/right
-    twist: { left: 45, right: 45 }, // tilt ear to shoulder
+    bend: { forward: { sign: -1, axis: "x", limit: 60 }, backward: { sign: 1, axis: "x", limit: 90 } },
+    turn: { left: { sign: -1, axis: "y", limit: 90 }, right: { sign: 1, axis: "y", limit: 90 } },
+    sway: { left: { sign: -1, axis: "z", limit: 30 }, right: { sign: 1, axis: "z", limit: 30 } },
   },
   neck: {
-    bend: { inward: 45, outward: 60 },
-    turn: { left: 75, right: 75 },
-    twist: { left: 30, right: 30 },
+    bend: { forward: { sign: -1, axis: "x", limit: 45 }, backward: { sign: 1, axis: "x", limit: 60 } },
+    turn: { left: { sign: -1, axis: "y", limit: 75 }, right: { sign: 1, axis: "y", limit: 75 } },
+    sway: { left: { sign: -1, axis: "z", limit: 30 }, right: { sign: 1, axis: "z", limit: 30 } },
   },
   upper_body: {
-    bend: { inward: 30, outward: 45 },
-    turn: { left: 45, right: 45 },
-    twist: { left: 30, right: 30 },
+    bend: { forward: { sign: -1, axis: "x", limit: 30 }, backward: { sign: 1, axis: "x", limit: 45 } },
+    turn: { left: { sign: -1, axis: "y", limit: 45 }, right: { sign: 1, axis: "y", limit: 45 } },
+    sway: { left: { sign: -1, axis: "z", limit: 30 }, right: { sign: 1, axis: "z", limit: 30 } },
+  },
+  waist: {
+    bend: { forward: { sign: -1, axis: "x", limit: 90 }, backward: { sign: 1, axis: "x", limit: 90 } },
+    turn: { left: { sign: -1, axis: "y", limit: 45 }, right: { sign: 1, axis: "y", limit: 45 } },
+    sway: { left: { sign: -1, axis: "z", limit: 30 }, right: { sign: 1, axis: "z", limit: 30 } },
   },
 
-  // Arms & shoulders
-  shoulder_l: {
-    bend: { inward: 45, outward: 180 }, // arms down/up
-    turn: { left: 30, right: 45 },
-    twist: { left: 45, right: 45 },
-  },
-  shoulder_r: {
-    bend: { inward: 45, outward: 180 },
-    turn: { left: 45, right: 30 },
-    twist: { left: 45, right: 45 },
-  },
   arm_l: {
-    bend: { inward: 45, outward: 180 },
-    turn: { left: 90, right: 45 },
-    twist: { left: 90, right: 90 },
+    bend: { forward: { sign: 1, axis: "x", limit: 45 }, backward: { sign: -1, axis: "x", limit: 180 } },
+    turn: { left: { sign: 1, axis: "y", limit: 90 }, right: { sign: -1, axis: "y", limit: 45 } },
+    sway: { left: { sign: 1, axis: "z", limit: 90 }, right: { sign: -1, axis: "z", limit: 90 } },
   },
   arm_r: {
-    bend: { inward: 45, outward: 180 },
-    turn: { left: 45, right: 90 },
-    twist: { left: 90, right: 90 },
-  },
-  elbow_l: {
-    bend: { inward: 150, outward: 0 }, // elbow only bends inward
-  },
-  elbow_r: {
-    bend: { inward: 150, outward: 0 },
-  },
-  wrist_l: {
-    bend: { inward: 90, outward: 70 }, // flex/extend
-    turn: { left: 20, right: 35 }, // limited side bend
-  },
-  wrist_r: {
-    bend: { inward: 90, outward: 70 },
-    turn: { left: 35, right: 20 },
-  },
-  wrist_twist_l: {
-    twist: { left: 90, right: 90 }, // forearm rotation
-  },
-  wrist_twist_r: {
-    twist: { left: 90, right: 90 },
+    bend: { forward: { sign: 1, axis: "x", limit: 45 }, backward: { sign: -1, axis: "x", limit: 180 } },
+    turn: { left: { sign: -1, axis: "y", limit: 45 }, right: { sign: 1, axis: "y", limit: 90 } },
+    sway: { left: { sign: -1, axis: "z", limit: 90 }, right: { sign: 1, axis: "z", limit: 90 } },
   },
 
-  // Legs
-  knee_l: {
-    bend: { inward: 135, outward: 0 }, // knee only bends inward
+  leg_l: {
+    bend: { forward: { sign: 1, axis: "x", limit: 90 }, backward: { sign: -1, axis: "x", limit: 90 } },
+    turn: { left: { sign: -1, axis: "y", limit: 90 }, right: { sign: 1, axis: "y", limit: 90 } },
+    sway: { left: { sign: 1, axis: "z", limit: 180 }, right: { sign: -1, axis: "z", limit: 30 } },
   },
-  knee_r: {
-    bend: { inward: 135, outward: 0 },
+  leg_r: {
+    bend: { forward: { sign: 1, axis: "x", limit: 90 }, backward: { sign: -1, axis: "x", limit: 90 } },
+    turn: { left: { sign: -1, axis: "y", limit: 90 }, right: { sign: 1, axis: "y", limit: 90 } },
+    sway: { left: { sign: 1, axis: "z", limit: 30 }, right: { sign: -1, axis: "z", limit: 180 } },
   },
-  ankle_l: {
-    bend: { inward: 50, outward: 30 }, // point/flex foot
-    turn: { left: 25, right: 25 },
-  },
-  ankle_r: {
-    bend: { inward: 50, outward: 30 },
-    turn: { left: 25, right: 25 },
-  },
+  knee_l: { bend: { backward: { sign: -1, axis: "x", limit: 135 } } },
+  knee_r: { bend: { backward: { sign: -1, axis: "x", limit: 135 } } },
 
-  // Eyes
-  eye_l: {
-    turn: { left: 45, right: 15 }, // limited eye movement
-  },
-  eye_r: {
-    turn: { left: 15, right: 45 },
-  },
-
-  // Fingers - example for thumbs
-  thumb_l_0: {
-    bend: { inward: 60, outward: 15 },
-    turn: { left: 45, right: 45 }, // thumb spread
-  },
-  thumb_r_0: {
-    bend: { inward: 60, outward: 15 },
-    turn: { left: 45, right: 45 },
-  },
-  thumb_l_1: {
-    bend: { inward: 90, outward: 0 }, // thumb curl only
-  },
-  thumb_r_1: {
-    bend: { inward: 90, outward: 0 },
-  },
+  // Fingers: bend=curl, sway=sideways
   index_l_0: {
-    bend: { inward: 60, outward: 15 },
-    turn: { left: 45, right: 45 },
+    bend: { forward: { sign: -1, axis: "z", limit: 60 }, backward: { sign: 1, axis: "z", limit: 15 } },
+    sway: { left: { sign: -1, axis: "x", limit: 15 }, right: { sign: 1, axis: "x", limit: 15 } },
   },
   index_r_0: {
-    bend: { inward: 60, outward: 15 },
-  },
-  index_l_1: {
-    bend: { inward: 90, outward: 0 },
-  },
-  index_r_1: {
-    bend: { inward: 90, outward: 0 },
-  },
-  index_l_2: {
-    bend: { inward: 90, outward: 0 },
-  },
-  index_r_2: {
-    bend: { inward: 90, outward: 0 },
+    bend: { forward: { sign: 1, axis: "z", limit: 60 }, backward: { sign: -1, axis: "z", limit: 15 } },
+    sway: { left: { sign: 1, axis: "x", limit: 15 }, right: { sign: -1, axis: "x", limit: 15 } },
   },
   middle_l_0: {
-    bend: { inward: 60, outward: 15 },
+    bend: { forward: { sign: 1, axis: "x", limit: 60 }, backward: { sign: -1, axis: "x", limit: 15 } },
+    sway: { left: { sign: 1, axis: "z", limit: 45 }, right: { sign: -1, axis: "z", limit: 45 } },
   },
   middle_r_0: {
-    bend: { inward: 60, outward: 15 },
-  },
-  middle_l_1: {
-    bend: { inward: 90, outward: 0 },
-  },
-  middle_r_1: {
-    bend: { inward: 90, outward: 0 },
-  },
-  middle_l_2: {
-    bend: { inward: 90, outward: 0 },
-  },
-  middle_r_2: {
-    bend: { inward: 90, outward: 0 },
+    bend: { forward: { sign: 1, axis: "x", limit: 60 }, backward: { sign: -1, axis: "x", limit: 15 } },
+    sway: { left: { sign: -1, axis: "z", limit: 45 }, right: { sign: 1, axis: "z", limit: 45 } },
   },
   ring_l_0: {
-    bend: { inward: 60, outward: 15 },
+    bend: { forward: { sign: 1, axis: "x", limit: 60 }, backward: { sign: -1, axis: "x", limit: 15 } },
+    sway: { left: { sign: 1, axis: "z", limit: 45 }, right: { sign: -1, axis: "z", limit: 45 } },
   },
   ring_r_0: {
-    bend: { inward: 60, outward: 15 },
-  },
-  ring_l_1: {
-    bend: { inward: 90, outward: 0 },
-  },
-  ring_r_1: {
-    bend: { inward: 90, outward: 0 },
-  },
-  ring_l_2: {
-    bend: { inward: 90, outward: 0 },
-  },
-  ring_r_2: {
-    bend: { inward: 90, outward: 0 },
+    bend: { forward: { sign: 1, axis: "x", limit: 60 }, backward: { sign: -1, axis: "x", limit: 15 } },
+    sway: { left: { sign: -1, axis: "z", limit: 45 }, right: { sign: 1, axis: "z", limit: 45 } },
   },
   pinky_l_0: {
-    bend: { inward: 60, outward: 15 },
+    bend: { forward: { sign: 1, axis: "x", limit: 60 }, backward: { sign: -1, axis: "x", limit: 15 } },
+    sway: { left: { sign: 1, axis: "z", limit: 45 }, right: { sign: -1, axis: "z", limit: 45 } },
   },
   pinky_r_0: {
-    bend: { inward: 60, outward: 15 },
-  },
-  pinky_l_1: {
-    bend: { inward: 90, outward: 0 },
-  },
-  pinky_r_1: {
-    bend: { inward: 90, outward: 0 },
-  },
-  pinky_l_2: {
-    bend: { inward: 90, outward: 0 },
-  },
-  pinky_r_2: {
-    bend: { inward: 90, outward: 0 },
+    bend: { forward: { sign: 1, axis: "x", limit: 60 }, backward: { sign: -1, axis: "x", limit: 15 } },
+    sway: { left: { sign: -1, axis: "z", limit: 45 }, right: { sign: 1, axis: "z", limit: 45 } },
   },
 }
 
-export const MPLInterpreter = (description: string): Pose | null => {
-  if (description === "") {
+export interface MPLStatement {
+  bone: string
+  action: string
+  direction: string
+  degrees: number
+}
+
+export const validateStatement = (input: string): MPLStatement | null => {
+  if (input === "") {
     return null
   }
-  const segments = description.split(" ")
+  const segments = input.split(" ")
   if (segments.length !== 4) {
     return null
   }
-  const bone = segments[0] as string
-  const action = segments[1] as string
-  const direction = segments[2] as string
+  const bone = segments[0].toLowerCase() as string
+  const action = segments[1].toLowerCase() as string
+  const direction = segments[2].toLowerCase() as string
   const degrees = Number(segments[3])
-  if (!BONES[bone] || !ACTIONS.includes(action) || !DIRECTIONS.includes(direction) || isNaN(degrees)) {
+
+  // Check if the bone-action-direction combination exists and validate degrees
+  const boneRules = BONE_ACTION_RULES[bone]
+  const actionRules = boneRules?.[action]
+  const rule = actionRules?.[direction]
+
+  if (
+    !BONES[bone] ||
+    !ACTIONS.includes(action) ||
+    !DIRECTIONS.includes(direction) ||
+    isNaN(degrees) ||
+    !rule ||
+    degrees > rule.limit
+  ) {
     return null
   }
-  if (degrees > BONE_LIMITS[bone][action][direction]) {
+  return {
+    bone,
+    action,
+    direction,
+    degrees,
+  } as MPLStatement
+}
+
+export const MPLInterpreter = (input: string): Pose | null => {
+  const statement = validateStatement(input)
+  if (!statement) {
     return null
   }
+  const { bone, action, direction, degrees } = statement
+
   const pose: Pose = {
-    description: description,
+    description: input,
     face: {} as Morphs,
     movableBones: {} as MovableBones,
     rotatableBones: {} as RotatableBones,
   }
+
+  // Convert MPL directly to quaternion
+  const boneRules = BONE_ACTION_RULES[bone]
+  const actionRules = boneRules?.[action]
+  const rule = actionRules?.[direction]
+
+  if (!rule) {
+    return null
+  }
+
+  // Apply the sign to degrees
+  const signedDegrees = rule.sign * degrees
+
+  const radians = signedDegrees * (Math.PI / 180)
+  const halfAngle = radians / 2
+  const sin = Math.sin(halfAngle)
+  const cos = Math.cos(halfAngle)
+
+  // Create quaternion based on the specified axis
+  let quaternion: [number, number, number, number] = [0, 0, 0, 1]
+  // Quaternion format: [x, y, z, w]
+  if (rule.axis === "x") {
+    quaternion = [sin, 0, 0, cos] // Rotation around X axis
+  } else if (rule.axis === "y") {
+    quaternion = [0, sin, 0, cos] // Rotation around Y axis
+  } else if (rule.axis === "z") {
+    quaternion = [0, 0, sin, cos] // Rotation around Z axis
+  } else {
+    return pose
+  }
+
+  // Apply to the bone
+  pose.rotatableBones[BONES[bone] as keyof RotatableBones] = quaternion
+  console.log(pose)
   return pose
 }

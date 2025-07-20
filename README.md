@@ -7,9 +7,9 @@
 Instead of manually calculating quaternions and dealing with bone direction complexities, MPL provides intuitive pose descriptions:
 
 ```
-"look at the sky" → "head bend outward 60, neck bend outward 30"
-"wave hello" → "arm_r bend outward 90, wrist_r bend inward 30"
-"point forward" → "arm_r bend outward 45, index_r_1 bend outward 10"
+"look at the sky" → "head bend backward 60, neck bend backward 30"
+"wave hello" → "arm_r bend backward 90, wrist_r bend forward 30"
+"point forward" → "arm_r bend backward 45, index_r_1 bend backward 10"
 ```
 
 ## Syntax
@@ -17,16 +17,16 @@ Instead of manually calculating quaternions and dealing with bone direction comp
 **Format:** `bone action direction degrees`
 
 **Actions:** `bend`, `turn`, `twist`  
-**Directions:** `inward`, `outward`, `left`, `right`
+**Directions:** `forward`, `backward`, `left`, `right`
 
 **Examples:**
 
 ```
 head turn left 30
-arm_r bend outward 90
-elbow_l bend inward 120
+arm_r bend backward 90
+elbow_l bend forward 120
 wrist_r twist left 45
-thumb_r_0 bend inward 60
+thumb_r_0 bend forward 60
 ```
 
 ## Built-in Safety

@@ -9,15 +9,10 @@ import { Pose, MovableBones } from "@/lib/pose"
 import { MPLInterpreter } from "@/lib/mpl"
 
 const suggestedPoses: string[] = [
-  "left hand thumb up",
-  "squat with right hand fist",
-  "lift left leg with shocked expression",
-  "sit with fingers apart both hands",
-  "bend over and look right with a shy smile",
-  "turn around with smile",
-  "standing with body and head tilted left",
-  "gun left hand with serious expression",
-  "I broke with my girlfriend",
+  "leg_l turn left 30",
+  "leg_l bend backward 40",
+  "leg_l sway left 40",
+  "leg_l bend forward 40",
 ] as const
 
 export default function ChatInput({
@@ -28,8 +23,6 @@ export default function ChatInput({
   setSmoothUpdate: (smoothUpdate: boolean) => void
 }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
-  const [showSuggestions, setShowSuggestions] = useState(false)
-  const [waitingPoseResult, setWaitingPoseResult] = useState(false)
   const [displayedPoses, setDisplayedPoses] = useState<string[]>([])
 
   // Function to get 4 random poses
@@ -43,19 +36,17 @@ export default function ChatInput({
     setDisplayedPoses(getRandomPoses())
   }, [])
 
-  const [description, setDescription] = useState("")
+  const [description, setDescription] = useState("head tUrn left 40")
 
   const generatePose = useCallback(
     async (description: string) => {
       resetHeight()
-      setWaitingPoseResult(true)
-      setShowSuggestions(false)
 
       const poseData = MPLInterpreter(description)
       if (!poseData) {
         return
       }
-      setDescription("")
+      // setDescription("")
       setSmoothUpdate(true)
 
       setPose((prev) => ({
@@ -65,9 +56,6 @@ export default function ChatInput({
         movableBones: { ...prev.movableBones, ...poseData.movableBones } as MovableBones,
         rotatableBones: { ...prev.rotatableBones, ...poseData.rotatableBones },
       }))
-      setWaitingPoseResult(false)
-      // Get new random poses for next time
-      setDisplayedPoses(getRandomPoses())
     },
     [setPose, setSmoothUpdate]
   )
@@ -93,34 +81,32 @@ export default function ChatInput({
   return (
     <>
       <div className="relative w-full flex flex-col gap-3">
-        {showSuggestions && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            {displayedPoses.map((pose, i) => (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 20 }}
-                transition={{ delay: 0.05 * i }}
-                key={`suggested-pose-${pose}-${i}`}
-                className={i > 1 ? "hidden sm:block" : "block"}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+          {displayedPoses.map((pose, i) => (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              transition={{ delay: 0.05 * i }}
+              key={`suggested-pose-${pose}-${i}`}
+              className={i > 1 ? "hidden sm:block" : "block"}
+            >
+              <Card
+                key={i}
+                className={`bg-white/50 hover:bg-pink-100/70 py-0 gap-0 h-full w-full cursor-pointer backdrop-blur-[3px] shadow-lg ${
+                  i >= 2 ? "hidden md:block" : ""
+                }`}
+                onClick={() => {
+                  generatePose(pose)
+                }}
               >
-                <Card
-                  key={i}
-                  className={`bg-white/50 hover:bg-pink-100/70 py-0 gap-0 h-full w-full cursor-pointer backdrop-blur-[3px] shadow-lg ${
-                    i >= 2 ? "hidden md:block" : ""
-                  }`}
-                  onClick={() => {
-                    generatePose(pose)
-                  }}
-                >
-                  <CardHeader className="py-2 gap-0">
-                    <CardDescription className="py-1 text-zinc-800 ">{pose}</CardDescription>
-                  </CardHeader>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-        )}
+                <CardHeader className="py-2 gap-0">
+                  <CardDescription className="py-1 text-zinc-800 ">{pose}</CardDescription>
+                </CardHeader>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
 
         <div className="relative w-full">
           <Textarea
@@ -140,11 +126,6 @@ export default function ChatInput({
             disabled={false}
             placeholder={"NECK TURN LEFT"}
           />
-          {waitingPoseResult && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-2xl z-10">
-              <div className="h-6 w-6 border-3 border-zinc-200 border-t-transparent rounded-full animate-spin"></div>
-            </div>
-          )}
         </div>
 
         <div className="absolute bottom-0 right-0 p-2 w-fit flex flex-row justify-end">
