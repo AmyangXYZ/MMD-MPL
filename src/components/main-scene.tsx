@@ -50,9 +50,7 @@ import {
   RotatableBonesTranslations,
 } from "@/lib/pose"
 import { IMmdRuntimeLinkedBone } from "babylon-mmd/esm/Runtime/IMmdRuntimeLinkedBone"
-import { Button } from "./ui/button"
-import { Shirt } from "lucide-react"
-import ClothesPanel from "./clothes-panel"
+
 import { MmdWasmPhysicsRuntimeImpl } from "babylon-mmd/esm/Runtime/Optimized/Physics/mmdWasmPhysicsRuntimeImpl"
 import MPLInput from "./mpl-input"
 
@@ -90,30 +88,14 @@ export default function MainScene() {
     rotatableBones: {} as RotatableBones,
   } as Pose)
   const defaultPoseRef = useRef<Pose>(null)
-  const [meshes, setMeshes] = useState<Mesh[]>([])
 
-  const smoothUpdateRef = useRef(true)
-
-  const [openClothesPanel, setOpenClothesPanel] = useState(false)
+  const [modelLoaded, setModelLoaded] = useState(false)
 
   const getBone = (name: string): IMmdRuntimeLinkedBone | null => {
     return bonesRef.current[name]
   }
 
-  const rotateBone = useCallback((boneName: string, targetQuaternion: Quaternion) => {
-    const bone = getBone(boneName)
-    if (!bone) return
-
-    bone.setRotationQuaternion(targetQuaternion, Space.LOCAL)
-  }, [])
-
-  const moveBone = useCallback((boneName: string, position: BonePosition) => {
-    const bone = getBone(boneName)
-    if (!bone) return
-    bone.position = new Vector3(position[0], position[1], position[2])
-  }, [])
-
-  const rotateBoneSmooth = useCallback((boneName: string, targetQuaternion: Quaternion, duration: number = 1000) => {
+  const rotateBone = useCallback((boneName: string, targetQuaternion: Quaternion, duration: number = 1000) => {
     const bone = getBone(boneName)
     if (!bone) return
 
@@ -125,18 +107,6 @@ export default function MainScene() {
     }
   }, [])
 
-  const moveBoneSmooth = useCallback((boneName: string, position: BonePosition, duration: number = 1000) => {
-    const bone = getBone(boneName)
-    if (!bone) return
-    const targetVector = new Vector3(position[0], position[1], position[2])
-
-    targetPositionsRef.current[boneName] = {
-      position: targetVector,
-      startTime: performance.now(),
-      duration: duration,
-      startPosition: bone.position.clone(),
-    }
-  }, [])
 
   const applyPose = useCallback(
     (pose?: Pose) => {
@@ -147,47 +117,16 @@ export default function MainScene() {
           modelRef.current.morph.setMorphWeight(morphName, targetValue as number)
         }
       }
-      if (pose.movableBones) {
-        for (const boneName of Object.keys(pose.movableBones)) {
-          const position = pose.movableBones[boneName as keyof MovableBones]
-          if (!position || typeof position !== "object") {
-            continue
-          }
-          if (smoothUpdateRef.current) {
-            moveBoneSmooth(boneName, position)
-          } else {
-            moveBone(boneName, position)
-          }
-        }
-      }
-      if (pose.rotatableBones) {
-        for (const boneName of Object.keys(pose.rotatableBones)) {
-          const boneRotationQuaternion = pose.rotatableBones[boneName as keyof RotatableBones]
-          if (smoothUpdateRef.current) {
-            rotateBoneSmooth(
-              boneName,
-              new Quaternion(
-                boneRotationQuaternion[0],
-                boneRotationQuaternion[1],
-                boneRotationQuaternion[2],
-                boneRotationQuaternion[3]
-              )
-            )
-          } else {
-            rotateBone(
-              boneName,
-              new Quaternion(
-                boneRotationQuaternion[0],
-                boneRotationQuaternion[1],
-                boneRotationQuaternion[2],
-                boneRotationQuaternion[3]
-              )
-            )
-          }
-        }
+
+      for (const [boneName] of Object.entries(RotatableBonesTranslations)) {
+        const bone = getBone(boneName)
+        if (!bone) continue
+
+        const boneRotationQuaternion = pose.rotatableBones[boneName as keyof RotatableBones] || [0, 0, 0, 1]
+        rotateBone(boneName, new Quaternion(boneRotationQuaternion[0], boneRotationQuaternion[1], boneRotationQuaternion[2], boneRotationQuaternion[3]))
       }
     },
-    [moveBone, rotateBone, moveBoneSmooth, rotateBoneSmooth]
+    [rotateBone]
   )
 
   const loadModel = useCallback(async (): Promise<void> => {
@@ -280,23 +219,8 @@ export default function MainScene() {
         defaultPose.description = "default pose"
 
         setPose(defaultPose)
+        setModelLoaded(true)
       }, 200)
-
-      const clothes = ["衣边", "衣服", "袖子", "头饰", "脖环", "脖带", "鞋子", "眼镜"]
-
-      setMeshes((prev) => {
-        const newMeshes = mesh.metadata.meshes.filter((mesh: Mesh) => clothes.includes(mesh.name))
-        if (prev.length === 0) {
-          return newMeshes
-        }
-        for (const m of newMeshes) {
-          const prevMesh = prev.find((p) => p.name === m.name)
-          if (prevMesh) {
-            m.setEnabled(prevMesh.isEnabled())
-          }
-        }
-        return newMeshes
-      })
     })
   }, [])
 
@@ -529,31 +453,13 @@ export default function MainScene() {
   }, [])
 
   return (
-    <div className="w-full h-full flex flex-row">
-      <MPLInput setPose={setPose} resetPose={resetPose} loadVpd={loadVpd} />
-      <div className="w-full h-full">
+    <div className="w-full h-full flex flex-col md:flex-row">
+      <div className="w-full h-[70%] md:w-1/2 md:h-full order-1 md:order-2">
         <canvas ref={canvasRef} className="w-full h-full z-1" />
       </div>
-
-      <div className="absolute flex justify-end items-center gap-2 top-2 mx-auto flex px-4 w-full z-20">
-
-        <div className="flex items-center gap-2">
-          {!openClothesPanel && (
-            <div className="">
-              <Button
-                size="icon"
-                className="bg-white text-black size-7 rounded-full hover:bg-pink-100 cursor-pointer"
-                onClick={() => setOpenClothesPanel(true)}
-              >
-                <Shirt />
-              </Button>
-            </div>
-          )}
-        </div>
+      <div className="w-full h-[30%] md:w-1/2 md:h-full order-2 md:order-1 border-t">
+        <MPLInput setPose={setPose} resetPose={resetPose} loadVpd={loadVpd} modelLoaded={modelLoaded} />
       </div>
-
-      <ClothesPanel open={openClothesPanel} setOpen={setOpenClothesPanel} meshes={meshes} setMeshes={setMeshes} />
-
     </div>
   )
 }
