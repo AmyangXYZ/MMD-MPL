@@ -417,12 +417,6 @@ export default function MainScene() {
   )
 
   useEffect(() => {
-    const resize = () => {
-      if (sceneRef.current) {
-        sceneRef.current.getEngine().resize()
-      }
-    }
-
     const init = async () => {
       if (!canvasRef.current) return
 
@@ -555,8 +549,6 @@ export default function MainScene() {
         }
       })
 
-      window.addEventListener("resize", resize)
-
       engine.runRenderLoop(() => {
         scene.render()
       })
@@ -566,7 +558,6 @@ export default function MainScene() {
     return () => {
       if (engineRef.current) {
         engineRef.current.dispose()
-        window.removeEventListener("resize", resize)
       }
     }
   }, [loadModel])
