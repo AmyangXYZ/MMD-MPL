@@ -39,7 +39,6 @@ import {
   RigidBody,
   PhysicsStaticPlaneShape,
 } from "babylon-mmd"
-import ChatInput from "./chat-input"
 import {
   BonePosition,
   BoneRotationQuaternion,
@@ -58,6 +57,7 @@ import CustomizePanel from "./customize-panel"
 import { HandMetal, Shirt } from "lucide-react"
 import ClothesPanel from "./clothes-panel"
 import { MmdWasmPhysicsRuntimeImpl } from "babylon-mmd/esm/Runtime/Optimized/Physics/mmdWasmPhysicsRuntimeImpl"
+import MPLInput from "./mpl-input"
 
 interface TargetRotation {
   quaternion: Quaternion
@@ -624,11 +624,11 @@ export default function MainScene() {
         exportPose={exportPose}
       />
       <div
-        className={`fixed left-1/2 -translate-x-1/2 bottom-0 max-w-2xl mx-auto flex p-4 w-full z-10 ${
+        className={`fixed left-1/2 -translate-x-1/2 bottom-0 max-w-2xl mx-auto flex p-4 w-full z-10 flex-col gap-2 ${
           openCustomizePanel || openClothesPanel ? "hidden" : ""
         }`}
       >
-        <ChatInput setPose={setPose} setSmoothUpdate={setSmoothUpdate} />
+        <MPLInput setPose={setPose} setSmoothUpdate={setSmoothUpdate} />
       </div>
     </div>
   )

@@ -288,6 +288,19 @@ export const BONE_ACTION_RULES: Record<string, Record<string, Record<string, Act
   },
 }
 
+export const VALID_STATEMENTS = ((): string[] => {
+  const combinations: string[] = []
+
+  for (const [bone, actions] of Object.entries(BONE_ACTION_RULES)) {
+    for (const [action, directions] of Object.entries(actions)) {
+      for (const direction of Object.keys(directions)) {
+        combinations.push(`${bone} ${action} ${direction}`)
+      }
+    }
+  }
+  return combinations
+})()
+
 export interface MPLStatement {
   bone: string
   action: string
