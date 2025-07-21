@@ -2,6 +2,8 @@
 
 MPL is a rule-based Domain-Specific Language for controlling MMD bones using natural language commands.
 
+![](./screenshots/image.png)
+
 ## Why MPL?
 
 Instead of manually calculating quaternions and dealing with bone direction complexities, MPL provides intuitive pose descriptions:
