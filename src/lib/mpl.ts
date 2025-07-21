@@ -1,9 +1,11 @@
 import { Morphs, MovableBones, Pose, RotatableBones } from "./pose"
 
+// Mapping of bone keys to Japanese bone names used in MMD
 export const BONES: Record<string, string> = {
   base: "全ての親",
   center: "センター",
   upper_body: "上半身",
+  upper_body2: "上半身2",
   waist: "腰",
   neck: "首",
   head: "頭",
@@ -59,238 +61,247 @@ export const BONES: Record<string, string> = {
   pinky_r_2: "右小指３",
 }
 
+// Valid action types
 export const ACTIONS: string[] = ["bend", "turn", "sway"]
 
+// Valid direction types
 export const DIRECTIONS: string[] = ["forward", "backward", "left", "right"]
 
+// Rule defining rotation axis and degree limit for each action
 interface ActionRule {
-  sign: number
-  axis: "x" | "y" | "z" | "xy" | "xz" | "yz" | "x-y" | "x-z" | "y-z"
-  limit: number
+  axis: [number, number, number] // 3D vector representing rotation axis
+  limit: number // Maximum degrees allowed for this action
 }
 
+// Comprehensive bone action rules defining how each bone can move
+// Each bone has actions (bend/turn/sway) with directions and their axis vectors
 export const BONE_ACTION_RULES: Record<string, Record<string, Record<string, ActionRule>>> = {
   base: {
-    bend: { forward: { sign: -1, axis: "x", limit: 90 }, backward: { sign: 1, axis: "x", limit: 90 } },
-    turn: { left: { sign: -1, axis: "y", limit: 180 }, right: { sign: 1, axis: "y", limit: 180 } },
-    sway: { left: { sign: -1, axis: "z", limit: 180 }, right: { sign: 1, axis: "z", limit: 180 } },
+    bend: { forward: { axis: [-1, 0, 0], limit: 90 }, backward: { axis: [1, 0, 0], limit: 90 } },
+    turn: { left: { axis: [0, -1, 0], limit: 180 }, right: { axis: [0, 1, 0], limit: 180 } },
+    sway: { left: { axis: [0, 0, -1], limit: 180 }, right: { axis: [0, 0, 1], limit: 180 } },
   },
   center: {
-    bend: { forward: { sign: -1, axis: "x", limit: 90 }, backward: { sign: 1, axis: "x", limit: 90 } },
-    turn: { left: { sign: -1, axis: "y", limit: 180 }, right: { sign: 1, axis: "y", limit: 180 } },
-    sway: { left: { sign: -1, axis: "z", limit: 180 }, right: { sign: 1, axis: "z", limit: 180 } },
+    bend: { forward: { axis: [-1, 0, 0], limit: 180 }, backward: { axis: [1, 0, 0], limit: 180 } },
+    turn: { left: { axis: [0, -1, 0], limit: 180 }, right: { axis: [0, 1, 0], limit: 180 } },
+    sway: { left: { axis: [0, 0, -1], limit: 180 }, right: { axis: [0, 0, 1], limit: 180 } },
   },
   head: {
-    bend: { forward: { sign: -1, axis: "x", limit: 60 }, backward: { sign: 1, axis: "x", limit: 90 } },
-    turn: { left: { sign: -1, axis: "y", limit: 90 }, right: { sign: 1, axis: "y", limit: 90 } },
-    sway: { left: { sign: -1, axis: "z", limit: 30 }, right: { sign: 1, axis: "z", limit: 30 } },
+    bend: { forward: { axis: [-1, 0, 0], limit: 60 }, backward: { axis: [1, 0, 0], limit: 90 } },
+    turn: { left: { axis: [0, -1, 0], limit: 90 }, right: { axis: [0, 1, 0], limit: 90 } },
+    sway: { left: { axis: [0, 0, -1], limit: 30 }, right: { axis: [0, 0, 1], limit: 30 } },
   },
   neck: {
-    bend: { forward: { sign: -1, axis: "x", limit: 45 }, backward: { sign: 1, axis: "x", limit: 60 } },
-    turn: { left: { sign: -1, axis: "y", limit: 75 }, right: { sign: 1, axis: "y", limit: 75 } },
-    sway: { left: { sign: -1, axis: "z", limit: 30 }, right: { sign: 1, axis: "z", limit: 30 } },
+    bend: { forward: { axis: [-1, 0, 0], limit: 45 }, backward: { axis: [1, 0, 0], limit: 60 } },
+    turn: { left: { axis: [0, -1, 0], limit: 75 }, right: { axis: [0, 1, 0], limit: 75 } },
+    sway: { left: { axis: [0, 0, -1], limit: 30 }, right: { axis: [0, 0, 1], limit: 30 } },
   },
   upper_body: {
-    bend: { forward: { sign: -1, axis: "x", limit: 30 }, backward: { sign: 1, axis: "x", limit: 45 } },
-    turn: { left: { sign: -1, axis: "y", limit: 45 }, right: { sign: 1, axis: "y", limit: 45 } },
-    sway: { left: { sign: -1, axis: "z", limit: 30 }, right: { sign: 1, axis: "z", limit: 30 } },
+    bend: { forward: { axis: [-1, 0, 0], limit: 45 }, backward: { axis: [1, 0, 0], limit: 45 } },
+    turn: { left: { axis: [0, -1, 0], limit: 45 }, right: { axis: [0, 1, 0], limit: 45 } },
+    sway: { left: { axis: [0, 0, -1], limit: 45 }, right: { axis: [0, 0, 1], limit: 45 } },
+  },
+  upper_body2: {
+    bend: { forward: { axis: [-1, 0, 0], limit: 45 }, backward: { axis: [1, 0, 0], limit: 45 } },
+    turn: { left: { axis: [0, -1, 0], limit: 45 }, right: { axis: [0, 1, 0], limit: 45 } },
+    sway: { left: { axis: [0, 0, -1], limit: 45 }, right: { axis: [0, 0, 1], limit: 45 } },
   },
   waist: {
-    bend: { forward: { sign: -1, axis: "x", limit: 90 }, backward: { sign: 1, axis: "x", limit: 90 } },
-    turn: { left: { sign: -1, axis: "y", limit: 45 }, right: { sign: 1, axis: "y", limit: 45 } },
-    sway: { left: { sign: -1, axis: "z", limit: 30 }, right: { sign: 1, axis: "z", limit: 30 } },
+    bend: { forward: { axis: [-1, 0, 0], limit: 90 }, backward: { axis: [1, 0, 0], limit: 90 } },
+    turn: { left: { axis: [0, -1, 0], limit: 45 }, right: { axis: [0, 1, 0], limit: 45 } },
+    sway: { left: { axis: [0, 0, -1], limit: 30 }, right: { axis: [0, 0, 1], limit: 30 } },
   },
 
   shoulder_l: {
-    bend: { forward: { sign: -1, axis: "z", limit: 90 }, backward: { sign: 1, axis: "z", limit: 90 } },
-    sway: { left: { sign: -1, axis: "y", limit: 90 }, right: { sign: 1, axis: "y", limit: 90 } },
+    bend: { forward: { axis: [0, 0, -1], limit: 90 }, backward: { axis: [0, 0, 1], limit: 90 } },
+    sway: { left: { axis: [0, -1, 0], limit: 90 }, right: { axis: [0, 1, 0], limit: 90 } },
   },
   shoulder_r: {
-    bend: { forward: { sign: 1, axis: "z", limit: 90 }, backward: { sign: -1, axis: "z", limit: 90 } },
-    sway: { left: { sign: 1, axis: "y", limit: 90 }, right: { sign: -1, axis: "y", limit: 90 } },
+    bend: { forward: { axis: [0, 0, 1], limit: 90 }, backward: { axis: [0, 0, -1], limit: 90 } },
+    sway: { left: { axis: [0, 1, 0], limit: 90 }, right: { axis: [0, -1, 0], limit: 90 } },
   },
   arm_l: {
-    bend: { forward: { sign: -1, axis: "z", limit: 90 }, backward: { sign: 1, axis: "z", limit: 90 } },
-    sway: { left: { sign: -1, axis: "y", limit: 90 }, right: { sign: 1, axis: "y", limit: 90 } },
+    bend: { forward: { axis: [0, 0, -1], limit: 90 }, backward: { axis: [0, 0, 1], limit: 90 } },
+    sway: { left: { axis: [0, -1, 0], limit: 90 }, right: { axis: [0, 1, 0], limit: 90 } },
   },
   arm_r: {
-    bend: { forward: { sign: 1, axis: "x", limit: 45 }, backward: { sign: -1, axis: "x", limit: 180 } },
-    sway: { left: { sign: -1, axis: "y", limit: 90 }, right: { sign: 1, axis: "y", limit: 90 } },
+    bend: { forward: { axis: [1, 0, 0], limit: 45 }, backward: { axis: [-1, 0, 0], limit: 180 } },
+    sway: { left: { axis: [0, -1, 0], limit: 90 }, right: { axis: [0, 1, 0], limit: 90 } },
   },
   arm_twist_l: {
-    turn: { left: { sign: -1, axis: "y", limit: 90 }, right: { sign: 1, axis: "y", limit: 90 } },
+    turn: { left: { axis: [0, -1, 0], limit: 90 }, right: { axis: [0, 1, 0], limit: 90 } },
   },
   arm_twist_r: {
-    turn: { left: { sign: -1, axis: "y", limit: 90 }, right: { sign: 1, axis: "y", limit: 90 } },
+    turn: { left: { axis: [0, -1, 0], limit: 90 }, right: { axis: [0, 1, 0], limit: 90 } },
   },
   elbow_l: {
     bend: {
-      forward: { sign: 1, axis: "xy", limit: 135 },
+      forward: { axis: [1, 1, 0], limit: 135 },
     },
   },
   elbow_r: {
     bend: {
-      forward: { sign: 1, axis: "x-y", limit: 135 },
+      forward: { axis: [1, -1, 0], limit: 135 },
     },
   },
   wrist_l: {
     bend: {
-      forward: { sign: -1, axis: "z", limit: 60 },
-      backward: { sign: 1, axis: "x-z", limit: 30 },
+      forward: { axis: [0, 0, -1], limit: 60 },
+      backward: { axis: [1, 0, -1], limit: 30 },
     },
     sway: {
-      right: { sign: 1, axis: "xy", limit: 15 },
-      left: { sign: -1, axis: "xy", limit: 15 },
+      right: { axis: [1, 1, 0], limit: 15 },
+      left: { axis: [-1, 1, 0], limit: 15 },
     },
   },
   wrist_r: {
     bend: {
-      forward: { sign: 1, axis: "z", limit: 60 },
-      backward: { sign: -1, axis: "x-z", limit: 30 },
+      forward: { axis: [0, 0, 1], limit: 60 },
+      backward: { axis: [-1, 0, -1], limit: 30 },
     },
     sway: {
-      right: { sign: -1, axis: "x-y", limit: 15 },
-      left: { sign: 1, axis: "x-y", limit: 15 },
+      right: { axis: [-1, -1, 0], limit: 15 },
+      left: { axis: [1, -1, 0], limit: 15 },
     },
   },
   wrist_twist_l: {
-    turn: { left: { sign: -1, axis: "y", limit: 90 }, right: { sign: 1, axis: "y", limit: 90 } },
+    turn: { left: { axis: [0, -1, 0], limit: 90 }, right: { axis: [0, 1, 0], limit: 90 } },
   },
   wrist_twist_r: {
-    turn: { left: { sign: -1, axis: "y", limit: 90 }, right: { sign: 1, axis: "y", limit: 90 } },
+    turn: { left: { axis: [0, -1, 0], limit: 90 }, right: { axis: [0, 1, 0], limit: 90 } },
   },
 
   leg_l: {
-    bend: { forward: { sign: 1, axis: "x", limit: 90 }, backward: { sign: -1, axis: "x", limit: 90 } },
-    turn: { left: { sign: -1, axis: "y", limit: 90 }, right: { sign: 1, axis: "y", limit: 90 } },
-    sway: { left: { sign: 1, axis: "z", limit: 180 }, right: { sign: -1, axis: "z", limit: 30 } },
+    bend: { forward: { axis: [1, 0, 0], limit: 90 }, backward: { axis: [-1, 0, 0], limit: 90 } },
+    turn: { left: { axis: [0, -1, 0], limit: 90 }, right: { axis: [0, 1, 0], limit: 90 } },
+    sway: { left: { axis: [0, 0, 1], limit: 180 }, right: { axis: [0, 0, -1], limit: 30 } },
   },
   leg_r: {
-    bend: { forward: { sign: 1, axis: "x", limit: 90 }, backward: { sign: -1, axis: "x", limit: 90 } },
-    turn: { left: { sign: -1, axis: "y", limit: 90 }, right: { sign: 1, axis: "y", limit: 90 } },
-    sway: { left: { sign: 1, axis: "z", limit: 30 }, right: { sign: -1, axis: "z", limit: 180 } },
+    bend: { forward: { axis: [1, 0, 0], limit: 90 }, backward: { axis: [-1, 0, 0], limit: 90 } },
+    turn: { left: { axis: [0, -1, 0], limit: 90 }, right: { axis: [0, 1, 0], limit: 90 } },
+    sway: { left: { axis: [0, 0, 1], limit: 30 }, right: { axis: [0, 0, -1], limit: 180 } },
   },
-  knee_l: { bend: { backward: { sign: -1, axis: "x", limit: 135 } } },
-  knee_r: { bend: { backward: { sign: -1, axis: "x", limit: 135 } } },
+  knee_l: { bend: { backward: { axis: [-1, 0, 0], limit: 135 } } },
+  knee_r: { bend: { backward: { axis: [-1, 0, 0], limit: 135 } } },
   ankle_l: {
-    bend: { forward: { sign: -1, axis: "x", limit: 45 }, backward: { sign: 1, axis: "x", limit: 45 } },
-    turn: { left: { sign: -1, axis: "y", limit: 90 }, right: { sign: 1, axis: "y", limit: 90 } },
-    sway: { left: { sign: 1, axis: "z", limit: 30 }, right: { sign: -1, axis: "z", limit: 30 } },
+    bend: { forward: { axis: [-1, 0, 0], limit: 60 }, backward: { axis: [1, 0, 0], limit: 60 } },
+    turn: { left: { axis: [0, -1, 0], limit: 90 }, right: { axis: [0, 1, 0], limit: 90 } },
+    sway: { left: { axis: [0, 0, 1], limit: 30 }, right: { axis: [0, 0, -1], limit: 30 } },
   },
   ankle_r: {
-    bend: { forward: { sign: -1, axis: "x", limit: 45 }, backward: { sign: 1, axis: "x", limit: 45 } },
-    turn: { left: { sign: -1, axis: "y", limit: 90 }, right: { sign: 1, axis: "y", limit: 90 } },
-    sway: { left: { sign: 1, axis: "z", limit: 30 }, right: { sign: -1, axis: "z", limit: 30 } },
+    bend: { forward: { axis: [-1, 0, 0], limit: 60 }, backward: { axis: [1, 0, 0], limit: 60 } },
+    turn: { left: { axis: [0, -1, 0], limit: 90 }, right: { axis: [0, 1, 0], limit: 90 } },
+    sway: { left: { axis: [0, 0, 1], limit: 30 }, right: { axis: [0, 0, -1], limit: 30 } },
   },
-  forefoot_l: { bend: { forward: { sign: -1, axis: "x", limit: 30 }, backward: { sign: 1, axis: "x", limit: 30 } } },
-  forefoot_r: { bend: { forward: { sign: -1, axis: "x", limit: 30 }, backward: { sign: 1, axis: "x", limit: 30 } } },
+  forefoot_l: { bend: { forward: { axis: [-1, 0, 0], limit: 30 }, backward: { axis: [1, 0, 0], limit: 30 } } },
+  forefoot_r: { bend: { forward: { axis: [-1, 0, 0], limit: 30 }, backward: { axis: [1, 0, 0], limit: 30 } } },
 
   thumb_l_0: {
-    bend: { forward: { sign: -1, axis: "xy", limit: 90 }, backward: { sign: 1, axis: "xy", limit: 15 } },
-    sway: { left: { sign: 1, axis: "z", limit: 45 }, right: { sign: -1, axis: "z", limit: 45 } },
+    bend: { forward: { axis: [-1, 1, 0], limit: 90 }, backward: { axis: [1, 1, 0], limit: 15 } },
+    sway: { left: { axis: [0, 0, 1], limit: 45 }, right: { axis: [0, 0, -1], limit: 45 } },
   },
   thumb_l_1: {
-    bend: { forward: { sign: -1, axis: "xy", limit: 90 }, backward: { sign: 1, axis: "xy", limit: 15 } },
+    bend: { forward: { axis: [-1, 1, 0], limit: 90 }, backward: { axis: [1, 1, 0], limit: 15 } },
   },
   thumb_l_2: {
-    bend: { forward: { sign: -1, axis: "xy", limit: 90 }, backward: { sign: 1, axis: "xy", limit: 15 } },
+    bend: { forward: { axis: [-1, 1, 0], limit: 90 }, backward: { axis: [1, 1, 0], limit: 15 } },
   },
   index_l_0: {
-    bend: { forward: { sign: -1, axis: "z", limit: 90 }, backward: { sign: 1, axis: "z", limit: 15 } },
-    sway: { left: { sign: -1, axis: "x", limit: 15 }, right: { sign: 1, axis: "x", limit: 15 } },
+    bend: { forward: { axis: [0, 0, -1], limit: 90 }, backward: { axis: [0, 0, 1], limit: 15 } },
+    sway: { left: { axis: [-1, 0, 0], limit: 15 }, right: { axis: [1, 0, 0], limit: 15 } },
   },
   index_l_1: {
-    bend: { forward: { sign: -1, axis: "z", limit: 90 }, backward: { sign: 1, axis: "z", limit: 15 } },
+    bend: { forward: { axis: [0, 0, -1], limit: 90 }, backward: { axis: [0, 0, 1], limit: 15 } },
   },
   index_l_2: {
-    bend: { forward: { sign: -1, axis: "z", limit: 90 }, backward: { sign: 1, axis: "z", limit: 15 } },
+    bend: { forward: { axis: [0, 0, -1], limit: 90 }, backward: { axis: [0, 0, 1], limit: 15 } },
   },
   middle_l_0: {
-    bend: { forward: { sign: -1, axis: "z", limit: 90 }, backward: { sign: 1, axis: "z", limit: 15 } },
-    sway: { left: { sign: -1, axis: "x", limit: 45 }, right: { sign: 1, axis: "x", limit: 45 } },
+    bend: { forward: { axis: [0, 0, -1], limit: 90 }, backward: { axis: [0, 0, 1], limit: 15 } },
+    sway: { left: { axis: [-1, 0, 0], limit: 45 }, right: { axis: [1, 0, 0], limit: 45 } },
   },
   middle_l_1: {
-    bend: { forward: { sign: -1, axis: "z", limit: 90 }, backward: { sign: 1, axis: "z", limit: 15 } },
+    bend: { forward: { axis: [0, 0, -1], limit: 90 }, backward: { axis: [0, 0, 1], limit: 15 } },
   },
   middle_l_2: {
-    bend: { forward: { sign: -1, axis: "z", limit: 90 }, backward: { sign: 1, axis: "z", limit: 15 } },
+    bend: { forward: { axis: [0, 0, -1], limit: 90 }, backward: { axis: [0, 0, 1], limit: 15 } },
   },
   ring_l_0: {
-    bend: { forward: { sign: -1, axis: "z", limit: 90 }, backward: { sign: 1, axis: "z", limit: 15 } },
-    sway: { left: { sign: -1, axis: "x", limit: 45 }, right: { sign: 1, axis: "x", limit: 45 } },
+    bend: { forward: { axis: [0, 0, -1], limit: 90 }, backward: { axis: [0, 0, 1], limit: 15 } },
+    sway: { left: { axis: [-1, 0, 0], limit: 45 }, right: { axis: [1, 0, 0], limit: 45 } },
   },
   ring_l_1: {
-    bend: { forward: { sign: -1, axis: "z", limit: 90 }, backward: { sign: 1, axis: "z", limit: 15 } },
+    bend: { forward: { axis: [0, 0, -1], limit: 90 }, backward: { axis: [0, 0, 1], limit: 15 } },
   },
   ring_l_2: {
-    bend: { forward: { sign: -1, axis: "z", limit: 90 }, backward: { sign: 1, axis: "z", limit: 15 } },
+    bend: { forward: { axis: [0, 0, -1], limit: 90 }, backward: { axis: [0, 0, 1], limit: 15 } },
   },
   pinky_l_0: {
-    bend: { forward: { sign: -1, axis: "z", limit: 90 }, backward: { sign: 1, axis: "z", limit: 15 } },
-    sway: { left: { sign: -1, axis: "x", limit: 45 }, right: { sign: 1, axis: "x", limit: 45 } },
+    bend: { forward: { axis: [0, 0, -1], limit: 90 }, backward: { axis: [0, 0, 1], limit: 15 } },
+    sway: { left: { axis: [-1, 0, 0], limit: 45 }, right: { axis: [1, 0, 0], limit: 45 } },
   },
   pinky_l_1: {
-    bend: { forward: { sign: -1, axis: "z", limit: 90 }, backward: { sign: 1, axis: "z", limit: 15 } },
+    bend: { forward: { axis: [0, 0, -1], limit: 90 }, backward: { axis: [0, 0, 1], limit: 15 } },
   },
   pinky_l_2: {
-    bend: { forward: { sign: -1, axis: "z", limit: 90 }, backward: { sign: 1, axis: "z", limit: 15 } },
+    bend: { forward: { axis: [0, 0, -1], limit: 90 }, backward: { axis: [0, 0, 1], limit: 15 } },
   },
 
   thumb_r_0: {
-    bend: { forward: { sign: -1, axis: "x-y", limit: 90 }, backward: { sign: 1, axis: "x-y", limit: 15 } },
-    sway: { left: { sign: 1, axis: "z", limit: 45 }, right: { sign: -1, axis: "z", limit: 45 } },
+    bend: { forward: { axis: [-1, -1, 0], limit: 90 }, backward: { axis: [1, -1, 0], limit: 15 } },
+    sway: { left: { axis: [0, 0, 1], limit: 45 }, right: { axis: [0, 0, -1], limit: 45 } },
   },
   thumb_r_1: {
-    bend: { forward: { sign: -1, axis: "x-y", limit: 90 }, backward: { sign: 1, axis: "x-y", limit: 15 } },
+    bend: { forward: { axis: [-1, -1, 0], limit: 90 }, backward: { axis: [1, -1, 0], limit: 15 } },
   },
   thumb_r_2: {
-    bend: { forward: { sign: -1, axis: "x-y", limit: 90 }, backward: { sign: 1, axis: "x-y", limit: 15 } },
+    bend: { forward: { axis: [-1, -1, 0], limit: 90 }, backward: { axis: [1, -1, 0], limit: 15 } },
   },
   index_r_0: {
-    bend: { forward: { sign: 1, axis: "z", limit: 90 }, backward: { sign: -1, axis: "z", limit: 15 } },
-    sway: { left: { sign: 1, axis: "x", limit: 15 }, right: { sign: -1, axis: "x", limit: 15 } },
+    bend: { forward: { axis: [0, 0, 1], limit: 90 }, backward: { axis: [0, 0, -1], limit: 15 } },
+    sway: { left: { axis: [1, 0, 0], limit: 15 }, right: { axis: [-1, 0, 0], limit: 15 } },
   },
   index_r_1: {
-    bend: { forward: { sign: 1, axis: "z", limit: 90 }, backward: { sign: -1, axis: "z", limit: 15 } },
+    bend: { forward: { axis: [0, 0, 1], limit: 90 }, backward: { axis: [0, 0, -1], limit: 15 } },
   },
   index_r_2: {
-    bend: { forward: { sign: 1, axis: "z", limit: 90 }, backward: { sign: -1, axis: "z", limit: 15 } },
+    bend: { forward: { axis: [0, 0, 1], limit: 90 }, backward: { axis: [0, 0, -1], limit: 15 } },
   },
   middle_r_0: {
-    bend: { forward: { sign: 1, axis: "z", limit: 90 }, backward: { sign: -1, axis: "z", limit: 15 } },
-    sway: { left: { sign: 1, axis: "x", limit: 45 }, right: { sign: -1, axis: "x", limit: 45 } },
+    bend: { forward: { axis: [0, 0, 1], limit: 90 }, backward: { axis: [0, 0, -1], limit: 15 } },
+    sway: { left: { axis: [1, 0, 0], limit: 45 }, right: { axis: [-1, 0, 0], limit: 45 } },
   },
   middle_r_1: {
-    bend: { forward: { sign: 1, axis: "z", limit: 90 }, backward: { sign: -1, axis: "z", limit: 15 } },
+    bend: { forward: { axis: [0, 0, 1], limit: 90 }, backward: { axis: [0, 0, -1], limit: 15 } },
   },
   middle_r_2: {
-    bend: { forward: { sign: 1, axis: "z", limit: 90 }, backward: { sign: -1, axis: "z", limit: 15 } },
+    bend: { forward: { axis: [0, 0, 1], limit: 90 }, backward: { axis: [0, 0, -1], limit: 15 } },
   },
   ring_r_0: {
-    bend: { forward: { sign: 1, axis: "z", limit: 90 }, backward: { sign: -1, axis: "z", limit: 15 } },
-    sway: { left: { sign: 1, axis: "x", limit: 45 }, right: { sign: -1, axis: "x", limit: 45 } },
+    bend: { forward: { axis: [0, 0, 1], limit: 90 }, backward: { axis: [0, 0, -1], limit: 15 } },
+    sway: { left: { axis: [1, 0, 0], limit: 45 }, right: { axis: [-1, 0, 0], limit: 45 } },
   },
   ring_r_1: {
-    bend: { forward: { sign: 1, axis: "z", limit: 90 }, backward: { sign: -1, axis: "z", limit: 15 } },
+    bend: { forward: { axis: [0, 0, 1], limit: 90 }, backward: { axis: [0, 0, -1], limit: 15 } },
   },
   ring_r_2: {
-    bend: { forward: { sign: 1, axis: "z", limit: 90 }, backward: { sign: -1, axis: "z", limit: 15 } },
+    bend: { forward: { axis: [0, 0, 1], limit: 90 }, backward: { axis: [0, 0, -1], limit: 15 } },
   },
   pinky_r_0: {
-    bend: { forward: { sign: 1, axis: "z", limit: 90 }, backward: { sign: -1, axis: "z", limit: 15 } },
-    sway: { left: { sign: 1, axis: "x", limit: 45 }, right: { sign: -1, axis: "x", limit: 45 } },
+    bend: { forward: { axis: [0, 0, 1], limit: 90 }, backward: { axis: [0, 0, -1], limit: 15 } },
+    sway: { left: { axis: [1, 0, 0], limit: 45 }, right: { axis: [-1, 0, 0], limit: 45 } },
   },
   pinky_r_1: {
-    bend: { forward: { sign: 1, axis: "z", limit: 90 }, backward: { sign: -1, axis: "z", limit: 15 } },
+    bend: { forward: { axis: [0, 0, 1], limit: 90 }, backward: { axis: [0, 0, -1], limit: 15 } },
   },
   pinky_r_2: {
-    bend: { forward: { sign: 1, axis: "z", limit: 90 }, backward: { sign: -1, axis: "z", limit: 15 } },
+    bend: { forward: { axis: [0, 0, 1], limit: 90 }, backward: { axis: [0, 0, -1], limit: 15 } },
   },
 }
 
+// Generate all valid bone-action-direction combinations
 export const VALID_STATEMENTS = ((): string[] => {
   const combinations: string[] = []
-
   for (const [bone, actions] of Object.entries(BONE_ACTION_RULES)) {
     for (const [action, directions] of Object.entries(actions)) {
       for (const direction of Object.keys(directions)) {
@@ -301,6 +312,7 @@ export const VALID_STATEMENTS = ((): string[] => {
   return combinations
 })()
 
+// Structure representing a single MPL statement
 export interface MPLStatement {
   bone: string
   action: string
@@ -308,43 +320,35 @@ export interface MPLStatement {
   degrees: number
 }
 
+// Validate and parse a single MPL statement string
 export const validateStatement = (input: string): MPLStatement | null => {
-  if (input === "") {
-    return null
-  }
+  if (input === "") return null
+
   const segments = input.split(" ")
-  if (segments.length !== 4) {
-    return null
-  }
+  if (segments.length !== 4) return null
+
   const bone = segments[0].toLowerCase() as string
   const action = segments[1].toLowerCase() as string
   const direction = segments[2].toLowerCase() as string
   const degrees = Number(segments[3])
 
-  // Check if the bone-action-direction combination exists and validate degrees
+  // Validate each component
   const boneRules = BONE_ACTION_RULES[bone]
   const actionRules = boneRules?.[action]
   const rule = actionRules?.[direction]
 
-  if (
-    !BONES[bone] ||
-    !ACTIONS.includes(action) ||
-    !DIRECTIONS.includes(direction) ||
-    isNaN(degrees) ||
-    !rule ||
-    degrees > rule.limit
-  ) {
+  if (!BONES[bone] || !ACTIONS.includes(action) || !DIRECTIONS.includes(direction) || isNaN(degrees) || !rule) {
     return null
   }
-  return {
-    bone,
-    action,
-    direction,
-    degrees,
-  } as MPLStatement
+  if (degrees > rule.limit) {
+    console.log(`${bone} ${action} ${direction} ${degrees} is greater than ${rule.limit}`)
+    return null
+  }
+
+  return { bone, action, direction, degrees } as MPLStatement
 }
 
-// Helper function to multiply two quaternions
+// Multiply two quaternions (for combining rotations)
 const multiplyQuaternions = (
   q1: [number, number, number, number],
   q2: [number, number, number, number]
@@ -360,83 +364,249 @@ const multiplyQuaternions = (
   ]
 }
 
-// Helper function to process a single statement and return quaternion
-const processSingleStatement = (statement: MPLStatement): [number, number, number, number] | null => {
+// Convert a single MPL statement to a quaternion
+const mplToQuat = (statement: MPLStatement): [number, number, number, number] | null => {
   const { bone, action, direction, degrees } = statement
 
   const boneRules = BONE_ACTION_RULES[bone]
   const actionRules = boneRules?.[action]
   const rule = actionRules?.[direction]
 
-  if (!rule) {
-    return null
-  }
+  if (!rule) return null
 
-  // Apply the sign to degrees
-  const signedDegrees = rule.sign * degrees
+  // Get normalized rotation axis
+  const [x, y, z] = rule.axis
+  const magnitude = Math.sqrt(x * x + y * y + z * z)
+  if (magnitude === 0) return null
 
-  const radians = signedDegrees * (Math.PI / 180)
+  const normalizedX = x / magnitude
+  const normalizedY = y / magnitude
+  const normalizedZ = z / magnitude
+
+  // Create quaternion from axis-angle
+  const radians = degrees * (Math.PI / 180)
   const halfAngle = radians / 2
   const sin = Math.sin(halfAngle)
   const cos = Math.cos(halfAngle)
 
-  // Create quaternion based on the specified axis
-  let quaternion: [number, number, number, number] = [0, 0, 0, 1]
-  if (rule.axis === "x") {
-    quaternion = [sin, 0, 0, cos] // Rotation around X axis
-  } else if (rule.axis === "y") {
-    quaternion = [0, sin, 0, cos] // Rotation around Y axis
-  } else if (rule.axis === "z") {
-    quaternion = [0, 0, sin, cos] // Rotation around Z axis
-  } else if (rule.axis === "xy") {
-    // Diagonal rotation around the middle of xy (45 degrees between x and y)
-    const diagonalSin = sin * Math.cos(Math.PI / 4) // cos(45°) = 1/√2
-    quaternion = [diagonalSin, diagonalSin, 0, cos] // Equal components in x and y
-  } else if (rule.axis === "x-y") {
-    // Diagonal rotation around x-y (x positive, y negative)
-    const diagonalSin = sin * Math.cos(Math.PI / 4) // cos(45°) = 1/√2
-    quaternion = [diagonalSin, -diagonalSin, 0, cos] // x positive, y negative
-  } else if (rule.axis === "xz") {
-    // Diagonal rotation around the middle of xz (45 degrees between x and z)
-    const diagonalSin = sin * Math.cos(Math.PI / 4) // cos(45°) = 1/√2
-    quaternion = [diagonalSin, 0, diagonalSin, cos] // Equal components in x and z
-  } else if (rule.axis === "x-z") {
-    // Diagonal rotation around x-z (x positive, z negative)
-    const diagonalSin = sin * Math.cos(Math.PI / 4) // cos(45°) = 1/√2
-    quaternion = [diagonalSin, 0, -diagonalSin, cos] // x positive, z negative
-  } else if (rule.axis === "yz") {
-    // Diagonal rotation around the middle of yz (45 degrees between y and z)
-    const diagonalSin = sin * Math.cos(Math.PI / 4) // cos(45°) = 1/√2
-    quaternion = [0, diagonalSin, diagonalSin, cos] // Equal components in y and z
-  } else if (rule.axis === "y-z") {
-    // Diagonal rotation around y-z (y positive, z negative)
-    const diagonalSin = sin * Math.cos(Math.PI / 4) // cos(45°) = 1/√2
-    quaternion = [0, diagonalSin, -diagonalSin, cos] // y positive, z negative
-  } else {
-    return null
-  }
-
-  return quaternion
+  return [normalizedX * sin, normalizedY * sin, normalizedZ * sin, cos]
 }
 
-export const MPLInterpreter = (input: string): Pose | null => {
-  // Split input by semicolons and trim whitespace
+// Calculate distance between two quaternions (0 = identical, 1 = opposite)
+const quaternionDistance = (q1: [number, number, number, number], q2: [number, number, number, number]): number => {
+  // Handle quaternion double-cover (q and -q represent same rotation)
+  const dot1 = q1[0] * q2[0] + q1[1] * q2[1] + q1[2] * q2[2] + q1[3] * q2[3]
+  const dot2 = q1[0] * -q2[0] + q1[1] * -q2[1] + q1[2] * -q2[2] + q1[3] * -q2[3]
+  return 1 - Math.abs(Math.max(dot1, dot2))
+}
+
+// Convert a quaternion back to MPL statements using global optimization
+const quaternionToMPL = (
+  bone: string,
+  targetQuaternion: [number, number, number, number],
+  tolerance: number = 0.0001
+): string[] => {
+  if (!BONES[bone]) return []
+
+  const boneRules = BONE_ACTION_RULES[bone]
+  if (!boneRules) return []
+
+  // Get all possible actions for this bone
+  const possibleActions: Array<{ action: string; direction: string; rule: ActionRule }> = []
+  for (const [action, directions] of Object.entries(boneRules)) {
+    for (const [direction, rule] of Object.entries(directions)) {
+      possibleActions.push({ action, direction, rule })
+    }
+  }
+
+  // Evaluate fitness of a degree combination
+  const evaluateCombination = (degrees: number[]): number => {
+    if (degrees.length !== possibleActions.length) return Infinity
+
+    let combinedQuaternion: [number, number, number, number] = [0, 0, 0, 1]
+
+    for (let i = 0; i < degrees.length; i++) {
+      const deg = Math.max(0, Math.min(possibleActions[i].rule.limit, degrees[i]))
+      if (deg > 0.01) {
+        // Only apply significant rotations
+        const q = mplToQuat({
+          bone,
+          action: possibleActions[i].action,
+          direction: possibleActions[i].direction,
+          degrees: deg,
+        })
+        if (q) {
+          combinedQuaternion = multiplyQuaternions(combinedQuaternion, q)
+        }
+      }
+    }
+
+    return quaternionDistance(targetQuaternion, combinedQuaternion)
+  }
+
+  // Nelder-Mead simplex optimization algorithm
+  const nelderMead = (initialGuess: number[], maxIterations: number = 200): { degrees: number[]; distance: number } => {
+    const n = initialGuess.length
+    const alpha = 1.0 // reflection coefficient
+    const gamma = 2.0 // expansion coefficient
+    const rho = 0.5 // contraction coefficient
+    const sigma = 0.5 // shrinkage coefficient
+
+    // Initialize simplex with n+1 points
+    const simplex: Array<{ point: number[]; value: number }> = []
+
+    simplex.push({
+      point: [...initialGuess],
+      value: evaluateCombination(initialGuess),
+    })
+
+    // Create additional points by perturbing initial guess
+    for (let i = 0; i < n; i++) {
+      const point = [...initialGuess]
+      const range = possibleActions[i].rule.limit
+      point[i] += range * 0.1
+      simplex.push({
+        point,
+        value: evaluateCombination(point),
+      })
+    }
+
+    // Main optimization loop
+    for (let iter = 0; iter < maxIterations; iter++) {
+      simplex.sort((a, b) => a.value - b.value)
+
+      const best = simplex[0]
+      const worst = simplex[n]
+      const secondWorst = simplex[n - 1]
+
+      // Check convergence
+      if (worst.value - best.value < tolerance) break
+
+      // Calculate centroid (excluding worst point)
+      const centroid = new Array(n).fill(0)
+      for (let i = 0; i < n; i++) {
+        for (let j = 0; j < n; j++) {
+          centroid[j] += simplex[i].point[j]
+        }
+      }
+      for (let j = 0; j < n; j++) {
+        centroid[j] /= n
+      }
+
+      // Reflection step
+      const reflected = centroid.map((c, i) => c + alpha * (c - worst.point[i]))
+      const reflectedValue = evaluateCombination(reflected)
+
+      if (reflectedValue >= best.value && reflectedValue < secondWorst.value) {
+        worst.point = reflected
+        worst.value = reflectedValue
+        continue
+      }
+
+      // Expansion step
+      if (reflectedValue < best.value) {
+        const expanded = centroid.map((c, i) => c + gamma * (reflected[i] - c))
+        const expandedValue = evaluateCombination(expanded)
+
+        if (expandedValue < reflectedValue) {
+          worst.point = expanded
+          worst.value = expandedValue
+        } else {
+          worst.point = reflected
+          worst.value = reflectedValue
+        }
+        continue
+      }
+
+      // Contraction step
+      const contracted = centroid.map((c, i) => c + rho * (worst.point[i] - c))
+      const contractedValue = evaluateCombination(contracted)
+
+      if (contractedValue < worst.value) {
+        worst.point = contracted
+        worst.value = contractedValue
+        continue
+      }
+
+      // Shrinkage step
+      for (let i = 1; i <= n; i++) {
+        for (let j = 0; j < n; j++) {
+          simplex[i].point[j] = best.point[j] + sigma * (simplex[i].point[j] - best.point[j])
+        }
+        simplex[i].value = evaluateCombination(simplex[i].point)
+      }
+    }
+
+    simplex.sort((a, b) => a.value - b.value)
+    return {
+      degrees: simplex[0].point,
+      distance: simplex[0].value,
+    }
+  }
+
+  let bestResult = { degrees: [] as number[], distance: Infinity }
+
+  // Try optimization from multiple starting points for global search
+  const startingPoints = [
+    new Array(possibleActions.length).fill(0), // Zero start
+    possibleActions.map((action) => Math.random() * Math.min(30, action.rule.limit)), // Random start
+    possibleActions.map((action) => action.rule.limit * 0.5), // Mid-range start
+    possibleActions.map((action, i) => (i % 2 === 0 ? action.rule.limit * 0.3 : action.rule.limit * 0.7)), // Mixed start
+  ]
+
+  for (const start of startingPoints) {
+    const result = nelderMead(start)
+    if (result.distance < bestResult.distance) {
+      bestResult = result
+    }
+  }
+
+  // Convert optimal degrees to MPL statements
+  const statements: string[] = []
+  for (let i = 0; i < bestResult.degrees.length; i++) {
+    const deg = bestResult.degrees[i]
+    if (deg > 0.01) {
+      // Only include significant rotations
+      const action = possibleActions[i]
+      // Clamp degrees to the allowed limit to avoid numerical precision issues
+      const clampedDeg = Math.max(0, Math.min(action.rule.limit, deg))
+      statements.push(`${bone} ${action.action} ${action.direction} ${clampedDeg.toFixed(3)}`)
+    }
+  }
+
+  return statements
+}
+
+// Convert entire pose to MPL string
+export const PoseToMPL = (pose: Pose, tolerance: number = 0.001): string => {
+  const allStatements: string[] = []
+
+  for (const [boneName, quaternion] of Object.entries(pose.rotatableBones)) {
+    const boneKey = Object.keys(BONES).find((key) => BONES[key] === boneName)
+
+    if (boneKey && quaternion) {
+      const statements = quaternionToMPL(boneKey, quaternion, tolerance)
+      allStatements.push(...statements)
+    }
+  }
+
+  return allStatements.join("; ")
+}
+
+// Convert MPL string to pose object
+export const MPLToPose = (input: string): Pose | null => {
   const statements = input
     .split(";")
     .map((s) => s.trim())
     .filter((s) => s !== "")
 
-  if (statements.length === 0) {
-    return null
-  }
+  if (statements.length === 0) return null
 
-  // Validate all statements first
+  // Validate all statements
   const validStatements: MPLStatement[] = []
   for (const statement of statements) {
     const validStatement = validateStatement(statement)
-    if (!validStatement) {
-      return null // If any statement is invalid, return null
-    }
+    if (!validStatement) return null
     validStatements.push(validStatement)
   }
 
@@ -447,7 +617,7 @@ export const MPLInterpreter = (input: string): Pose | null => {
     rotatableBones: {} as RotatableBones,
   }
 
-  // Group statements by bone to handle multiple rotations on the same bone
+  // Group statements by bone
   const boneGroups: Record<string, MPLStatement[]> = {}
   for (const statement of validStatements) {
     if (!boneGroups[statement.bone]) {
@@ -458,21 +628,17 @@ export const MPLInterpreter = (input: string): Pose | null => {
 
   // Process each bone group
   for (const [bone, boneStatements] of Object.entries(boneGroups)) {
-    let combinedQuaternion: [number, number, number, number] = [0, 0, 0, 1] // Identity quaternion
+    let combinedQuaternion: [number, number, number, number] = [0, 0, 0, 1]
 
-    // Process all statements for this bone
     for (const statement of boneStatements) {
-      const quaternion = processSingleStatement(statement)
+      const quaternion = mplToQuat(statement)
       if (quaternion) {
-        // Multiply quaternions to combine rotations
         combinedQuaternion = multiplyQuaternions(combinedQuaternion, quaternion)
       }
     }
 
-    // Apply the combined quaternion to the bone
     pose.rotatableBones[BONES[bone] as keyof RotatableBones] = combinedQuaternion
   }
 
-  console.log(pose)
   return pose
 }

@@ -1,4 +1,4 @@
-import { VALID_STATEMENTS, MPLInterpreter } from "@/lib/mpl"
+import { VALID_STATEMENTS, MPLToPose } from "@/lib/mpl"
 import { MovableBones, Pose } from "@/lib/pose"
 import { SetStateAction, Dispatch, useCallback, useState, useEffect } from "react"
 import { CommandGroup, CommandInput, CommandItem, CommandList, Command } from "./ui/command"
@@ -49,7 +49,7 @@ export default function MPLInput({
 
   const generatePose = useCallback(
     async (description: string) => {
-      const poseData = MPLInterpreter(description)
+      const poseData = MPLToPose(description)
       if (!poseData) {
         return
       }
@@ -84,9 +84,8 @@ export default function MPLInput({
           >
             <Card
               key={i}
-              className={`bg-white/50 hover:bg-pink-100/70 py-0 gap-0 h-full w-full cursor-pointer backdrop-blur-[3px] shadow-lg ${
-                i >= 2 ? "hidden md:block" : ""
-              }`}
+              className={`bg-white/50 hover:bg-pink-100/70 py-0 gap-0 h-full w-full cursor-pointer backdrop-blur-[3px] shadow-lg ${i >= 2 ? "hidden md:block" : ""
+                }`}
               onClick={() => {
                 generatePose(statement)
               }}
