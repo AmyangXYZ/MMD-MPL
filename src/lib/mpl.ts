@@ -561,16 +561,55 @@ const quaternionToMPL = (
     }
   }
 
-  // Convert optimal degrees to MPL statements
-  const statements: string[] = []
+  // Convert optimal degrees to MPL statements and simplify opposing actions
+  const actionMap: Record<string, Record<string, number>> = {}
+
+  // Group degrees by action and direction
   for (let i = 0; i < bestResult.degrees.length; i++) {
     const deg = bestResult.degrees[i]
     if (deg > 0.01) {
-      // Only include significant rotations
       const action = possibleActions[i]
-      // Clamp degrees to the allowed limit to avoid numerical precision issues
       const clampedDeg = Math.max(0, Math.min(action.rule.limit, deg))
-      statements.push(`${bone} ${action.action} ${action.direction} ${clampedDeg.toFixed(3)}`)
+
+      if (!actionMap[action.action]) {
+        actionMap[action.action] = {}
+      }
+      actionMap[action.action][action.direction] = clampedDeg
+    }
+  }
+
+  // Simplify opposing directions within each action
+  const statements: string[] = []
+  for (const [action, directions] of Object.entries(actionMap)) {
+    // Handle opposing pairs
+    const opposingPairs = [
+      ["forward", "backward"],
+      ["left", "right"],
+    ]
+
+    const processedDirections = new Set<string>()
+
+    for (const [dir1, dir2] of opposingPairs) {
+      if (directions[dir1] && directions[dir2] && !processedDirections.has(dir1) && !processedDirections.has(dir2)) {
+        const deg1 = directions[dir1]
+        const deg2 = directions[dir2]
+        const netDegrees = Math.abs(deg1 - deg2)
+
+        if (netDegrees > 0.01) {
+          const netDirection = deg1 > deg2 ? dir1 : dir2
+          statements.push(`${bone} ${action} ${netDirection} ${netDegrees.toFixed(3)}`)
+        }
+
+        processedDirections.add(dir1)
+        processedDirections.add(dir2)
+      }
+    }
+
+    // Handle remaining directions that don't have opposing pairs
+    for (const [direction, degrees] of Object.entries(directions)) {
+      if (!processedDirections.has(direction) && degrees > 0.01) {
+        statements.push(`${bone} ${action} ${direction} ${degrees.toFixed(3)}`)
+      }
     }
   }
 
@@ -590,7 +629,7 @@ export const PoseToMPL = (pose: Pose, tolerance: number = 0.001): string => {
     }
   }
 
-  return allStatements.join("; ")
+  return allStatements.join(";")
 }
 
 // Convert MPL string to pose object

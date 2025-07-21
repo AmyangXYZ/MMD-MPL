@@ -21,7 +21,6 @@ import {
   Vector3,
 } from "@babylonjs/core"
 import { useRef, useEffect, useCallback, useState } from "react"
-import Image from "next/image"
 import {
   MmdWasmModel,
   PmxLoader,
@@ -52,9 +51,7 @@ import {
 } from "@/lib/pose"
 import { IMmdRuntimeLinkedBone } from "babylon-mmd/esm/Runtime/IMmdRuntimeLinkedBone"
 import { Button } from "./ui/button"
-import Link from "next/link"
-import CustomizePanel from "./customize-panel"
-import { HandMetal, Shirt } from "lucide-react"
+import { Shirt } from "lucide-react"
 import ClothesPanel from "./clothes-panel"
 import { MmdWasmPhysicsRuntimeImpl } from "babylon-mmd/esm/Runtime/Optimized/Physics/mmdWasmPhysicsRuntimeImpl"
 import MPLInput from "./mpl-input"
@@ -95,14 +92,9 @@ export default function MainScene() {
   const defaultPoseRef = useRef<Pose>(null)
   const [meshes, setMeshes] = useState<Mesh[]>([])
 
-  const [openCustomizePanel, setOpenCustomizePanel] = useState(false)
   const smoothUpdateRef = useRef(true)
 
   const [openClothesPanel, setOpenClothesPanel] = useState(false)
-
-  const setSmoothUpdate = useCallback((smoothUpdate: boolean) => {
-    smoothUpdateRef.current = smoothUpdate
-  }, [])
 
   const getBone = (name: string): IMmdRuntimeLinkedBone | null => {
     return bonesRef.current[name]
@@ -309,22 +301,26 @@ export default function MainScene() {
   }, [])
 
   const loadVpd = useCallback(
-    async (vpdUrl: string) => {
-      if (!vpdLoaderRef.current || !modelRef.current) return
+    async (vpdUrl: string): Promise<Pose | null> => {
+      if (!vpdLoaderRef.current || !modelRef.current || !defaultPoseRef.current) return null
 
       const vpd = await vpdLoaderRef.current.loadAsync("vpd_pose", vpdUrl)
-
+      // modelRef.current.addAnimation(vpd)
+      // modelRef.current.setAnimation("vpd_pose")
+      // modelRef.current.currentAnimation?.animate(0)
       const poseVpd = {
         description: "",
         face: {} as Morphs,
         movableBones: {} as MovableBones,
         rotatableBones: {} as RotatableBones,
       }
-
       for (const boneTrack of vpd.boneTracks) {
         const boneName = boneTrack.name
 
-        if (!Object.keys(RotatableBonesTranslations).includes(boneName)) continue
+        if (!Object.keys(RotatableBonesTranslations).includes(boneName)) {
+          console.log("missing rotatable bone", boneName)
+          continue
+        }
 
         const rotations = boneTrack.rotations
         if (rotations.length === 0) continue
@@ -337,86 +333,43 @@ export default function MainScene() {
 
       for (const boneTrack of vpd.movableBoneTracks) {
         const boneName = boneTrack.name
-        if (!Object.keys(MovableBonesTranslations).includes(boneName)) continue
+        if (!Object.keys(MovableBonesTranslations).includes(boneName)) {
+          console.log("missing movable bone", boneName)
+          continue
+        }
 
-        const runtimeBone = modelRef.current.runtimeBones.find((b) => b.name === boneName)
-        if (runtimeBone) {
-          const worldMatrix = Matrix.FromArray(runtimeBone.worldMatrix, 0)
+        if (boneTrack.positions && boneTrack.positions.length > 0) {
+          const defaultPosition = defaultPoseRef.current.movableBones[boneName as keyof MovableBones] || [0, 0, 0]
 
-          let parentWorldMatrix = Matrix.Identity()
-          if (runtimeBone.parentBone) {
-            parentWorldMatrix = Matrix.FromArray(runtimeBone.parentBone.worldMatrix, 0)
-          }
+          const position: BonePosition = [
+            defaultPosition[0] + boneTrack.positions[0],
+            defaultPosition[1] + boneTrack.positions[1],
+            defaultPosition[2] + boneTrack.positions[2],
+          ]
 
-          const invParentWorld = parentWorldMatrix.invert()
-          const localMatrix = invParentWorld.multiply(worldMatrix)
-
-          const localRotation = new Quaternion()
-          const localPosition = new Vector3()
-          const localScaling = new Vector3()
-          localMatrix.decompose(localScaling, localRotation, localPosition)
-
-          const position: BonePosition = [localPosition.x, localPosition.y, localPosition.z]
           if (!(position[0] === 0 && position[1] === 0 && position[2] === 0)) {
             poseVpd.movableBones[boneName as keyof MovableBones] = position
           }
         }
+
+        if (boneTrack.rotations && boneTrack.rotations.length > 0) {
+          const rotation: BoneRotationQuaternion = [...boneTrack.rotations] as BoneRotationQuaternion
+          poseVpd.rotatableBones[boneName as keyof typeof poseVpd.rotatableBones] = rotation
+        }
       }
 
-      setSmoothUpdate(true)
-      setPose((prev: Pose) => ({
-        ...prev,
-        description: "unlabeled pose from vpd",
-        face: { ...prev.face, ...poseVpd.face },
-        movableBones: { ...prev.movableBones, ...poseVpd.movableBones },
-        rotatableBones: { ...prev.rotatableBones, ...poseVpd.rotatableBones },
-      }))
+      return poseVpd
     },
-    [vpdLoaderRef, modelRef, setPose, setSmoothUpdate]
-  )
-
-  const exportPose = useCallback(
-    (description: string) => {
-      if (pose && defaultPoseRef.current) {
-        const exportedPose = {
-          description: description,
-          face: {} as Morphs,
-          movableBones: {} as MovableBones,
-          rotatableBones: {} as RotatableBones,
-        }
-        const defaultPose = defaultPoseRef.current
-        for (const [morphName, targetValue] of Object.entries(pose.face)) {
-          if (targetValue !== 0) {
-            exportedPose.face[morphName as keyof Morphs] = targetValue
-          }
-        }
-        for (const [boneName, position] of Object.entries(pose.movableBones)) {
-          if (JSON.stringify(position) !== JSON.stringify(defaultPose.movableBones[boneName as keyof MovableBones])) {
-            exportedPose.movableBones[boneName as keyof MovableBones] = position
-          }
-        }
-        for (const [boneName, rotation] of Object.entries(pose.rotatableBones)) {
-          if (
-            JSON.stringify(rotation) !== JSON.stringify(defaultPose.rotatableBones[boneName as keyof RotatableBones])
-          ) {
-            exportedPose.rotatableBones[boneName as keyof RotatableBones] = rotation
-          }
-        }
-        const blob = new Blob([JSON.stringify(exportedPose, null, 2)], { type: "application/json" })
-        const url = URL.createObjectURL(blob)
-        const a = document.createElement("a")
-        a.href = url
-        a.download = `${description.trim().replace(/\s+/g, "-").replace(/:/g, "-")}.json`
-        document.body.appendChild(a)
-        a.click()
-        document.body.removeChild(a)
-        URL.revokeObjectURL(url)
-      }
-    },
-    [pose, defaultPoseRef]
+    [vpdLoaderRef, modelRef, defaultPoseRef]
   )
 
   useEffect(() => {
+    const resize = () => {
+      if (sceneRef.current) {
+        sceneRef.current.getEngine().resize()
+      }
+    }
+
     const init = async () => {
       if (!canvasRef.current) return
 
@@ -549,6 +502,8 @@ export default function MainScene() {
         }
       })
 
+      window.addEventListener("resize", resize)
+
       engine.runRenderLoop(() => {
         scene.render()
       })
@@ -558,6 +513,7 @@ export default function MainScene() {
     return () => {
       if (engineRef.current) {
         engineRef.current.dispose()
+        window.removeEventListener("resize", resize)
       }
     }
   }, [loadModel])
@@ -568,16 +524,19 @@ export default function MainScene() {
     }
   }, [pose, applyPose])
 
-  return (
-    <div className="w-full h-full">
-      <canvas ref={canvasRef} className="w-full h-full z-1" />
+  const resetPose = useCallback(() => {
+    setPose(defaultPoseRef.current!)
+  }, [])
 
-      <div className="absolute flex justify-between top-2 mx-auto flex px-4 w-full z-20">
-        <Button size="icon" asChild className="bg-white text-black size-7 rounded-full hover:bg-gray-200">
-          <Link href="https://github.com/AmyangXYZ/MPL" target="_blank">
-            <Image src="/github-mark.svg" alt="GitHub" width={18} height={18} />
-          </Link>
-        </Button>
+  return (
+    <div className="w-full h-full flex flex-row">
+      <MPLInput setPose={setPose} resetPose={resetPose} loadVpd={loadVpd} />
+      <div className="w-full h-full">
+        <canvas ref={canvasRef} className="w-full h-full z-1" />
+      </div>
+
+      <div className="absolute flex justify-end items-center gap-2 top-2 mx-auto flex px-4 w-full z-20">
+
         <div className="flex items-center gap-2">
           {!openClothesPanel && (
             <div className="">
@@ -590,37 +549,11 @@ export default function MainScene() {
               </Button>
             </div>
           )}
-          {!openCustomizePanel && (
-            <div className="">
-              <Button
-                size="icon"
-                className="bg-white text-black size-7 rounded-full hover:bg-pink-100 cursor-pointer"
-                onClick={() => setOpenCustomizePanel(true)}
-              >
-                <HandMetal />
-              </Button>
-            </div>
-          )}
         </div>
       </div>
+
       <ClothesPanel open={openClothesPanel} setOpen={setOpenClothesPanel} meshes={meshes} setMeshes={setMeshes} />
-      <CustomizePanel
-        open={openCustomizePanel}
-        setOpen={setOpenCustomizePanel}
-        pose={pose}
-        setPose={setPose}
-        loadVpd={loadVpd}
-        setSmoothUpdate={setSmoothUpdate}
-        resetPose={() => loadModel()}
-        exportPose={exportPose}
-      />
-      <div
-        className={`fixed left-1/2 -translate-x-1/2 bottom-0 max-w-2xl mx-auto flex p-4 w-full z-10 flex-col gap-2 ${
-          openCustomizePanel || openClothesPanel ? "hidden" : ""
-        }`}
-      >
-        <MPLInput setPose={setPose} setSmoothUpdate={setSmoothUpdate} />
-      </div>
+
     </div>
   )
 }

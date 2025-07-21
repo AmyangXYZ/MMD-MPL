@@ -71,6 +71,8 @@ MPL supports multiple statements separated by semicolons (`;`), allowing complex
 
 - `thumb_l/r_0/1/2`, `index_l/r_0/1/2`, `middle_l/r_0/1/2`, `ring_l/r_0/1/2`, `pinky_l/r_0/1/2`
 
+[Available actions and limits for each bone](./src/lib/mpl.ts#L78)
+
 ## 📄 License
 
 GPL-3.0 License - see LICENSE for details.
