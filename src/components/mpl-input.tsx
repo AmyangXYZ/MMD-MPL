@@ -18,7 +18,6 @@ const suggestedStatements: string[] = [
   "middle_l_0 bend forward 75",
   "waist bend forward 30",
   "leg_l bend forward 45; leg_l sway left 25; ankle_l bend forward 15",
-  "shoulder_l bend forward 30; arm_l bend forward 50; arm_l sway left 20",
   "pinky_r_0 bend forward 60",
   "center bend forward 20",
   "head bend forward 25; neck bend forward 20; upper_body bend forward 15",
