@@ -10,7 +10,6 @@ import {
   HemisphericLight,
   ImportMeshAsync,
   Material,
-  Matrix,
   Mesh,
   Quaternion,
   RegisterSceneLoaderPlugin,
@@ -38,21 +37,12 @@ import {
   RigidBody,
   PhysicsStaticPlaneShape,
 } from "babylon-mmd"
-import {
-  BonePosition,
-  BoneRotationQuaternion,
-  Morphs,
-  MorphsTranslations,
-  MovableBones,
-  MovableBonesTranslations,
-  Pose,
-  RotatableBones,
-  RotatableBonesTranslations,
-} from "@/lib/pose"
+
 import { IMmdRuntimeLinkedBone } from "babylon-mmd/esm/Runtime/IMmdRuntimeLinkedBone"
 
 import { MmdWasmPhysicsRuntimeImpl } from "babylon-mmd/esm/Runtime/Optimized/Physics/mmdWasmPhysicsRuntimeImpl"
 import MPLInput from "./mpl-input"
+import { BoneRotationQuaternion, BONES, Pose } from "@/lib/mpl"
 
 interface TargetRotation {
   quaternion: Quaternion
@@ -83,11 +73,9 @@ export default function MainScene() {
   const targetPositionsRef = useRef<{ [key: string]: TargetPosition }>({})
   const [pose, setPose] = useState<Pose>({
     description: "",
-    face: {} as Morphs,
-    movableBones: {} as MovableBones,
-    rotatableBones: {} as RotatableBones,
-  } as Pose)
-  const defaultPoseRef = useRef<Pose>(null)
+    morphs: {},
+    bones: {} as { [key: string]: BoneRotationQuaternion },
+  })
 
   const [modelLoaded, setModelLoaded] = useState(false)
 
@@ -107,23 +95,30 @@ export default function MainScene() {
     }
   }, [])
 
-
   const applyPose = useCallback(
     (pose?: Pose) => {
       if (!modelRef.current || !pose) return
 
-      if (pose.face) {
-        for (const [morphName, targetValue] of Object.entries(pose.face)) {
-          modelRef.current.morph.setMorphWeight(morphName, targetValue as number)
-        }
-      }
+      // if (pose.face) {
+      //   for (const [morphName, targetValue] of Object.entries(pose.face)) {
+      //     modelRef.current.morph.setMorphWeight(morphName, targetValue as number)
+      //   }
+      // }
 
-      for (const [boneName] of Object.entries(RotatableBonesTranslations)) {
-        const bone = getBone(boneName)
+      for (const boneNameJp of Object.values(BONES)) {
+        const bone = getBone(boneNameJp)
         if (!bone) continue
 
-        const boneRotationQuaternion = pose.rotatableBones[boneName as keyof RotatableBones] || [0, 0, 0, 1]
-        rotateBone(boneName, new Quaternion(boneRotationQuaternion[0], boneRotationQuaternion[1], boneRotationQuaternion[2], boneRotationQuaternion[3]))
+        const boneRotationQuaternion = pose.bones[boneNameJp] || [0, 0, 0, 1]
+        rotateBone(
+          boneNameJp,
+          new Quaternion(
+            boneRotationQuaternion[0],
+            boneRotationQuaternion[1],
+            boneRotationQuaternion[2],
+            boneRotationQuaternion[3]
+          )
+        )
       }
     },
     [rotateBone]
@@ -152,81 +147,18 @@ export default function MainScene() {
       })
 
       for (const bone of modelRef.current!.skeleton.bones) {
-        if (
-          Object.keys(RotatableBonesTranslations).includes(bone.name) ||
-          Object.keys(MovableBonesTranslations).includes(bone.name)
-        ) {
+        if (Object.values(BONES).includes(bone.name)) {
           bonesRef.current[bone.name] = bone
         }
       }
 
-      setTimeout(() => {
-        const defaultFace = {} as Morphs
-        const defaultMovableBones = {} as MovableBones
-        const defaultRotatableBones = {} as RotatableBones
-        for (const morph of Object.keys(MorphsTranslations)) {
-          defaultFace[morph as keyof Morphs] = 0
-        }
-        for (const bone of Object.keys(MovableBonesTranslations)) {
-          if (bonesRef.current[bone]) {
-            const runtimeBone = modelRef.current!.runtimeBones.find((b) => b.name === bone)
-            if (runtimeBone) {
-              // Get this bone's world matrix
-              const worldMatrix = Matrix.FromArray(runtimeBone.worldMatrix, 0)
-
-              // Get parent world matrix (identity if no parent)
-              let parentWorldMatrix = Matrix.Identity()
-              if (runtimeBone.parentBone) {
-                parentWorldMatrix = Matrix.FromArray(runtimeBone.parentBone.worldMatrix, 0)
-              }
-
-              // Compute local matrix: local = inverse(parentWorld) * world
-              const invParentWorld = parentWorldMatrix.invert()
-              const localMatrix = invParentWorld.multiply(worldMatrix)
-
-              // Decompose local matrix to get local position
-              const localRotation = new Quaternion()
-              const localPosition = new Vector3()
-              const localScaling = new Vector3()
-              localMatrix.decompose(localScaling, localRotation, localPosition)
-
-              const position: BonePosition = [localPosition.x, localPosition.y, localPosition.z]
-              if (!(position[0] === 0 && position[1] === 0 && position[2] === 0)) {
-                defaultMovableBones[bone as keyof MovableBones] = position
-              }
-            }
-          }
-        }
-
-        for (const bone of Object.keys(RotatableBonesTranslations)) {
-          if (bonesRef.current[bone]) {
-            const boneRotationQuaternion = bonesRef.current[bone].rotationQuaternion.clone()
-            defaultRotatableBones[bone as keyof RotatableBones] = [
-              boneRotationQuaternion.x,
-              boneRotationQuaternion.y,
-              boneRotationQuaternion.z,
-              boneRotationQuaternion.w,
-            ]
-          }
-        }
-        const defaultPose = {
-          description: "",
-          face: defaultFace,
-          movableBones: defaultMovableBones,
-          rotatableBones: defaultRotatableBones,
-        }
-        defaultPoseRef.current = defaultPose
-        defaultPose.description = "default pose"
-
-        setPose(defaultPose)
-        setModelLoaded(true)
-      }, 200)
+      setModelLoaded(true)
     })
   }, [])
 
   const loadVpd = useCallback(
     async (vpdUrl: string): Promise<Pose | null> => {
-      if (!vpdLoaderRef.current || !modelRef.current || !defaultPoseRef.current) return null
+      if (!vpdLoaderRef.current || !modelRef.current) return null
 
       const vpd = await vpdLoaderRef.current.loadAsync("vpd_pose", vpdUrl)
       // modelRef.current.addAnimation(vpd)
@@ -234,15 +166,13 @@ export default function MainScene() {
       // modelRef.current.currentAnimation?.animate(0)
       const poseVpd = {
         description: "",
-        face: {} as Morphs,
-        movableBones: {} as MovableBones,
-        rotatableBones: {} as RotatableBones,
+        morphs: {},
+        bones: {} as { [key: string]: BoneRotationQuaternion },
       }
       for (const boneTrack of vpd.boneTracks) {
         const boneName = boneTrack.name
 
-        if (!Object.keys(RotatableBonesTranslations).includes(boneName)) {
-          console.log("missing rotatable bone", boneName)
+        if (!Object.values(BONES).includes(boneName)) {
           continue
         }
 
@@ -251,40 +181,25 @@ export default function MainScene() {
         const rotation: BoneRotationQuaternion = [...rotations] as BoneRotationQuaternion
 
         if (!(rotation[0] === 0 && rotation[1] === 0 && rotation[2] === 0 && rotation[3] === 1)) {
-          poseVpd.rotatableBones[boneName as keyof typeof poseVpd.rotatableBones] = rotation
+          poseVpd.bones[boneName] = rotation
         }
       }
 
       for (const boneTrack of vpd.movableBoneTracks) {
         const boneName = boneTrack.name
-        if (!Object.keys(MovableBonesTranslations).includes(boneName)) {
-          console.log("missing movable bone", boneName)
+        if (!Object.values(BONES).includes(boneName)) {
           continue
-        }
-
-        if (boneTrack.positions && boneTrack.positions.length > 0) {
-          const defaultPosition = defaultPoseRef.current.movableBones[boneName as keyof MovableBones] || [0, 0, 0]
-
-          const position: BonePosition = [
-            defaultPosition[0] + boneTrack.positions[0],
-            defaultPosition[1] + boneTrack.positions[1],
-            defaultPosition[2] + boneTrack.positions[2],
-          ]
-
-          if (!(position[0] === 0 && position[1] === 0 && position[2] === 0)) {
-            poseVpd.movableBones[boneName as keyof MovableBones] = position
-          }
         }
 
         if (boneTrack.rotations && boneTrack.rotations.length > 0) {
           const rotation: BoneRotationQuaternion = [...boneTrack.rotations] as BoneRotationQuaternion
-          poseVpd.rotatableBones[boneName as keyof typeof poseVpd.rotatableBones] = rotation
+          poseVpd.bones[boneName] = rotation
         }
       }
 
       return poseVpd
     },
-    [vpdLoaderRef, modelRef, defaultPoseRef]
+    [vpdLoaderRef, modelRef]
   )
 
   useEffect(() => {
@@ -449,7 +364,11 @@ export default function MainScene() {
   }, [pose, applyPose])
 
   const resetPose = useCallback(() => {
-    setPose(defaultPoseRef.current!)
+    setPose({
+      description: "",
+      morphs: {},
+      bones: {} as { [key: string]: BoneRotationQuaternion },
+    })
   }, [])
 
   return (

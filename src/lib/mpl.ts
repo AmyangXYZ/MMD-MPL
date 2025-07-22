@@ -1,6 +1,53 @@
-import { Morphs, MovableBones, Pose, RotatableBones } from "./pose"
+export type BoneRotationQuaternion = [number, number, number, number] // [x, y, z, w]
 
-// Mapping of bone keys to Japanese bone names used in MMD
+// keys are in Japanese
+export interface Pose {
+  description: string
+  morphs: {
+    [key: string]: number
+  }
+  bones: {
+    [key: string]: BoneRotationQuaternion
+  }
+}
+
+export const Morphs: string[] = [
+  "真面目",
+  "困る",
+  "にこり",
+  "怒り",
+  "まばたき",
+  "笑い",
+  "ウィンク",
+  "ウィンク右",
+  "ウィンク２",
+  "ｳｨﾝｸ２右",
+  "なごみ",
+  "びっくり",
+  "恐ろしい子！",
+  "はちゅ目",
+  "はぅ",
+  "ｷﾘｯ",
+  "眼睑上",
+  "眼角下",
+  "じと目",
+  "じと目1",
+  "あ",
+  "い",
+  "う",
+  "え",
+  "お",
+  "お1",
+  "口角上げ",
+  "口角下げ",
+  "口角下げ1",
+  "口横缩げ",
+  "口横広げ",
+  "にやり２",
+  "にやり２1",
+  "照れ",
+]
+// Mapping of bone English names to Japanese names used in MMD
 export const BONES: Record<string, string> = {
   base: "全ての親",
   center: "センター",
@@ -29,36 +76,36 @@ export const BONES: Record<string, string> = {
   ankle_r: "右足首",
   forefoot_l: "左足先EX",
   forefoot_r: "右足先EX",
-  thumb_l_0: "左親指０",
-  thumb_r_0: "右親指０",
-  thumb_l_1: "左親指１",
-  thumb_r_1: "右親指１",
-  thumb_l_2: "左親指２",
-  thumb_r_2: "右親指２",
-  index_l_0: "左人指１",
-  index_r_0: "右人指１",
-  index_l_1: "左人指２",
-  index_r_1: "右人指２",
-  index_l_2: "左人指３",
-  index_r_2: "右人指３",
-  middle_l_0: "左中指１",
-  middle_r_0: "右中指１",
+  thumb_0_l: "左親指０",
+  thumb_0_r: "右親指０",
+  thumb_1_l: "左親指１",
+  thumb_1_r: "右親指１",
+  thumb_2_l: "左親指２",
+  thumb_2_r: "右親指２",
+  index_0_l: "左人指１",
+  index_0_r: "右人指１",
+  index_1_l: "左人指２",
+  index_1_r: "右人指２",
+  index_2_l: "左人指３",
+  index_2_r: "右人指３",
+  middle_0_l: "左中指１",
+  middle_0_r: "右中指１",
   middle_l_1: "左中指２",
-  middle_r_1: "右中指２",
-  middle_l_2: "左中指３",
-  middle_r_2: "右中指３",
-  ring_l_0: "左薬指１",
-  ring_r_0: "右薬指１",
-  ring_l_1: "左薬指２",
-  ring_r_1: "右薬指２",
-  ring_l_2: "左薬指３",
-  ring_r_2: "右薬指３",
-  pinky_l_0: "左小指１",
-  pinky_r_0: "右小指１",
-  pinky_l_1: "左小指２",
-  pinky_r_1: "右小指２",
-  pinky_l_2: "左小指３",
-  pinky_r_2: "右小指３",
+  middle_1_r: "右中指２",
+  middle_2_l: "左中指３",
+  middle_2_r: "右中指３",
+  ring_0_l: "左薬指１",
+  ring_0_r: "右薬指１",
+  ring_1_l: "左薬指２",
+  ring_1_r: "右薬指２",
+  ring_2_l: "左薬指３",
+  ring_2_r: "右薬指３",
+  pinky_0_l: "左小指１",
+  pinky_0_r: "右小指１",
+  pinky_1_l: "左小指２",
+  pinky_1_r: "右小指２",
+  pinky_2_l: "左小指３",
+  pinky_2_r: "右小指３",
 }
 
 // Valid action types
@@ -196,105 +243,105 @@ export const BONE_ACTION_RULES: Record<string, Record<string, Record<string, Act
   forefoot_l: { bend: { forward: { axis: [-1, 0, 0], limit: 30 }, backward: { axis: [1, 0, 0], limit: 30 } } },
   forefoot_r: { bend: { forward: { axis: [-1, 0, 0], limit: 30 }, backward: { axis: [1, 0, 0], limit: 30 } } },
 
-  thumb_l_0: {
+  thumb_0_l: {
     bend: { forward: { axis: [-1, 1, 0], limit: 90 }, backward: { axis: [1, 1, 0], limit: 15 } },
     sway: { left: { axis: [0, 0, 1], limit: 45 }, right: { axis: [0, 0, -1], limit: 45 } },
   },
-  thumb_l_1: {
+  thumb_1_l: {
     bend: { forward: { axis: [-1, 1, 0], limit: 90 }, backward: { axis: [1, 1, 0], limit: 15 } },
   },
-  thumb_l_2: {
+  thumb_2_l: {
     bend: { forward: { axis: [-1, 1, 0], limit: 90 }, backward: { axis: [1, 1, 0], limit: 15 } },
   },
-  index_l_0: {
+  index_0_l: {
     bend: { forward: { axis: [0, 0, -1], limit: 90 }, backward: { axis: [0, 0, 1], limit: 15 } },
     sway: { left: { axis: [-1, 0, 0], limit: 15 }, right: { axis: [1, 0, 0], limit: 15 } },
   },
-  index_l_1: {
+  index_1_l: {
     bend: { forward: { axis: [0, 0, -1], limit: 90 }, backward: { axis: [0, 0, 1], limit: 15 } },
   },
-  index_l_2: {
+  index_2_l: {
     bend: { forward: { axis: [0, 0, -1], limit: 90 }, backward: { axis: [0, 0, 1], limit: 15 } },
   },
-  middle_l_0: {
-    bend: { forward: { axis: [0, 0, -1], limit: 90 }, backward: { axis: [0, 0, 1], limit: 15 } },
-    sway: { left: { axis: [-1, 0, 0], limit: 45 }, right: { axis: [1, 0, 0], limit: 45 } },
-  },
-  middle_l_1: {
-    bend: { forward: { axis: [0, 0, -1], limit: 90 }, backward: { axis: [0, 0, 1], limit: 15 } },
-  },
-  middle_l_2: {
-    bend: { forward: { axis: [0, 0, -1], limit: 90 }, backward: { axis: [0, 0, 1], limit: 15 } },
-  },
-  ring_l_0: {
+  middle_0_l: {
     bend: { forward: { axis: [0, 0, -1], limit: 90 }, backward: { axis: [0, 0, 1], limit: 15 } },
     sway: { left: { axis: [-1, 0, 0], limit: 45 }, right: { axis: [1, 0, 0], limit: 45 } },
   },
-  ring_l_1: {
+  middle_1_l: {
     bend: { forward: { axis: [0, 0, -1], limit: 90 }, backward: { axis: [0, 0, 1], limit: 15 } },
   },
-  ring_l_2: {
+  middle_2_l: {
     bend: { forward: { axis: [0, 0, -1], limit: 90 }, backward: { axis: [0, 0, 1], limit: 15 } },
   },
-  pinky_l_0: {
+  ring_0_l: {
     bend: { forward: { axis: [0, 0, -1], limit: 90 }, backward: { axis: [0, 0, 1], limit: 15 } },
     sway: { left: { axis: [-1, 0, 0], limit: 45 }, right: { axis: [1, 0, 0], limit: 45 } },
   },
-  pinky_l_1: {
+  ring_1_l: {
     bend: { forward: { axis: [0, 0, -1], limit: 90 }, backward: { axis: [0, 0, 1], limit: 15 } },
   },
-  pinky_l_2: {
+  ring_2_l: {
+    bend: { forward: { axis: [0, 0, -1], limit: 90 }, backward: { axis: [0, 0, 1], limit: 15 } },
+  },
+  pinky_0_l: {
+    bend: { forward: { axis: [0, 0, -1], limit: 90 }, backward: { axis: [0, 0, 1], limit: 15 } },
+    sway: { left: { axis: [-1, 0, 0], limit: 45 }, right: { axis: [1, 0, 0], limit: 45 } },
+  },
+  pinky_1_l: {
+    bend: { forward: { axis: [0, 0, -1], limit: 90 }, backward: { axis: [0, 0, 1], limit: 15 } },
+  },
+  pinky_2_l: {
     bend: { forward: { axis: [0, 0, -1], limit: 90 }, backward: { axis: [0, 0, 1], limit: 15 } },
   },
 
-  thumb_r_0: {
+  thumb_0_r: {
     bend: { forward: { axis: [-1, -1, 0], limit: 90 }, backward: { axis: [1, -1, 0], limit: 15 } },
     sway: { left: { axis: [0, 0, 1], limit: 45 }, right: { axis: [0, 0, -1], limit: 45 } },
   },
-  thumb_r_1: {
+  thumb_1_r: {
     bend: { forward: { axis: [-1, -1, 0], limit: 90 }, backward: { axis: [1, -1, 0], limit: 15 } },
   },
-  thumb_r_2: {
+  thumb_2_r: {
     bend: { forward: { axis: [-1, -1, 0], limit: 90 }, backward: { axis: [1, -1, 0], limit: 15 } },
   },
-  index_r_0: {
+  index_0_r: {
     bend: { forward: { axis: [0, 0, 1], limit: 90 }, backward: { axis: [0, 0, -1], limit: 15 } },
     sway: { left: { axis: [1, 0, 0], limit: 15 }, right: { axis: [-1, 0, 0], limit: 15 } },
   },
-  index_r_1: {
+  index_1_r: {
     bend: { forward: { axis: [0, 0, 1], limit: 90 }, backward: { axis: [0, 0, -1], limit: 15 } },
   },
-  index_r_2: {
+  index_2_r: {
     bend: { forward: { axis: [0, 0, 1], limit: 90 }, backward: { axis: [0, 0, -1], limit: 15 } },
   },
-  middle_r_0: {
-    bend: { forward: { axis: [0, 0, 1], limit: 90 }, backward: { axis: [0, 0, -1], limit: 15 } },
-    sway: { left: { axis: [1, 0, 0], limit: 45 }, right: { axis: [-1, 0, 0], limit: 45 } },
-  },
-  middle_r_1: {
-    bend: { forward: { axis: [0, 0, 1], limit: 90 }, backward: { axis: [0, 0, -1], limit: 15 } },
-  },
-  middle_r_2: {
-    bend: { forward: { axis: [0, 0, 1], limit: 90 }, backward: { axis: [0, 0, -1], limit: 15 } },
-  },
-  ring_r_0: {
+  middle_0_r: {
     bend: { forward: { axis: [0, 0, 1], limit: 90 }, backward: { axis: [0, 0, -1], limit: 15 } },
     sway: { left: { axis: [1, 0, 0], limit: 45 }, right: { axis: [-1, 0, 0], limit: 45 } },
   },
-  ring_r_1: {
+  middle_1_r: {
     bend: { forward: { axis: [0, 0, 1], limit: 90 }, backward: { axis: [0, 0, -1], limit: 15 } },
   },
-  ring_r_2: {
+  middle_2_r: {
     bend: { forward: { axis: [0, 0, 1], limit: 90 }, backward: { axis: [0, 0, -1], limit: 15 } },
   },
-  pinky_r_0: {
+  ring_0_r: {
     bend: { forward: { axis: [0, 0, 1], limit: 90 }, backward: { axis: [0, 0, -1], limit: 15 } },
     sway: { left: { axis: [1, 0, 0], limit: 45 }, right: { axis: [-1, 0, 0], limit: 45 } },
   },
-  pinky_r_1: {
+  ring_1_r: {
     bend: { forward: { axis: [0, 0, 1], limit: 90 }, backward: { axis: [0, 0, -1], limit: 15 } },
   },
-  pinky_r_2: {
+  ring_2_r: {
+    bend: { forward: { axis: [0, 0, 1], limit: 90 }, backward: { axis: [0, 0, -1], limit: 15 } },
+  },
+  pinky_0_r: {
+    bend: { forward: { axis: [0, 0, 1], limit: 90 }, backward: { axis: [0, 0, -1], limit: 15 } },
+    sway: { left: { axis: [1, 0, 0], limit: 45 }, right: { axis: [-1, 0, 0], limit: 45 } },
+  },
+  pinky_1_r: {
+    bend: { forward: { axis: [0, 0, 1], limit: 90 }, backward: { axis: [0, 0, -1], limit: 15 } },
+  },
+  pinky_2_r: {
     bend: { forward: { axis: [0, 0, 1], limit: 90 }, backward: { axis: [0, 0, -1], limit: 15 } },
   },
 }
@@ -620,11 +667,11 @@ const quaternionToMPL = (
 export const PoseToMPL = (pose: Pose, tolerance: number = 0.001): string => {
   const allStatements: string[] = []
 
-  for (const [boneName, quaternion] of Object.entries(pose.rotatableBones)) {
-    const boneKey = Object.keys(BONES).find((key) => BONES[key] === boneName)
+  for (const [boneNameJp, quaternion] of Object.entries(pose.bones)) {
+    const boneNameEng = Object.keys(BONES).find((key) => BONES[key] === boneNameJp)
 
-    if (boneKey && quaternion) {
-      const statements = quaternionToMPL(boneKey, quaternion, tolerance)
+    if (boneNameEng && quaternion) {
+      const statements = quaternionToMPL(boneNameEng, quaternion, tolerance)
       allStatements.push(...statements)
     }
   }
@@ -645,15 +692,14 @@ export const MPLToPose = (input: string): Pose | null => {
   const validStatements: MPLStatement[] = []
   for (const statement of statements) {
     const validStatement = validateStatement(statement)
-    if (!validStatement) return null
+    if (!validStatement) continue
     validStatements.push(validStatement)
   }
 
   const pose: Pose = {
     description: input,
-    face: {} as Morphs,
-    movableBones: {} as MovableBones,
-    rotatableBones: {} as RotatableBones,
+    morphs: {},
+    bones: {} as { [key: string]: BoneRotationQuaternion },
   }
 
   // Group statements by bone
@@ -676,8 +722,7 @@ export const MPLToPose = (input: string): Pose | null => {
       }
     }
 
-    pose.rotatableBones[BONES[bone] as keyof RotatableBones] = combinedQuaternion
+    pose.bones[BONES[bone]] = combinedQuaternion
   }
-
   return pose
 }

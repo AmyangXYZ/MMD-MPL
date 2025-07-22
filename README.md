@@ -28,7 +28,7 @@ head turn left 30
 arm_r bend forward 90
 elbow_l bend forward 120
 wrist_r sway left 45
-thumb_r_0 bend forward 60
+thumb_0_r bend forward 60
 ```
 
 **Multi-Statement Examples:**
@@ -71,7 +71,7 @@ MPL supports multiple statements separated by semicolons (`;`), allowing complex
 
 **Fingers:**
 
-- `thumb_l/r_0/1/2`, `index_l/r_0/1/2`, `middle_l/r_0/1/2`, `ring_l/r_0/1/2`, `pinky_l/r_0/1/2`
+- `thumb_0/1/2_l/r`, `index_0/1/2_l/r`, `middle_0/1/2_l/r`, `ring_0/1/2_l/r`, `pinky_0/1/2_l/r`
 
 [Available actions and limits for each bone](./src/lib/mpl.ts#L78)
 
