@@ -363,21 +363,13 @@ export default function MainScene() {
     }
   }, [pose, applyPose])
 
-  const resetPose = useCallback(() => {
-    setPose({
-      description: "",
-      morphs: {},
-      bones: {} as { [key: string]: BoneRotationQuaternion },
-    })
-  }, [])
-
   return (
     <div className="w-full h-full flex flex-col md:flex-row">
       <div className="w-full h-[70%] md:w-1/2 md:h-full order-1 md:order-2">
         <canvas ref={canvasRef} className="w-full h-full z-1" />
       </div>
       <div className="w-full h-[30%] md:w-1/2 md:h-full order-2 md:order-1 border-t">
-        <MPLInput setPose={setPose} resetPose={resetPose} loadVpd={loadVpd} modelLoaded={modelLoaded} />
+        <MPLInput setPose={setPose} loadVpd={loadVpd} modelLoaded={modelLoaded} />
       </div>
     </div>
   )

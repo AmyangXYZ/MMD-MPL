@@ -8,12 +8,10 @@ import CodeEditor from "./code-editor"
 
 export default function MPLInput({
   setPose,
-  resetPose,
   loadVpd,
   modelLoaded,
 }: {
   setPose: Dispatch<SetStateAction<Pose>>
-  resetPose: () => void
   loadVpd: (url: string) => Promise<Pose | null>
   modelLoaded: boolean
 }) {
@@ -86,6 +84,14 @@ leg_l sway left 0.819`)
     },
     [setStatement, loadVpd]
   )
+
+  const resetPose = useCallback(() => {
+    setPose({
+      description: "",
+      morphs: {},
+      bones: {},
+    })
+  }, [setPose])
 
   const generatePose = useCallback(
     async (statement: string) => {
