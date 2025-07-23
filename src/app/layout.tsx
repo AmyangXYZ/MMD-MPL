@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import "./globals.css"
 import { Analytics } from "@vercel/analytics/next"
+import { Viewport } from "next"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -12,8 +13,6 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 })
-
-export const viewport = "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
 
 export const metadata: Metadata = {
   title: "MPL - MMD Pose Language",
@@ -31,6 +30,13 @@ export const metadata: Metadata = {
     title: "MPL - MMD Pose Language",
     description: "Use plain text to control MMD poses and facial morphs, no more brain-hurting quaternions",
   },
+}
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 }
 
 export default function RootLayout({

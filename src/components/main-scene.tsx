@@ -8,7 +8,7 @@ import {
   DirectionalLight,
   Engine,
   HemisphericLight,
-  ImportMeshAsync,
+  LoadAssetContainerAsync,
   Material,
   Mesh,
   Quaternion,
@@ -22,7 +22,6 @@ import {
 import { useRef, useEffect, useCallback, useState } from "react"
 import {
   MmdWasmModel,
-  PmxLoader,
   SdefInjector,
   MmdWasmInstanceTypeMPR,
   GetMmdWasmInstance,
@@ -36,6 +35,7 @@ import {
   RigidBodyConstructionInfo,
   RigidBody,
   PhysicsStaticPlaneShape,
+  BpmxLoader,
 } from "babylon-mmd"
 
 import { IMmdRuntimeLinkedBone } from "babylon-mmd/esm/Runtime/IMmdRuntimeLinkedBone"
@@ -131,7 +131,7 @@ export default function MainScene() {
       modelRef.current.mesh.dispose()
     }
 
-    ImportMeshAsync(`/models/深空之眼-梵天/深空之眼-梵天.pmx`, sceneRef.current!, {
+    LoadAssetContainerAsync(`/models/深空之眼-梵天.bpmx`, sceneRef.current!, {
       pluginOptions: {
         mmdmodel: {
           materialBuilder: mmdMaterialBuilderRef.current || undefined,
@@ -152,6 +152,7 @@ export default function MainScene() {
         }
       }
 
+      result.addAllToScene()
       setModelLoaded(true)
     })
   }, [])
@@ -213,7 +214,7 @@ export default function MainScene() {
       if (!canvasRef.current) return
 
       // Register the PMX loader plugin
-      RegisterSceneLoaderPlugin(new PmxLoader())
+      RegisterSceneLoaderPlugin(new BpmxLoader())
 
       const engine = new Engine(canvasRef.current, true, {}, true)
       SdefInjector.OverrideEngineCreateEffect(engine)
