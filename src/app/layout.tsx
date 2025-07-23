@@ -13,9 +13,10 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 })
 
+export const viewport = "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+
 export const metadata: Metadata = {
   title: "MPL - MMD Pose Language",
-  viewport: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no",
   description: "Use plain text to control MMD poses and facial morphs, no more brain-hurting quaternions",
   keywords: ["MMD", "MikuMikuDance", "AI pose", "text to pose", "MMD pose language"],
   openGraph: {
