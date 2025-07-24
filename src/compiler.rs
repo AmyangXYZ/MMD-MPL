@@ -1,8 +1,10 @@
 use std::collections::HashMap;
 
+use serde::{Deserialize, Serialize};
+
 use crate::{animation::MPLAnimation, pose::MPLPose};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MPLScript {
     pub poses: HashMap<String, MPLPose>,
     pub animations: HashMap<String, MPLAnimation>,

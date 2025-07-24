@@ -1,12 +1,14 @@
 use std::collections::HashMap;
 
+use serde::{Deserialize, Serialize};
+
 use crate::{
     bone::MPLBoneState,
     utils::{Quaternion, Vector3},
     with_bone_db,
 };
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MPLPoseStatement {
     pub bone: String,
     pub action: String,
@@ -75,7 +77,7 @@ impl MPLPoseStatement {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MPLPose {
     pub name: String,
     pub statements: Vec<MPLPoseStatement>,

@@ -1,4 +1,6 @@
-#[derive(Debug, Clone)]
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MPLAnimationFrame {
     pub poses: Vec<String>,
     pub duration: f32,
@@ -44,7 +46,7 @@ impl MPLAnimationFrame {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MPLAnimation {
     pub name: String,
     pub frames: Vec<MPLAnimationFrame>,
