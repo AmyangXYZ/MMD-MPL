@@ -67,7 +67,7 @@ MPL supports multiple statements separated by semicolons (`;`), allowing complex
 
 **Legs:**
 
-- `leg_l/r`, `knee_l/r`, `ankle_l/r`, `forefoot_l/r`
+- `leg_l/r`, `knee_l/r`, `ankle_l/r`, `toe_l/r`
 
 **Fingers:**
 
