@@ -123,7 +123,7 @@ leg_l sway left 0.819`)
         </h3>
         <h3 className="scroll-m-20 text-lg font-semibold tracking-tight md:hidden">MPL Editor</h3>
         <div className="flex flex-row gap-2">
-          <div className="relative mr-1 hidden md:block">
+          <div className="relative hidden md:block">
             <input
               type="file"
               accept=".vpd"
@@ -148,30 +148,13 @@ leg_l sway left 0.819`)
               setStatement("")
               resetPose()
             }}
-            className="flex gap-2 hidden md:flex"
-            size="sm"
-          >
-            <RefreshCw className="size-4" />
-            <span className="text-xs">Reset</span>
-          </Button>
-          <Button
-            onClick={() => {
-              setStatement("")
-              resetPose()
-            }}
-            className="flex gap-2 md:hidden bg-black text-white"
+            className="flex gap-2 bg-black text-white"
             size="sm"
             variant="outline"
           >
             <RefreshCw className="size-4" />
           </Button>
-          <Button size="sm" asChild className="hidden md:flex">
-            <Link href="https://github.com/AmyangXYZ/MPL" target="_blank" className="flex gap-2">
-              <Image src="/github-mark-white.svg" alt="GitHub" width={18} height={18} />
-              <span className="text-xs">Github</span>
-            </Link>
-          </Button>
-          <Button size="sm" asChild className="md:hidden bg-black text-white px-2.5" variant="outline">
+          <Button size="sm" asChild className="bg-black text-white px-2.5" variant="outline">
             <Link href="https://github.com/AmyangXYZ/MPL" target="_blank" className="flex gap-2">
               <Image src="/github-mark-white.svg" alt="GitHub" width={18} height={18} />
             </Link>

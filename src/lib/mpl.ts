@@ -74,8 +74,8 @@ export const BONES: Record<string, string> = {
   knee_r: "右ひざ",
   ankle_l: "左足首",
   ankle_r: "右足首",
-  forefoot_l: "左足先EX",
-  forefoot_r: "右足先EX",
+  toe_l: "左足先EX",
+  toe_r: "右足先EX",
   thumb_0_l: "左親指０",
   thumb_0_r: "右親指０",
   thumb_1_l: "左親指１",
@@ -240,8 +240,8 @@ export const BONE_ACTION_RULES: Record<string, Record<string, Record<string, Act
     turn: { left: { axis: [0, -1, 0], limit: 90 }, right: { axis: [0, 1, 0], limit: 90 } },
     sway: { left: { axis: [0, 0, 1], limit: 30 }, right: { axis: [0, 0, -1], limit: 30 } },
   },
-  forefoot_l: { bend: { forward: { axis: [-1, 0, 0], limit: 30 }, backward: { axis: [1, 0, 0], limit: 30 } } },
-  forefoot_r: { bend: { forward: { axis: [-1, 0, 0], limit: 30 }, backward: { axis: [1, 0, 0], limit: 30 } } },
+  toe_l: { bend: { forward: { axis: [-1, 0, 0], limit: 30 }, backward: { axis: [1, 0, 0], limit: 30 } } },
+  toe_r: { bend: { forward: { axis: [-1, 0, 0], limit: 30 }, backward: { axis: [1, 0, 0], limit: 30 } } },
 
   thumb_0_l: {
     bend: { forward: { axis: [-1, -1, 0], limit: 90 }, backward: { axis: [1, 1, 0], limit: 15 } },
@@ -368,7 +368,7 @@ export interface MPLStatement {
 }
 
 // Validate and parse a single MPL statement string
-export const validateStatement = (input: string): MPLStatement | null => {
+export const parseStatement = (input: string): MPLStatement | null => {
   if (input === "") return null
 
   const segments = input.split(" ")
@@ -388,11 +388,70 @@ export const validateStatement = (input: string): MPLStatement | null => {
     return null
   }
   if (degrees > rule.limit) {
-    console.log(`${bone} ${action} ${direction} ${degrees} is greater than ${rule.limit}`)
     return null
   }
 
   return { bone, action, direction, degrees } as MPLStatement
+}
+
+// Convert entire pose to MPL string
+export const PoseToMPL = (pose: Pose, tolerance: number = 0.001): string => {
+  const allStatements: string[] = []
+
+  for (const [boneNameJp, quaternion] of Object.entries(pose.bones)) {
+    const boneNameEng = Object.keys(BONES).find((key) => BONES[key] === boneNameJp)
+
+    if (boneNameEng && quaternion) {
+      const statements = quaternionToMPL(boneNameEng, quaternion, tolerance)
+      allStatements.push(...statements)
+    }
+  }
+
+  return allStatements.join(";")
+}
+
+// Convert MPL string to pose object
+export const MPLToPose = (input: string): Pose | null => {
+  if (!input) return null
+
+  const statements = input
+    .split(";")
+    .map((s) => s.trim())
+    .filter((s) => s !== "")
+
+  if (statements.length === 0) return null
+
+  const validStatements = statements.map((s) => parseStatement(s)).filter((s) => s !== null)
+
+  const pose: Pose = {
+    description: input,
+    morphs: {},
+    bones: {} as { [key: string]: BoneRotationQuaternion },
+  }
+
+  // Group statements by bone
+  const boneGroups: Record<string, MPLStatement[]> = {}
+  for (const statement of validStatements) {
+    if (!boneGroups[statement.bone]) {
+      boneGroups[statement.bone] = []
+    }
+    boneGroups[statement.bone].push(statement)
+  }
+
+  // Process each bone group
+  for (const [bone, boneStatements] of Object.entries(boneGroups)) {
+    let combinedQuaternion: [number, number, number, number] = [0, 0, 0, 1]
+
+    for (const statement of boneStatements) {
+      const quaternion = mplToQuat(statement)
+      if (quaternion) {
+        combinedQuaternion = multiplyQuaternions(combinedQuaternion, quaternion)
+      }
+    }
+
+    pose.bones[BONES[bone]] = combinedQuaternion
+  }
+  return pose
 }
 
 // Multiply two quaternions (for combining rotations)
@@ -661,68 +720,4 @@ const quaternionToMPL = (
   }
 
   return statements
-}
-
-// Convert entire pose to MPL string
-export const PoseToMPL = (pose: Pose, tolerance: number = 0.001): string => {
-  const allStatements: string[] = []
-
-  for (const [boneNameJp, quaternion] of Object.entries(pose.bones)) {
-    const boneNameEng = Object.keys(BONES).find((key) => BONES[key] === boneNameJp)
-
-    if (boneNameEng && quaternion) {
-      const statements = quaternionToMPL(boneNameEng, quaternion, tolerance)
-      allStatements.push(...statements)
-    }
-  }
-
-  return allStatements.join(";")
-}
-
-// Convert MPL string to pose object
-export const MPLToPose = (input: string): Pose | null => {
-  const statements = input
-    .split(";")
-    .map((s) => s.trim())
-    .filter((s) => s !== "")
-
-  if (statements.length === 0) return null
-
-  // Validate all statements
-  const validStatements: MPLStatement[] = []
-  for (const statement of statements) {
-    const validStatement = validateStatement(statement)
-    if (!validStatement) continue
-    validStatements.push(validStatement)
-  }
-
-  const pose: Pose = {
-    description: input,
-    morphs: {},
-    bones: {} as { [key: string]: BoneRotationQuaternion },
-  }
-
-  // Group statements by bone
-  const boneGroups: Record<string, MPLStatement[]> = {}
-  for (const statement of validStatements) {
-    if (!boneGroups[statement.bone]) {
-      boneGroups[statement.bone] = []
-    }
-    boneGroups[statement.bone].push(statement)
-  }
-
-  // Process each bone group
-  for (const [bone, boneStatements] of Object.entries(boneGroups)) {
-    let combinedQuaternion: [number, number, number, number] = [0, 0, 0, 1]
-
-    for (const statement of boneStatements) {
-      const quaternion = mplToQuat(statement)
-      if (quaternion) {
-        combinedQuaternion = multiplyQuaternions(combinedQuaternion, quaternion)
-      }
-    }
-
-    pose.bones[BONES[bone]] = combinedQuaternion
-  }
-  return pose
 }
