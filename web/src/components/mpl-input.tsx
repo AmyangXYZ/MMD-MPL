@@ -3,9 +3,9 @@ import { Button } from "./ui/button"
 import { Import, RefreshCw } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
-import CodeEditor from "./code-editor"
 import { useMPLCompiler } from "@/hooks/useMPLCompiler"
 import { MPLBoneState } from "mmd-mpl"
+import CodeEditor from "./code-editor"
 
 export default function MPLInput({
   applyBoneStates,
@@ -159,7 +159,10 @@ export default function MPLInput({
       </div>
 
       <div className="flex-1 py-2 px-6">
-        <CodeEditor value={statement} onChange={setStatement} placeholder="@pose mypose {...}" />
+        <CodeEditor
+          value={statement}
+          onChange={setStatement}
+        />
       </div>
     </div>
   )
