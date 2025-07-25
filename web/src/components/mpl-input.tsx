@@ -71,12 +71,34 @@ export default function MPLInput({
     leg_l turn left 3;
     leg_l sway left 1;
 }
+
+@pose kick_left {
+    leg_l bend forward 30;
+    knee_l bend backward 0;
+    leg_r bend backward 20;
+    knee_r bend backward 15;
+}
+
+@pose kick_right {
+    leg_r bend forward 30;
+    knee_r bend backward 0;
+    leg_l bend backward 20;
+    knee_l bend backward 15;
+}
+
+@animation walk {
+    0: kick_left;
+    0.3: kick_right;
+    0.6: kick_left;
+    0.9: kick_right;
+}
     
 @animation love {
-    0.9: welcome;
+    1.2: welcome;
 }
     
 main {
+    walk;
     love;
 }`)
 
