@@ -86,6 +86,11 @@ function takeFromExternrefTable0(idx) {
     return value;
 }
 
+function getArrayU8FromWasm0(ptr, len) {
+    ptr = ptr >>> 0;
+    return getUint8ArrayMemory0().subarray(ptr / 1, ptr / 1 + len);
+}
+
 let cachedDataViewMemory0 = null;
 
 function getDataViewMemory0() {
@@ -93,17 +98,6 @@ function getDataViewMemory0() {
         cachedDataViewMemory0 = new DataView(wasm.memory.buffer);
     }
     return cachedDataViewMemory0;
-}
-
-function getArrayJsValueFromWasm0(ptr, len) {
-    ptr = ptr >>> 0;
-    const mem = getDataViewMemory0();
-    const result = [];
-    for (let i = ptr; i < ptr + 4 * len; i += 4) {
-        result.push(wasm.__wbindgen_export_0.get(mem.getUint32(i, true)));
-    }
-    wasm.__externref_drop_slice(ptr, len);
-    return result;
 }
 
 function addToExternrefTable0(obj) {
@@ -122,22 +116,25 @@ function passArrayJsValueToWasm0(array, malloc) {
     return ptr;
 }
 
-const MPLBoneStateFinalization = (typeof FinalizationRegistry === 'undefined')
-    ? { register: () => {}, unregister: () => {} }
-    : new FinalizationRegistry(ptr => wasm.__wbg_mplbonestate_free(ptr >>> 0, 1));
-
-export class MPLBoneState {
-
-    static __wrap(ptr) {
-        ptr = ptr >>> 0;
-        const obj = Object.create(MPLBoneState.prototype);
-        obj.__wbg_ptr = ptr;
-        MPLBoneStateFinalization.register(obj, obj.__wbg_ptr, obj);
-        return obj;
+function getArrayJsValueFromWasm0(ptr, len) {
+    ptr = ptr >>> 0;
+    const mem = getDataViewMemory0();
+    const result = [];
+    for (let i = ptr; i < ptr + 4 * len; i += 4) {
+        result.push(wasm.__wbindgen_export_0.get(mem.getUint32(i, true)));
     }
+    wasm.__externref_drop_slice(ptr, len);
+    return result;
+}
+
+const MPLBoneFrameFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_mplboneframe_free(ptr >>> 0, 1));
+
+export class MPLBoneFrame {
 
     static __unwrap(jsValue) {
-        if (!(jsValue instanceof MPLBoneState)) {
+        if (!(jsValue instanceof MPLBoneFrame)) {
             return 0;
         }
         return jsValue.__destroy_into_raw();
@@ -146,42 +143,42 @@ export class MPLBoneState {
     __destroy_into_raw() {
         const ptr = this.__wbg_ptr;
         this.__wbg_ptr = 0;
-        MPLBoneStateFinalization.unregister(this);
+        MPLBoneFrameFinalization.unregister(this);
         return ptr;
     }
 
     free() {
         const ptr = this.__destroy_into_raw();
-        wasm.__wbg_mplbonestate_free(ptr, 0);
+        wasm.__wbg_mplboneframe_free(ptr, 0);
     }
     /**
-     * @param {string} bone_name_en
-     * @param {string} bone_name_jp
+     * @param {string} name_en
+     * @param {string} name_jp
      * @param {Vector3} position
-     * @param {Quaternion} quaternion
+     * @param {Quaternion} rotation
      */
-    constructor(bone_name_en, bone_name_jp, position, quaternion) {
-        const ptr0 = passStringToWasm0(bone_name_en, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    constructor(name_en, name_jp, position, rotation) {
+        const ptr0 = passStringToWasm0(name_en, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
-        const ptr1 = passStringToWasm0(bone_name_jp, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const ptr1 = passStringToWasm0(name_jp, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len1 = WASM_VECTOR_LEN;
         _assertClass(position, Vector3);
         var ptr2 = position.__destroy_into_raw();
-        _assertClass(quaternion, Quaternion);
-        var ptr3 = quaternion.__destroy_into_raw();
-        const ret = wasm.mplbonestate_new(ptr0, len0, ptr1, len1, ptr2, ptr3);
+        _assertClass(rotation, Quaternion);
+        var ptr3 = rotation.__destroy_into_raw();
+        const ret = wasm.mplboneframe_new(ptr0, len0, ptr1, len1, ptr2, ptr3);
         this.__wbg_ptr = ret >>> 0;
-        MPLBoneStateFinalization.register(this, this.__wbg_ptr, this);
+        MPLBoneFrameFinalization.register(this, this.__wbg_ptr, this);
         return this;
     }
     /**
      * @returns {string}
      */
-    get bone_name_en() {
+    get name_en() {
         let deferred1_0;
         let deferred1_1;
         try {
-            const ret = wasm.mplbonestate_bone_name_en(this.__wbg_ptr);
+            const ret = wasm.mplboneframe_name_en(this.__wbg_ptr);
             deferred1_0 = ret[0];
             deferred1_1 = ret[1];
             return getStringFromWasm0(ret[0], ret[1]);
@@ -192,11 +189,11 @@ export class MPLBoneState {
     /**
      * @returns {string}
      */
-    get bone_name_jp() {
+    get name_jp() {
         let deferred1_0;
         let deferred1_1;
         try {
-            const ret = wasm.mplbonestate_bone_name_jp(this.__wbg_ptr);
+            const ret = wasm.mplboneframe_name_jp(this.__wbg_ptr);
             deferred1_0 = ret[0];
             deferred1_1 = ret[1];
             return getStringFromWasm0(ret[0], ret[1]);
@@ -208,14 +205,14 @@ export class MPLBoneState {
      * @returns {Vector3}
      */
     get position() {
-        const ret = wasm.mplbonestate_position(this.__wbg_ptr);
+        const ret = wasm.mplboneframe_position(this.__wbg_ptr);
         return Vector3.__wrap(ret);
     }
     /**
      * @returns {Quaternion}
      */
-    get quaternion() {
-        const ret = wasm.mplbonestate_quaternion(this.__wbg_ptr);
+    get rotation() {
+        const ret = wasm.mplboneframe_rotation(this.__wbg_ptr);
         return Quaternion.__wrap(ret);
     }
 }
@@ -484,7 +481,7 @@ export class WasmMPLCompiler {
     }
     /**
      * @param {string} script
-     * @returns {MPLBoneState[]}
+     * @returns {Uint8Array}
      */
     compile(script) {
         const ptr0 = passStringToWasm0(script, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
@@ -493,22 +490,22 @@ export class WasmMPLCompiler {
         if (ret[3]) {
             throw takeFromExternrefTable0(ret[2]);
         }
-        var v2 = getArrayJsValueFromWasm0(ret[0], ret[1]).slice();
-        wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
+        var v2 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
         return v2;
     }
     /**
      * @param {string} name
-     * @param {MPLBoneState[]} states
+     * @param {MPLBoneFrame[]} frames
      * @returns {string}
      */
-    reverse_compile(name, states) {
+    reverse_compile(name, frames) {
         let deferred3_0;
         let deferred3_1;
         try {
             const ptr0 = passStringToWasm0(name, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
             const len0 = WASM_VECTOR_LEN;
-            const ptr1 = passArrayJsValueToWasm0(states, wasm.__wbindgen_malloc);
+            const ptr1 = passArrayJsValueToWasm0(frames, wasm.__wbindgen_malloc);
             const len1 = WASM_VECTOR_LEN;
             const ret = wasm.wasmmplcompiler_reverse_compile(this.__wbg_ptr, ptr0, len0, ptr1, len1);
             deferred3_0 = ret[0];
@@ -642,12 +639,8 @@ async function __wbg_load(module, imports) {
 function __wbg_get_imports() {
     const imports = {};
     imports.wbg = {};
-    imports.wbg.__wbg_mplbonestate_new = function(arg0) {
-        const ret = MPLBoneState.__wrap(arg0);
-        return ret;
-    };
-    imports.wbg.__wbg_mplbonestate_unwrap = function(arg0) {
-        const ret = MPLBoneState.__unwrap(arg0);
+    imports.wbg.__wbg_mplboneframe_unwrap = function(arg0) {
+        const ret = MPLBoneFrame.__unwrap(arg0);
         return ret;
     };
     imports.wbg.__wbindgen_init_externref_table = function() {

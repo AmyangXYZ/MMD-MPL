@@ -1,8 +1,7 @@
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-use serde::{Deserialize, Serialize};
-
-use crate::{animation::MPLAnimation, pose::MPLPose, MPLBoneState};
+use crate::{animation::MPLAnimation, mpl::MPLKeyFrame, pose::MPLPose};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MPLScript {
@@ -18,6 +17,35 @@ impl MPLScript {
             animations: HashMap::new(),
             main: vec![],
         }
+    }
+    pub fn to_key_frames(&self) -> Vec<MPLKeyFrame> {
+        let mut key_frames = vec![];
+        for name in &self.main {
+            if self.animations.contains_key(name) {
+                let anim = self.animations.get(name).unwrap();
+                for statement in &anim.statements {
+                    let mut bone_frames = vec![];
+                    if statement.poses.len() == 1 {
+                        let pose_name = statement.poses[0].clone();
+                        let pose = self.poses.get(&pose_name).unwrap();
+                        bone_frames.extend(pose.to_bone_frames());
+                    } else {
+                        let mut pose_statements = vec![];
+                        for pose_name in &statement.poses {
+                            let pose = self.poses.get(pose_name).unwrap();
+                            pose_statements.extend(pose.statements.clone());
+                        }
+                        let pose = MPLPose::new("composite".to_string(), pose_statements);
+                        bone_frames.extend(pose.to_bone_frames());
+                    }
+                    key_frames.push(MPLKeyFrame::new(statement.time, bone_frames, vec![]));
+                }
+            } else if self.poses.contains_key(name) {
+                let pose = self.poses.get(name).unwrap();
+                key_frames.push(MPLKeyFrame::new(0.0, pose.to_bone_frames(), vec![]));
+            }
+        }
+        key_frames
     }
 }
 
@@ -35,7 +63,7 @@ impl MPLCompiler {
         Self {}
     }
 
-    pub fn compile(&self, text: &str) -> Result<Vec<MPLBoneState>, String> {
+    pub fn compile(&self, text: &str) -> Result<Vec<MPLKeyFrame>, String> {
         let mut in_block = false;
         let mut brace_count = 0;
         let mut current_block = String::new();
@@ -93,7 +121,9 @@ impl MPLCompiler {
                         if script.poses.contains_key(&pose.name) {
                             return Err(format!("Duplicate pose name: '{}'", pose.name));
                         }
-                        if script.animations.contains_key(&pose.name) {
+                        if script.animations.contains_key(&pose.name)
+                            || script.poses.contains_key(&pose.name)
+                        {
                             return Err(format!(
                                 "Name '{}' already used by an animation",
                                 pose.name
@@ -106,9 +136,12 @@ impl MPLCompiler {
                         let animation = self.parse_animation(&current_block)?;
 
                         // Check for duplicate animation name
-                        if script.animations.contains_key(&animation.name) {
+                        if script.animations.contains_key(&animation.name)
+                            || script.poses.contains_key(&animation.name)
+                        {
                             return Err(format!("Duplicate animation name: '{}'", animation.name));
                         }
+
                         if script.poses.contains_key(&animation.name) {
                             return Err(format!(
                                 "Name '{}' already used by a pose",
@@ -117,8 +150,8 @@ impl MPLCompiler {
                         }
 
                         // Validate that all referenced poses exist
-                        for frame in &animation.frames {
-                            for pose_name in &frame.poses {
+                        for statement in &animation.statements {
+                            for pose_name in &statement.poses {
                                 if !script.poses.contains_key(pose_name) {
                                     return Err(format!(
                                         "Animation '{}' references unknown pose '{}'",
@@ -159,11 +192,7 @@ impl MPLCompiler {
             return Err("Unclosed block".to_string());
         }
 
-        let mut bone_states = vec![];
-        for pose in script.poses.values() {
-            bone_states.extend(pose.to_bone_states());
-        }
-        Ok(bone_states)
+        Ok(script.to_key_frames())
     }
 
     fn parse_pose(&self, text: &str) -> Result<MPLPose, String> {
@@ -236,7 +265,7 @@ impl MPLCompiler {
             if trimmed.ends_with(';') {
                 let stmt_text = trimmed.trim_end_matches(';').trim();
                 if !stmt_text.is_empty() {
-                    match crate::animation::MPLAnimationFrame::from_str(stmt_text) {
+                    match crate::animation::MPLAnimationStatement::from_str(stmt_text) {
                         Ok(stmt) => statements.push(stmt),
                         Err(e) => return Err(format!("Line {}: {}", line_number + 1, e)),
                     }
@@ -274,11 +303,11 @@ impl MPLCompiler {
                 continue;
             }
 
-            // Parse animation reference (must end with semicolon)
+            // Parse animation/pose reference (must end with semicolon)
             if trimmed.ends_with(';') {
-                let animation_name = trimmed.trim_end_matches(';').trim();
-                if !animation_name.is_empty() {
-                    animations.push(animation_name.to_string());
+                let name = trimmed.trim_end_matches(';').trim();
+                if !name.is_empty() {
+                    animations.push(name.to_string());
                 }
             } else {
                 return Err(format!(

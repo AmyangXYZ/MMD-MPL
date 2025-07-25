@@ -1,12 +1,12 @@
 /* tslint:disable */
 /* eslint-disable */
-export class MPLBoneState {
+export class MPLBoneFrame {
   free(): void;
-  constructor(bone_name_en: string, bone_name_jp: string, position: Vector3, quaternion: Quaternion);
-  readonly bone_name_en: string;
-  readonly bone_name_jp: string;
+  constructor(name_en: string, name_jp: string, position: Vector3, rotation: Quaternion);
+  readonly name_en: string;
+  readonly name_jp: string;
   readonly position: Vector3;
-  readonly quaternion: Quaternion;
+  readonly rotation: Quaternion;
 }
 export class Quaternion {
   free(): void;
@@ -37,8 +37,8 @@ export class Vector3 {
 export class WasmMPLCompiler {
   free(): void;
   constructor();
-  compile(script: string): MPLBoneState[];
-  reverse_compile(name: string, states: MPLBoneState[]): string;
+  compile(script: string): Uint8Array;
+  reverse_compile(name: string, frames: MPLBoneFrame[]): string;
   get_all_bones(): string[];
   get_bone_actions(bone: string): string[] | undefined;
   get_bone_directions(bone: string, action: string): string[] | undefined;
@@ -51,12 +51,12 @@ export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembl
 
 export interface InitOutput {
   readonly memory: WebAssembly.Memory;
-  readonly __wbg_mplbonestate_free: (a: number, b: number) => void;
-  readonly mplbonestate_new: (a: number, b: number, c: number, d: number, e: number, f: number) => number;
-  readonly mplbonestate_bone_name_en: (a: number) => [number, number];
-  readonly mplbonestate_bone_name_jp: (a: number) => [number, number];
-  readonly mplbonestate_position: (a: number) => number;
-  readonly mplbonestate_quaternion: (a: number) => number;
+  readonly __wbg_mplboneframe_free: (a: number, b: number) => void;
+  readonly mplboneframe_new: (a: number, b: number, c: number, d: number, e: number, f: number) => number;
+  readonly mplboneframe_name_en: (a: number) => [number, number];
+  readonly mplboneframe_name_jp: (a: number) => [number, number];
+  readonly mplboneframe_position: (a: number) => number;
+  readonly mplboneframe_rotation: (a: number) => number;
   readonly __wbg_quaternion_free: (a: number, b: number) => void;
   readonly __wbg_get_quaternion_x: (a: number) => number;
   readonly __wbg_set_quaternion_x: (a: number, b: number) => void;
@@ -77,6 +77,12 @@ export interface InitOutput {
   readonly vector3_new: (a: number, b: number, c: number) => number;
   readonly vector3_normalize: (a: number) => number;
   readonly vector3_dot: (a: number, b: number) => number;
+  readonly __wbg_get_vector3_x: (a: number) => number;
+  readonly __wbg_get_vector3_y: (a: number) => number;
+  readonly __wbg_get_vector3_z: (a: number) => number;
+  readonly __wbg_set_vector3_x: (a: number, b: number) => void;
+  readonly __wbg_set_vector3_y: (a: number, b: number) => void;
+  readonly __wbg_set_vector3_z: (a: number, b: number) => void;
   readonly __wbg_wasmmplcompiler_free: (a: number, b: number) => void;
   readonly wasmmplcompiler_new: () => number;
   readonly wasmmplcompiler_compile: (a: number, b: number, c: number) => [number, number, number, number];
@@ -87,19 +93,13 @@ export interface InitOutput {
   readonly wasmmplcompiler_get_bone_degree_limit: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => number;
   readonly wasmmplcompiler_get_bone_japanese_name: (a: number, b: number, c: number) => [number, number];
   readonly wasmmplcompiler_get_bone_english_name: (a: number, b: number, c: number) => [number, number];
-  readonly __wbg_get_vector3_x: (a: number) => number;
-  readonly __wbg_get_vector3_y: (a: number) => number;
-  readonly __wbg_get_vector3_z: (a: number) => number;
-  readonly __wbg_set_vector3_x: (a: number, b: number) => void;
-  readonly __wbg_set_vector3_y: (a: number, b: number) => void;
-  readonly __wbg_set_vector3_z: (a: number, b: number) => void;
   readonly __wbindgen_export_0: WebAssembly.Table;
   readonly __wbindgen_malloc: (a: number, b: number) => number;
   readonly __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
   readonly __wbindgen_free: (a: number, b: number, c: number) => void;
   readonly __externref_table_dealloc: (a: number) => void;
-  readonly __externref_drop_slice: (a: number, b: number) => void;
   readonly __externref_table_alloc: () => number;
+  readonly __externref_drop_slice: (a: number, b: number) => void;
   readonly __wbindgen_start: () => void;
 }
 

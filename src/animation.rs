@@ -1,35 +1,37 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct MPLAnimationFrame {
+pub struct MPLAnimationStatement {
+    pub time: f32,
     pub poses: Vec<String>,
-    pub duration: f32,
 }
 
-impl MPLAnimationFrame {
+impl MPLAnimationStatement {
     pub fn from_str(text: &str) -> Result<Self, String> {
         let text = text.trim();
 
-        // Parse duration: "pose1 & pose2 1.5s" or just "pose1 & pose2" (default 1s)
-        let (poses_text, duration) = if let Some(space_pos) = text.rfind(' ') {
-            let potential_duration = &text[space_pos + 1..];
-            if potential_duration.ends_with('s') {
-                let dur_str = &potential_duration[..potential_duration.len() - 1];
-                match dur_str.parse::<f32>() {
-                    Ok(dur) => {
-                        if dur <= 0.0 {
-                            return Err("Duration must be positive".to_string());
-                        }
-                        (&text[..space_pos], dur)
-                    }
-                    Err(_) => (text, 1.0), // Default if parse fails
-                }
-            } else {
-                (text, 1.0) // Default if no 's' suffix
-            }
+        let text = if text.ends_with(';') {
+            &text[..text.len() - 1]
         } else {
-            (text, 1.0) // Default if no space found
+            text
         };
+
+        // Parse keyframe: "0.5: pose1 & pose2"
+        let colon_pos = text
+            .find(':')
+            .ok_or("Keyframe must have format 'time: poses'")?;
+
+        let time_str = text[..colon_pos].trim();
+        let poses_text = text[colon_pos + 1..].trim();
+
+        // Parse time
+        let time = time_str
+            .parse::<f32>()
+            .map_err(|_| format!("Invalid time value: '{}'", time_str))?;
+
+        if time < 0.0 {
+            return Err("Time must be non-negative".to_string());
+        }
 
         // Parse poses (split by &)
         let poses: Vec<String> = poses_text
@@ -39,21 +41,21 @@ impl MPLAnimationFrame {
             .collect();
 
         if poses.is_empty() {
-            return Err("Animation statement must contain at least one pose".to_string());
+            return Err("Keyframe must contain at least one pose".to_string());
         }
 
-        Ok(Self { poses, duration })
+        Ok(Self { time, poses })
     }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MPLAnimation {
     pub name: String,
-    pub frames: Vec<MPLAnimationFrame>,
+    pub statements: Vec<MPLAnimationStatement>,
 }
 
 impl MPLAnimation {
-    pub fn new(name: String, frames: Vec<MPLAnimationFrame>) -> Self {
-        Self { name, frames }
+    pub fn new(name: String, statements: Vec<MPLAnimationStatement>) -> Self {
+        Self { name, statements }
     }
 }

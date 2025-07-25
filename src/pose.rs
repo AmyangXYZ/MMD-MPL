@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    bone::MPLBoneState,
+    mpl::MPLBoneFrame,
     utils::{Quaternion, Vector3},
     with_bone_db, ActionRule,
 };
@@ -34,7 +34,6 @@ impl MPLPoseStatement {
             .parse()
             .map_err(|_| "Invalid degrees number".to_string())?;
 
-        // Validate using bone database
         with_bone_db(|db| db.validate(&bone, &action, &direction, degrees))?;
 
         Ok(Self {
@@ -53,7 +52,6 @@ impl MPLPoseStatement {
     }
 
     pub fn to_quaternion(&self) -> Quaternion {
-        // Get the rule from bone database
         let rule = with_bone_db(|db| {
             db.get_rule(&self.bone, &self.action, &self.direction)
                 .cloned()
@@ -61,13 +59,11 @@ impl MPLPoseStatement {
 
         let rule = match rule {
             Some(r) => r,
-            None => return Quaternion::identity(), // Default if no rule found
+            None => return Quaternion::identity(),
         };
 
-        // Get normalized rotation axis
         let normalized_axis = rule.axis.normalize();
 
-        // Create quaternion from axis-angle
         let radians = self.degrees * (std::f32::consts::PI / 180.0);
         let half_angle = radians / 2.0;
         let sin = half_angle.sin();
@@ -81,14 +77,6 @@ impl MPLPoseStatement {
         )
     }
 
-    /// Convert a target quaternion for a given bone back into one or more MPL
-    /// statements by optimising the per-axis rotation degrees so their composed
-    /// quaternion matches the target. Returns an empty vector when no rule is found.
-    ///
-    /// # Arguments
-    /// * `bone` - The bone name to generate statements for
-    /// * `target_quat` - The target quaternion to approximate
-    /// * `precision` - The precision for degree values (e.g., 1.0, 0.1, 0.001)
     pub fn from_quaternion(bone: &str, target_quat: Quaternion) -> Vec<Self> {
         let bone = bone.to_string();
 
@@ -365,20 +353,20 @@ impl MPLPose {
 
     pub fn to_string(&self) -> String {
         format!(
-            "@pose {} {{\n{}\n}}",
+            "@pose {} {{\n{}\n}}\nmain {{\n    {};\n}}",
             self.name,
             self.statements
                 .iter()
                 .map(|s| format!("    {}", s.to_string()))
                 .collect::<Vec<String>>()
-                .join("\n")
+                .join("\n"),
+            self.name
         )
     }
 
-    pub fn to_bone_states(&self) -> Vec<MPLBoneState> {
-        let mut states = vec![];
+    pub fn to_bone_frames(&self) -> Vec<MPLBoneFrame> {
+        let mut frames = vec![];
 
-        // Group statements by bone
         let mut bone_groups: HashMap<String, Vec<&MPLPoseStatement>> = HashMap::new();
         for statement in &self.statements {
             bone_groups
@@ -387,7 +375,6 @@ impl MPLPose {
                 .push(statement);
         }
 
-        // Process each bone group
         for (bone, bone_statements) in bone_groups {
             let mut combined_quaternion = Quaternion::identity();
 
@@ -400,7 +387,7 @@ impl MPLPose {
             let bone_name_jp =
                 with_bone_db(|db| db.japanese_name(&bone).unwrap_or(&bone).to_string());
 
-            states.push(MPLBoneState::new(
+            frames.push(MPLBoneFrame::new(
                 bone,
                 bone_name_jp,
                 position,
@@ -408,15 +395,15 @@ impl MPLPose {
             ));
         }
 
-        states
+        frames
     }
 
-    pub fn from_bone_states(name: &str, states: Vec<MPLBoneState>) -> Self {
+    pub fn from_bone_frames(name: &str, frames: Vec<MPLBoneFrame>) -> Self {
         let mut statements = vec![];
-        for state in states {
+        for frame in frames.iter() {
             statements.extend(MPLPoseStatement::from_quaternion(
-                &state.bone_name_en(),
-                state.quaternion(),
+                &frame.name_en(),
+                frame.rotation(),
             ));
         }
         Self::new(name.to_string(), statements.into_iter().collect())

@@ -1,15 +1,16 @@
 [package]
 name = "mmd-mpl"
-version = "0.1.1"
+version = "0.2.0"
 edition = "2021"
 license = "GPL-3.0"
-description = "MPL is a rule-based Domain-Specific Language for controlling MMD bones and make animations using natural language commands."
+description = "MPL is a rule-based Domain-Specific Language for creating MMD poses and animations using natural semantic syntax"
 repository = "https://github.com/AmyangXYZ/MMD-MPL"
 
 [dependencies]
 wasm-bindgen = "0.2.100"
 serde = { version = "1.0", features = ["derive"] }
 serde-wasm-bindgen = "0.6.5"
+encoding_rs = "0.8.35"
 
 [lib]
 crate-type = ["cdylib", "rlib"]

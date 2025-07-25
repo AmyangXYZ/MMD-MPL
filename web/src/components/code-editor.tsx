@@ -127,6 +127,7 @@ export default function CodeEditor({
                     autocompletion: true,
                     highlightSelectionMatches: false,
                     searchKeymap: false,
+                    tabSize: 4,
                 }}
             />
         </div>

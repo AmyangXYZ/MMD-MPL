@@ -1,56 +1,6 @@
-use serde::{Deserialize, Serialize};
-use wasm_bindgen::prelude::*;
-
-use crate::utils::{Quaternion, Vector3};
+use crate::utils::Vector3;
 use std::cell::OnceCell;
 use std::collections::HashMap;
-
-#[wasm_bindgen]
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct MPLBoneState {
-    bone_name_en: String,
-    bone_name_jp: String,
-    position: Vector3,
-    quaternion: Quaternion,
-}
-
-#[wasm_bindgen]
-impl MPLBoneState {
-    #[wasm_bindgen(constructor)]
-    pub fn new(
-        bone_name_en: String,
-        bone_name_jp: String,
-        position: Vector3,
-        quaternion: Quaternion,
-    ) -> Self {
-        Self {
-            bone_name_en,
-            bone_name_jp,
-            position,
-            quaternion,
-        }
-    }
-
-    #[wasm_bindgen(getter)]
-    pub fn bone_name_en(&self) -> String {
-        self.bone_name_en.clone()
-    }
-
-    #[wasm_bindgen(getter)]
-    pub fn bone_name_jp(&self) -> String {
-        self.bone_name_jp.clone()
-    }
-
-    #[wasm_bindgen(getter)]
-    pub fn position(&self) -> Vector3 {
-        self.position
-    }
-
-    #[wasm_bindgen(getter)]
-    pub fn quaternion(&self) -> Quaternion {
-        self.quaternion
-    }
-}
 
 #[derive(Debug, Clone)]
 pub struct ActionRule {

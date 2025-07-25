@@ -1,13 +1,16 @@
 mod animation;
 mod bone;
 mod compiler;
+mod mpl;
 mod pose;
 mod utils;
+mod vmd;
 
 pub use bone::*;
 pub use compiler::MPLCompiler;
-pub use pose::{MPLPose, MPLPoseStatement};
-pub use utils::{Quaternion, Vector3};
+use mpl::MPLBoneFrame;
+use pose::MPLPose;
+pub use vmd::VMDWriter;
 
 use wasm_bindgen::prelude::*;
 
@@ -26,14 +29,18 @@ impl WasmMPLCompiler {
     }
 
     #[wasm_bindgen]
-    pub fn compile(&self, script: &str) -> Result<Vec<MPLBoneState>, String> {
-        let result = self.compiler.compile(script)?;
-        Ok(result)
+    pub fn compile(&self, script: &str) -> Result<Vec<u8>, String> {
+        let key_frames = self.compiler.compile(script)?;
+        let vmd = VMDWriter::new(key_frames);
+        match vmd.create_vmd() {
+            Ok(vmd) => Ok(vmd),
+            Err(e) => Err(e.to_string()),
+        }
     }
 
     #[wasm_bindgen]
-    pub fn reverse_compile(&self, name: &str, states: Vec<MPLBoneState>) -> String {
-        MPLPose::from_bone_states(name, states).to_string()
+    pub fn reverse_compile(&self, name: &str, frames: Vec<MPLBoneFrame>) -> String {
+        MPLPose::from_bone_frames(name, frames).to_string()
     }
 
     #[wasm_bindgen]

@@ -4,73 +4,65 @@ import { Import, RefreshCw } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import { useMPLCompiler } from "@/hooks/useMPLCompiler"
-import { MPLBoneState } from "mmd-mpl"
+import { MPLBoneFrame } from "mmd-mpl"
 import CodeEditor from "./code-editor"
 
 export default function MPLInput({
-  applyBoneStates,
-  loadVpd,
+  loadVPD,
   modelLoaded,
+  loadVMD,
 }: {
-  applyBoneStates: (boneStates: MPLBoneState[]) => void
-  loadVpd: (url: string) => Promise<MPLBoneState[] | null>
+  loadVPD: (url: string) => Promise<MPLBoneFrame[] | null>
+  loadVMD: (url: string) => void
   modelLoaded: boolean
 }) {
   const mplCompiler = useMPLCompiler()
 
-  const [statement, setStatement] = useState(`@pose welcome {
-    upper_body bend forward 12;
-    upper_body sway left 9;
-    shoulder_r bend backward 13;
-    shoulder_r sway left 4;
-    ankle_r bend forward 60;
-    ankle_r turn left 4;
-    ankle_r sway left 5;
-    knee_l bend backward 34;
-    ankle_l bend forward 43;
-    ankle_l turn right 2;
-    ankle_l sway right 1;
-    upper_body2 bend backward 9;
-    upper_body2 turn left 1;
-    upper_body2 sway right 14;
-    neck bend forward 9;
-    neck turn right 7;
-    neck sway right 13;
-    arm_twist_r turn right 5;
-    elbow_r bend forward 135;
-    wrist_twist_r turn right 27;
-    wrist_r bend backward 30;
-    thumb_0_r bend backward 3;
-    thumb_0_r sway left 6;
-    pinky_0_r bend backward 15;
-    pinky_0_r sway right 3;
-    pinky_1_r bend forward 18;
-    ring_0_r bend backward 13;
-    ring_0_r sway right 1;
-    ring_1_r bend forward 18;
-    middle_1_r bend forward 23;
-    index_0_r bend forward 17;
-    index_0_r sway right 3;
-    index_1_r bend forward 21;
-    shoulder_l bend backward 14;
-    shoulder_l sway left 2;
-    arm_l bend forward 6;
-    arm_twist_l turn left 18;
-    elbow_l bend forward 135;
-    wrist_twist_l turn left 16;
-    wrist_l sway left 12;
-    thumb_2_l bend forward 20;
-    pinky_1_l bend forward 32;
-    ring_1_l bend forward 32;
-    middle_1_l bend forward 42;
-    index_1_l bend forward 54;
-    leg_r bend forward 19;
-    leg_r turn right 8;
-    leg_r sway left 1;
-    leg_l bend forward 32;
-    leg_l turn left 3;
-    leg_l sway left 1;
-}`)
+  const [statement, setStatement] = useState(`@pose default {
+               head turn right 0;
+               head sway right 0;
+               waist bend forward 0;
+}
+
+        @pose look_left {
+               head turn left 20;
+               head sway left 20;
+}
+
+       @pose look_right {
+               head turn right 20;
+               head sway right 20;
+}
+
+       @pose bend_over {
+               waist bend forward 90;
+}
+                      @pose stand {
+               waist bend forward 0;
+}
+               
+
+       @animation look_around {
+      
+  0.8: look_right;
+  0.9: look_left;
+  1.2: look_right;
+}
+
+@animation bow {
+    1.4: stand & look_left;
+  2.0: bend_over;
+  2.3: stand;
+    }
+
+    @animation default1 {
+        0.5: bend_over;
+    }
+
+  main {
+        default1;
+    
+  }`)
 
   const handleFileUpload = useCallback(
     async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -79,7 +71,7 @@ export default function MPLInput({
 
       if (file.name.endsWith(".vpd")) {
         const url = URL.createObjectURL(file)
-        const boneStates = await loadVpd(url)
+        const boneStates = await loadVPD(url)
         if (boneStates && mplCompiler) {
           const statements = mplCompiler.reverse_compile("vpd_pose", boneStates)
           setStatement(statements)
@@ -88,23 +80,33 @@ export default function MPLInput({
 
       event.target.value = ""
     },
-    [setStatement, loadVpd, mplCompiler]
+    [setStatement, loadVPD, mplCompiler]
   )
 
-  const resetPose = useCallback(() => {
-    applyBoneStates([])
-  }, [applyBoneStates])
+
 
   useEffect(() => {
     if (modelLoaded && mplCompiler) {
       try {
-        const boneStates = mplCompiler.compile(statement)
-        applyBoneStates(boneStates)
+        const vmdBytes = mplCompiler.compile(statement)
+        if (vmdBytes.length === 0) {
+          loadVMD("")
+          return
+        }
+        // Create a blob from the raw VMD bytes
+        const vmdBlob = new Blob([vmdBytes], { type: 'application/octet-stream' })
+        const vmdUrl = URL.createObjectURL(vmdBlob)
+        loadVMD(vmdUrl)
+
+        // Clean up the URL when component unmounts or statement changes
+        return () => {
+          URL.revokeObjectURL(vmdUrl)
+        }
       } catch (error) {
         console.error(error)
       }
     }
-  }, [statement, modelLoaded, mplCompiler, applyBoneStates])
+  }, [statement, modelLoaded, mplCompiler, loadVMD])
 
   return (
     <div className="flex flex-col gap-1 w-full h-full">
@@ -137,7 +139,6 @@ export default function MPLInput({
           <Button
             onClick={() => {
               setStatement("")
-              resetPose()
             }}
             className="flex gap-2 bg-black text-white hover:bg-black hover:text-white cursor-pointer"
             size="sm"
