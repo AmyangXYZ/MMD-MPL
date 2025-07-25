@@ -43,7 +43,8 @@ import { IMmdRuntimeLinkedBone } from "babylon-mmd/esm/Runtime/IMmdRuntimeLinked
 import { MmdWasmPhysicsRuntimeImpl } from "babylon-mmd/esm/Runtime/Optimized/Physics/mmdWasmPhysicsRuntimeImpl"
 import MPLInput from "./mpl-input"
 import { MPLBoneState, Quaternion as MPLQuaternion, Vector3 as MPLVector3 } from "mmd-mpl"
-import { BONES } from "@/lib/mpl"
+import { useMPLCompiler } from "@/hooks/useMPLCompiler"
+
 
 interface TargetRotation {
   quaternion: Quaternion
@@ -60,6 +61,8 @@ interface TargetPosition {
 }
 
 export default function MainScene() {
+  const mplCompiler = useMPLCompiler()
+
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const engineRef = useRef<Engine>(null)
   const sceneRef = useRef<Scene>(null)
@@ -115,7 +118,7 @@ export default function MainScene() {
   )
 
   const loadModel = useCallback(async (): Promise<void> => {
-    if (!sceneRef.current || !mmdWasmInstanceRef.current || !mmdRuntimeRef.current) return
+    if (!sceneRef.current || !mmdWasmInstanceRef.current || !mmdRuntimeRef.current || !mplCompiler) return
     if (modelRef.current) {
       mmdRuntimeRef.current.destroyMmdModel(modelRef.current)
       modelRef.current.mesh.dispose()
@@ -136,8 +139,9 @@ export default function MainScene() {
         },
       })
 
+      const boneNamesJp = mplCompiler.get_all_bones().map((bone) => mplCompiler.get_bone_japanese_name(bone))
       for (const bone of modelRef.current!.skeleton.bones) {
-        if (Object.values(BONES).includes(bone.name)) {
+        if (boneNamesJp.includes(bone.name)) {
           bonesRef.current[bone.name] = bone
         }
       }
@@ -145,11 +149,11 @@ export default function MainScene() {
       result.addAllToScene()
       setModelLoaded(true)
     })
-  }, [])
+  }, [mplCompiler])
 
   const loadVpd = useCallback(
     async (vpdUrl: string): Promise<MPLBoneState[] | null> => {
-      if (!vpdLoaderRef.current || !modelRef.current) return null
+      if (!vpdLoaderRef.current || !modelRef.current || !mplCompiler) return null
 
       const vpd = await vpdLoaderRef.current.loadAsync("vpd_pose", vpdUrl)
       // modelRef.current.addAnimation(vpd)
@@ -158,10 +162,7 @@ export default function MainScene() {
       const boneStates: MPLBoneState[] = []
       for (const boneTrack of vpd.boneTracks) {
         const boneNameJp = boneTrack.name
-        if (!Object.values(BONES).includes(boneNameJp)) {
-          continue
-        }
-        const boneNameEn = Object.keys(BONES).find((key) => BONES[key] === boneNameJp)
+        const boneNameEn = mplCompiler.get_bone_english_name(boneNameJp)
         if (!boneNameEn) {
           continue
         }
@@ -183,10 +184,7 @@ export default function MainScene() {
 
       for (const boneTrack of vpd.movableBoneTracks) {
         const boneNameJp = boneTrack.name
-        if (!Object.values(BONES).includes(boneNameJp)) {
-          continue
-        }
-        const boneNameEn = Object.keys(BONES).find((key) => BONES[key] === boneNameJp)
+        const boneNameEn = mplCompiler.get_bone_english_name(boneNameJp)
         if (!boneNameEn) {
           continue
         }
@@ -206,7 +204,7 @@ export default function MainScene() {
 
       return boneStates
     },
-    [vpdLoaderRef, modelRef]
+    [vpdLoaderRef, modelRef, mplCompiler]
   )
 
   useEffect(() => {
@@ -217,7 +215,7 @@ export default function MainScene() {
     }
 
     const init = async () => {
-      if (!canvasRef.current) return
+      if (!canvasRef.current || !mplCompiler) return
 
       // Register the PMX loader plugin
       RegisterSceneLoaderPlugin(new BpmxLoader())
@@ -362,7 +360,7 @@ export default function MainScene() {
         window.removeEventListener("resize", resize)
       }
     }
-  }, [loadModel])
+  }, [loadModel, mplCompiler])
 
   return (
     <div className="w-full h-full flex flex-col md:flex-row">

@@ -39,6 +39,12 @@ export class WasmMPLCompiler {
   constructor();
   compile(script: string): MPLBoneState[];
   reverse_compile(name: string, states: MPLBoneState[]): string;
+  get_all_bones(): string[];
+  get_bone_actions(bone: string): string[] | undefined;
+  get_bone_directions(bone: string, action: string): string[] | undefined;
+  get_bone_degree_limit(bone: string, action: string, direction: string): number | undefined;
+  get_bone_japanese_name(bone: string): string | undefined;
+  get_bone_english_name(bone: string): string | undefined;
 }
 
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
@@ -47,8 +53,8 @@ export interface InitOutput {
   readonly memory: WebAssembly.Memory;
   readonly __wbg_mplbonestate_free: (a: number, b: number) => void;
   readonly mplbonestate_new: (a: number, b: number, c: number, d: number, e: number, f: number) => number;
-  readonly mplbonestate_bone_name_en: (a: number, b: number) => void;
-  readonly mplbonestate_bone_name_jp: (a: number, b: number) => void;
+  readonly mplbonestate_bone_name_en: (a: number) => [number, number];
+  readonly mplbonestate_bone_name_jp: (a: number) => [number, number];
   readonly mplbonestate_position: (a: number) => number;
   readonly mplbonestate_quaternion: (a: number) => number;
   readonly __wbg_quaternion_free: (a: number, b: number) => void;
@@ -73,18 +79,28 @@ export interface InitOutput {
   readonly vector3_dot: (a: number, b: number) => number;
   readonly __wbg_wasmmplcompiler_free: (a: number, b: number) => void;
   readonly wasmmplcompiler_new: () => number;
-  readonly wasmmplcompiler_compile: (a: number, b: number, c: number, d: number) => void;
-  readonly wasmmplcompiler_reverse_compile: (a: number, b: number, c: number, d: number, e: number, f: number) => void;
-  readonly __wbg_set_vector3_x: (a: number, b: number) => void;
-  readonly __wbg_set_vector3_y: (a: number, b: number) => void;
-  readonly __wbg_set_vector3_z: (a: number, b: number) => void;
+  readonly wasmmplcompiler_compile: (a: number, b: number, c: number) => [number, number, number, number];
+  readonly wasmmplcompiler_reverse_compile: (a: number, b: number, c: number, d: number, e: number) => [number, number];
+  readonly wasmmplcompiler_get_all_bones: (a: number) => [number, number];
+  readonly wasmmplcompiler_get_bone_actions: (a: number, b: number, c: number) => [number, number];
+  readonly wasmmplcompiler_get_bone_directions: (a: number, b: number, c: number, d: number, e: number) => [number, number];
+  readonly wasmmplcompiler_get_bone_degree_limit: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => number;
+  readonly wasmmplcompiler_get_bone_japanese_name: (a: number, b: number, c: number) => [number, number];
+  readonly wasmmplcompiler_get_bone_english_name: (a: number, b: number, c: number) => [number, number];
   readonly __wbg_get_vector3_x: (a: number) => number;
   readonly __wbg_get_vector3_y: (a: number) => number;
   readonly __wbg_get_vector3_z: (a: number) => number;
+  readonly __wbg_set_vector3_x: (a: number, b: number) => void;
+  readonly __wbg_set_vector3_y: (a: number, b: number) => void;
+  readonly __wbg_set_vector3_z: (a: number, b: number) => void;
+  readonly __wbindgen_export_0: WebAssembly.Table;
   readonly __wbindgen_malloc: (a: number, b: number) => number;
   readonly __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
-  readonly __wbindgen_add_to_stack_pointer: (a: number) => number;
   readonly __wbindgen_free: (a: number, b: number, c: number) => void;
+  readonly __externref_table_dealloc: (a: number) => void;
+  readonly __externref_drop_slice: (a: number, b: number) => void;
+  readonly __externref_table_alloc: () => number;
+  readonly __wbindgen_start: () => void;
 }
 
 export type SyncInitInput = BufferSource | WebAssembly.Module;

@@ -1,7 +1,10 @@
 [package]
 name = "mmd-mpl"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
+license = "GPL-3.0"
+description = "MPL is a rule-based Domain-Specific Language for controlling MMD bones and make animations using natural language commands."
+repository = "https://github.com/AmyangXYZ/MMD-MPL"
 
 [dependencies]
 wasm-bindgen = "0.2.100"

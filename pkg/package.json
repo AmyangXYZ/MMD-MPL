@@ -1,7 +1,13 @@
 {
   "name": "mmd-mpl",
   "type": "module",
-  "version": "0.1.0",
+  "description": "MPL is a rule-based Domain-Specific Language for controlling MMD bones and make animations using natural language commands.",
+  "version": "0.1.1",
+  "license": "GPL-3.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AmyangXYZ/MMD-MPL"
+  },
   "files": [
     "mmd_mpl_bg.wasm",
     "mmd_mpl.js",

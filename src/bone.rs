@@ -147,6 +147,13 @@ impl BoneActionDatabase {
         self.bone_translations.get(bone_en).map(|s| s.as_str())
     }
 
+    pub fn english_name(&self, bone_jp: &str) -> Option<&str> {
+        self.bone_translations
+            .iter()
+            .find(|(_, v)| v == &&bone_jp.to_string())
+            .map(|(k, _)| k.as_str())
+    }
+
     fn build_translations() -> HashMap<String, String> {
         macro_rules! translations {
             { $( $en:literal => $jp:literal ),* $(,)? } => {{
@@ -161,6 +168,7 @@ impl BoneActionDatabase {
             "center" => "センター",
             "upper_body" => "上半身",
             "upper_body2" => "上半身2",
+            "lower_body" => "下半身",
             "waist" => "腰",
             "neck" => "首",
             "head" => "頭",
@@ -185,34 +193,34 @@ impl BoneActionDatabase {
             "toe_l" => "左足先EX",
             "toe_r" => "右足先EX",
             "thumb_0_l" => "左親指０",
-            "thumb_0_r" => "右親指０",
             "thumb_1_l" => "左親指１",
-            "thumb_1_r" => "右親指１",
             "thumb_2_l" => "左親指２",
-            "thumb_2_r" => "右親指２",
             "index_0_l" => "左人指１",
-            "index_0_r" => "右人指１",
             "index_1_l" => "左人指２",
-            "index_1_r" => "右人指２",
             "index_2_l" => "左人指３",
-            "index_2_r" => "右人指３",
-            "middle_0_l" => "左中指１",
-            "middle_0_r" => "右中指１",
+            "middle_0_l" => "左中指０",
             "middle_1_l" => "左中指２",
-            "middle_1_r" => "右中指２",
             "middle_2_l" => "左中指３",
-            "middle_2_r" => "右中指３",
             "ring_0_l" => "左薬指１",
-            "ring_0_r" => "右薬指１",
             "ring_1_l" => "左薬指２",
-            "ring_1_r" => "右薬指２",
             "ring_2_l" => "左薬指３",
-            "ring_2_r" => "右薬指３",
             "pinky_0_l" => "左小指１",
-            "pinky_0_r" => "右小指１",
             "pinky_1_l" => "左小指２",
-            "pinky_1_r" => "右小指２",
             "pinky_2_l" => "左小指３",
+            "thumb_0_r" => "右親指０",
+            "thumb_1_r" => "右親指１",
+            "thumb_2_r" => "右親指２",
+            "index_0_r" => "右人指１",
+            "index_1_r" => "右人指２",
+            "index_2_r" => "右人指３",
+            "middle_0_r" => "右中指１",
+            "middle_1_r" => "右中指２",
+            "middle_2_r" => "右中指３",
+            "ring_0_r" => "右薬指１",
+            "ring_1_r" => "右薬指２",
+            "ring_2_r" => "右薬指３",
+            "pinky_0_r" => "右小指１",
+            "pinky_1_r" => "右小指２",
             "pinky_2_r" => "右小指３",
         }
     }
@@ -317,6 +325,20 @@ impl BoneActionDatabase {
                 },
             },
             "upper_body2" => {
+                "bend" => {
+                    "forward" => [-1.0, 0.0, 0.0], 45.0,
+                    "backward" => [1.0, 0.0, 0.0], 45.0,
+                },
+                "turn" => {
+                    "left" => [0.0, -1.0, 0.0], 45.0,
+                    "right" => [0.0, 1.0, 0.0], 45.0,
+                },
+                "sway" => {
+                    "left" => [0.0, 0.0, -1.0], 45.0,
+                    "right" => [0.0, 0.0, 1.0], 45.0,
+                },
+            },
+            "lower_body" => {
                 "bend" => {
                     "forward" => [-1.0, 0.0, 0.0], 45.0,
                     "backward" => [1.0, 0.0, 0.0], 45.0,
@@ -746,7 +768,7 @@ impl BoneActionDatabase {
                     "backward" => [0.0, 0.0, -1.0], 15.0,
                 },
             },
-            " ring_2_r" => {
+            "ring_2_r" => {
                 "bend" => {
                     "forward" => [0.0, 0.0, 1.0], 90.0,
                     "backward" => [0.0, 0.0, -1.0], 15.0,

@@ -4,7 +4,7 @@ import { Import, RefreshCw } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import CodeEditor from "./code-editor"
-import { useMPLCompiler } from "../../hooks/useMPLCompiler"
+import { useMPLCompiler } from "@/hooks/useMPLCompiler"
 import { MPLBoneState } from "mmd-mpl"
 
 export default function MPLInput({
