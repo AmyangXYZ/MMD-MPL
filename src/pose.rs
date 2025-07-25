@@ -353,7 +353,7 @@ impl MPLPose {
 
     pub fn to_string(&self) -> String {
         format!(
-            "@pose {} {{\n{}\n}}\nmain {{\n    {};\n}}",
+            "@pose {} {{\n{}\n}}\n\nmain {{\n    {};\n}}",
             self.name,
             self.statements
                 .iter()
