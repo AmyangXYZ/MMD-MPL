@@ -1,32 +1,23 @@
-use mmd_mpl::MPLCompiler;
+use mmd_mpl::{MPLCompiler, MPLPoseStatement};
 
 fn main() {
     let compiler = MPLCompiler::new();
     let bone_states = compiler.compile(
         "@pose bend {
-    head bend forward 30;
-    head turn right 15;
+       waist bend forward 40;
+       waist turn right 20;
+
 }
-
-@pose look_right {
-    head turn right 30;
-}
-
-@animation aa {
-    bend 0.5s;
-    look_right 1s;
-}
-
-@animation bb {
-        look_right 1s;
-    bend 0.5s;
-}
-
-
-main {
-    aa;
-    bb;
-}",
+",
     );
-    println!("{:?}", bone_states);
+    if let Ok(bone_states) = bone_states {
+        println!("{:?}", bone_states[0]);
+        println!(
+            "{:?}",
+            MPLPoseStatement::from_quaternion(
+                &bone_states[0].bone_name_en(),
+                bone_states[0].quaternion()
+            )
+        );
+    }
 }

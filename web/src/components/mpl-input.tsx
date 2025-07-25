@@ -140,13 +140,18 @@ leg_l sway left 0.819;
               setStatement("")
               resetPose()
             }}
-            className="flex gap-2 bg-black text-white"
+            className="flex gap-2 bg-black text-white hover:bg-black hover:text-white cursor-pointer"
             size="sm"
             variant="outline"
           >
             <RefreshCw className="size-4" />
           </Button>
-          <Button size="sm" asChild className="bg-black text-white px-2.5" variant="outline">
+          <Button
+            size="sm"
+            asChild
+            className="bg-black text-white hover:bg-black hover:text-white px-2.5"
+            variant="outline"
+          >
             <Link href="https://github.com/AmyangXYZ/MPL" target="_blank" className="flex gap-2">
               <Image src="/github-mark-white.svg" alt="GitHub" width={18} height={18} />
             </Link>

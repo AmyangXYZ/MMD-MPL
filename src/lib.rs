@@ -6,6 +6,7 @@ mod utils;
 
 pub use bone::*;
 pub use compiler::MPLCompiler;
+pub use pose::{MPLPose, MPLPoseStatement};
 
 use wasm_bindgen::prelude::*;
 

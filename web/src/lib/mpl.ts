@@ -551,7 +551,10 @@ const quaternionToMPL = (
   }
 
   // Nelder-Mead simplex optimization algorithm
-  const nelderMead = (initialGuess: number[], maxIterations: number = 200): { degrees: number[]; distance: number } => {
+  const nelderMead = (
+    initialGuess: number[],
+    maxIterations: number = 1000
+  ): { degrees: number[]; distance: number } => {
     const n = initialGuess.length
     const alpha = 1.0 // reflection coefficient
     const gamma = 2.0 // expansion coefficient
@@ -720,4 +723,12 @@ const quaternionToMPL = (
   }
 
   return statements
+}
+
+if (require.main === module) {
+  const pose = MPLToPose(`
+      waist bend forward 30;
+    
+  `)
+  console.log(PoseToMPL(pose as Pose, 0.0001))
 }

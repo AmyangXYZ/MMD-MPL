@@ -30,10 +30,29 @@ impl Quaternion {
             w: self.w * other.w - self.x * other.x - self.y * other.y - self.z * other.z,
         }
     }
-    pub fn distance(&self, other: &Self) -> f32 {
-        let diff = self.multiply(other);
-        let dot = diff.x * diff.x + diff.y * diff.y + diff.z * diff.z + diff.w * diff.w;
-        dot.sqrt()
+
+    pub fn dot(&self, other: &Self) -> f32 {
+        self.x * other.x + self.y * other.y + self.z * other.z + self.w * other.w
+    }
+
+    pub fn similarity(&self, other: &Self) -> f32 {
+        self.dot(other).abs()
+    }
+
+    pub fn angular_distance(&self, other: &Self) -> f32 {
+        1.0 - self.similarity(other)
+    }
+
+    pub fn from_axis_angle(axis: Vector3, degrees: f32) -> Self {
+        if degrees.abs() < 0.0001 {
+            return Self::identity();
+        }
+        let radians = degrees * (std::f32::consts::PI / 180.0);
+        let half = radians / 2.0;
+        let sin = half.sin();
+        let cos = half.cos();
+        let n = axis.normalize();
+        Self::new(n.x * sin, n.y * sin, n.z * sin, cos)
     }
 }
 
@@ -56,5 +75,10 @@ impl Vector3 {
             y: self.y / magnitude,
             z: self.z / magnitude,
         }
+    }
+
+    /// Dot product with another vector
+    pub fn dot(&self, other: &Self) -> f32 {
+        self.x * other.x + self.y * other.y + self.z * other.z
     }
 }
