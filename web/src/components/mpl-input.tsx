@@ -1,22 +1,27 @@
 import { MPLToPose, PoseToMPL, Pose } from "@/lib/mpl"
-import { SetStateAction, Dispatch, useCallback, useState, useEffect } from "react"
+import { SetStateAction, Dispatch, useCallback, useState, useEffect, useRef } from "react"
 import { Button } from "./ui/button"
 import { Import, RefreshCw } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import CodeEditor from "./code-editor"
+import { useMPLCompiler } from "../../hooks/useMPLCompiler"
+import { MPLBoneState } from "mmd-mpl"
 
 export default function MPLInput({
-  setPose,
+  applyBoneStates,
   loadVpd,
   modelLoaded,
 }: {
-  setPose: Dispatch<SetStateAction<Pose>>
+  applyBoneStates: (boneStates: MPLBoneState[]) => void
   loadVpd: (url: string) => Promise<Pose | null>
   modelLoaded: boolean
 }) {
-  const [statement, setStatement] = useState(`upper_body bend forward 11.611;
-upper_body sway left 8.889;
+  const mplCompiler = useMPLCompiler()
+
+  const [statement, setStatement] = useState(`@pose a {
+        upper_body bend forward 11.611;
+    upper_body sway left 8.889;
 shoulder_r bend backward 13.441;
 shoulder_r sway left 3.702;
 ankle_r bend forward 60.000;
@@ -65,7 +70,8 @@ leg_r turn right 8.139;
 leg_r sway left 0.963;
 leg_l bend forward 32.118;
 leg_l turn left 4.180;
-leg_l sway left 0.819`)
+leg_l sway left 0.819;
+  }`)
 
   const handleFileUpload = useCallback(
     async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -86,34 +92,20 @@ leg_l sway left 0.819`)
   )
 
   const resetPose = useCallback(() => {
-    setPose({
-      description: "",
-      morphs: {},
-      bones: {},
-    })
-  }, [setPose])
-
-  const generatePose = useCallback(
-    async (statement: string) => {
-      if (statement === "") {
-        resetPose()
-        return
-      }
-
-      const poseData = MPLToPose(statement)
-      console.log(poseData)
-      if (poseData) {
-        setPose(poseData)
-      }
-    },
-    [setPose, resetPose]
-  )
+    applyBoneStates([])
+  }, [applyBoneStates])
 
   useEffect(() => {
-    if (modelLoaded) {
-      generatePose(statement)
+    if (modelLoaded && mplCompiler) {
+      try {
+        const boneStates = mplCompiler.compile(statement)
+        console.log(boneStates)
+        applyBoneStates(boneStates)
+      } catch (error) {
+        console.error(error)
+      }
     }
-  }, [statement, generatePose, modelLoaded])
+  }, [statement, modelLoaded, mplCompiler, applyBoneStates])
 
   return (
     <div className="flex flex-col gap-1 w-full h-full">

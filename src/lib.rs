@@ -9,7 +9,7 @@ pub use compiler::MPLCompiler;
 
 use wasm_bindgen::prelude::*;
 
-#[wasm_bindgen(js_name = "MPLCompiler")]
+#[wasm_bindgen]
 pub struct WasmMPLCompiler {
     compiler: MPLCompiler,
 }
@@ -24,8 +24,8 @@ impl WasmMPLCompiler {
     }
 
     #[wasm_bindgen]
-    pub fn compile(&self, script: &str) -> Result<JsValue, String> {
+    pub fn compile(&self, script: &str) -> Result<Vec<MPLBoneState>, String> {
         let result = self.compiler.compile(script)?;
-        Ok(serde_wasm_bindgen::to_value(&result).unwrap())
+        Ok(result)
     }
 }

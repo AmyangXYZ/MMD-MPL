@@ -1,4 +1,8 @@
-#[derive(Debug, Clone)]
+use serde::{Deserialize, Serialize};
+use wasm_bindgen::prelude::*;
+
+#[wasm_bindgen]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct Quaternion {
     pub x: f32,
     pub y: f32,
@@ -33,7 +37,8 @@ impl Quaternion {
     }
 }
 
-#[derive(Debug, Clone)]
+#[wasm_bindgen]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct Vector3 {
     pub x: f32,
     pub y: f32,
@@ -45,11 +50,11 @@ impl Vector3 {
         Self { x, y, z }
     }
     pub fn normalize(&self) -> Self {
-        let length = self.x * self.x + self.y * self.y + self.z * self.z;
+        let magnitude = (self.x * self.x + self.y * self.y + self.z * self.z).sqrt();
         Self {
-            x: self.x / length,
-            y: self.y / length,
-            z: self.z / length,
+            x: self.x / magnitude,
+            y: self.y / magnitude,
+            z: self.z / magnitude,
         }
     }
 }

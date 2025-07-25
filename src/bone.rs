@@ -1,13 +1,55 @@
+use serde::{Deserialize, Serialize};
+use wasm_bindgen::prelude::*;
+
 use crate::utils::{Quaternion, Vector3};
 use std::cell::OnceCell;
 use std::collections::HashMap;
 
-#[derive(Debug, Clone)]
+#[wasm_bindgen]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MPLBoneState {
-    pub bone_name_en: String,
-    pub bone_name_jp: String,
-    pub position: Vector3,
-    pub quaternion: Quaternion,
+    bone_name_en: String,
+    bone_name_jp: String,
+    position: Vector3,
+    quaternion: Quaternion,
+}
+
+#[wasm_bindgen]
+impl MPLBoneState {
+    #[wasm_bindgen(constructor)]
+    pub fn new(
+        bone_name_en: String,
+        bone_name_jp: String,
+        position: Vector3,
+        quaternion: Quaternion,
+    ) -> Self {
+        Self {
+            bone_name_en,
+            bone_name_jp,
+            position,
+            quaternion,
+        }
+    }
+
+    #[wasm_bindgen(getter)]
+    pub fn bone_name_en(&self) -> String {
+        self.bone_name_en.clone()
+    }
+
+    #[wasm_bindgen(getter)]
+    pub fn bone_name_jp(&self) -> String {
+        self.bone_name_jp.clone()
+    }
+
+    #[wasm_bindgen(getter)]
+    pub fn position(&self) -> Vector3 {
+        self.position
+    }
+
+    #[wasm_bindgen(getter)]
+    pub fn quaternion(&self) -> Quaternion {
+        self.quaternion
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -255,6 +297,10 @@ impl BoneActionDatabase {
                     "left" => [0.0, -1.0, 0.0], 75.0,
                     "right" => [0.0, 1.0, 0.0], 75.0,
                 },
+                "sway" => {
+                    "left" => [0.0, 0.0, -1.0], 30.0,
+                    "right" => [0.0, 0.0, 1.0], 30.0,
+                },
             },
             "upper_body" => {
                 "bend" => {
@@ -354,13 +400,11 @@ impl BoneActionDatabase {
             "elbow_l" => {
                 "bend" => {
                     "forward" => [1.0, 1.0, 0.0], 135.0,
-                    "backward" => [1.0, -1.0, 0.0], 135.0,
                 },
             },
             "elbow_r" => {
                 "bend" => {
-                    "forward" => [1.0, 1.0, 0.0], 135.0,
-                    "backward" => [1.0, -1.0, 0.0], 135.0,
+                    "forward" => [1.0, -1.0, 0.0], 135.0,
                 },
             },
             "wrist_l" => {
@@ -368,11 +412,19 @@ impl BoneActionDatabase {
                     "forward" => [0.0, 0.0, -1.0], 60.0,
                     "backward" => [1.0, 0.0, -1.0], 30.0,
                 },
+                "sway" => {
+                    "left" => [-1.0, 1.0, 0.0], 15.0,
+                    "right" => [1.0, 1.0, 0.0], 15.0,
+                },
             },
             "wrist_r" => {
                 "bend" => {
                     "forward" => [0.0, 0.0, 1.0], 60.0,
-                    "backward" => [1.0, 0.0, -1.0], 30.0,
+                    "backward" => [-1.0, 0.0, -1.0], 30.0,
+                },
+                "sway" => {
+                    "left" => [-1.0, -1.0, 0.0], 15.0,
+                    "right" => [1.0, -1.0, 0.0], 15.0,
                 },
             },
             "wrist_twist_l" => {

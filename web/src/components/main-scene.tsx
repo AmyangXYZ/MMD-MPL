@@ -43,6 +43,7 @@ import { IMmdRuntimeLinkedBone } from "babylon-mmd/esm/Runtime/IMmdRuntimeLinked
 import { MmdWasmPhysicsRuntimeImpl } from "babylon-mmd/esm/Runtime/Optimized/Physics/mmdWasmPhysicsRuntimeImpl"
 import MPLInput from "./mpl-input"
 import { BoneRotationQuaternion, BONES, Pose } from "@/lib/mpl"
+import { MPLBoneState } from "mmd-mpl"
 
 interface TargetRotation {
   quaternion: Quaternion
@@ -71,11 +72,6 @@ export default function MainScene() {
   const bonesRef = useRef<{ [key: string]: IMmdRuntimeLinkedBone }>({})
   const targetRotationsRef = useRef<{ [key: string]: TargetRotation }>({})
   const targetPositionsRef = useRef<{ [key: string]: TargetPosition }>({})
-  const [pose, setPose] = useState<Pose>({
-    description: "",
-    morphs: {},
-    bones: {} as { [key: string]: BoneRotationQuaternion },
-  })
 
   const [modelLoaded, setModelLoaded] = useState(false)
 
@@ -95,30 +91,24 @@ export default function MainScene() {
     }
   }, [])
 
-  const applyPose = useCallback(
-    (pose?: Pose) => {
-      if (!modelRef.current || !pose) return
+  const applyBoneStates = useCallback(
+    (boneStates?: MPLBoneState[]) => {
+      if (!modelRef.current || !boneStates) return
 
-      // if (pose.face) {
-      //   for (const [morphName, targetValue] of Object.entries(pose.face)) {
-      //     modelRef.current.morph.setMorphWeight(morphName, targetValue as number)
-      //   }
-      // }
-
-      for (const boneNameJp of Object.values(BONES)) {
-        const bone = getBone(boneNameJp)
+      for (const boneName of Object.keys(bonesRef.current)) {
+        const bone = getBone(boneName)
         if (!bone) continue
 
-        const boneRotationQuaternion = pose.bones[boneNameJp] || [0, 0, 0, 1]
-        rotateBone(
-          boneNameJp,
-          new Quaternion(
-            boneRotationQuaternion[0],
-            boneRotationQuaternion[1],
-            boneRotationQuaternion[2],
-            boneRotationQuaternion[3]
+        let targetQuaternion = new Quaternion(0, 0, 0, 1)
+        if (boneStates.find((boneState) => boneState.bone_name_jp === boneName)) {
+          targetQuaternion = new Quaternion(
+            boneStates.find((boneState) => boneState.bone_name_jp === boneName)?.quaternion.x || 0,
+            boneStates.find((boneState) => boneState.bone_name_jp === boneName)?.quaternion.y || 0,
+            boneStates.find((boneState) => boneState.bone_name_jp === boneName)?.quaternion.z || 0,
+            boneStates.find((boneState) => boneState.bone_name_jp === boneName)?.quaternion.w || 1
           )
-        )
+        }
+        rotateBone(boneName, targetQuaternion)
       }
     },
     [rotateBone]
@@ -358,19 +348,13 @@ export default function MainScene() {
     }
   }, [loadModel])
 
-  useEffect(() => {
-    if (modelRef.current && pose) {
-      applyPose(pose)
-    }
-  }, [pose, applyPose])
-
   return (
     <div className="w-full h-full flex flex-col md:flex-row">
       <div className="w-full h-[70%] md:w-1/2 md:h-full order-1 md:order-2">
         <canvas ref={canvasRef} className="w-full h-full z-1" />
       </div>
       <div className="w-full h-[30%] md:w-1/2 md:h-full order-2 md:order-1 border-t">
-        <MPLInput setPose={setPose} loadVpd={loadVpd} modelLoaded={modelLoaded} />
+        <MPLInput applyBoneStates={applyBoneStates} loadVpd={loadVpd} modelLoaded={modelLoaded} />
       </div>
     </div>
   )

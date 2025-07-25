@@ -1,0 +1,15 @@
+{
+  "name": "mmd-mpl",
+  "type": "module",
+  "version": "0.1.0",
+  "files": [
+    "mmd_mpl_bg.wasm",
+    "mmd_mpl.js",
+    "mmd_mpl.d.ts"
+  ],
+  "main": "mmd_mpl.js",
+  "types": "mmd_mpl.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}

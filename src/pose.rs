@@ -59,8 +59,6 @@ impl MPLPoseStatement {
 
         // Get normalized rotation axis
         let normalized_axis = rule.axis.normalize();
-        let (normalized_x, normalized_y, normalized_z) =
-            (normalized_axis.x, normalized_axis.y, normalized_axis.z);
 
         // Create quaternion from axis-angle
         let radians = self.degrees * (std::f32::consts::PI / 180.0);
@@ -69,9 +67,9 @@ impl MPLPoseStatement {
         let cos = half_angle.cos();
 
         Quaternion::new(
-            normalized_x * sin,
-            normalized_y * sin,
-            normalized_z * sin,
+            normalized_axis.x * sin,
+            normalized_axis.y * sin,
+            normalized_axis.z * sin,
             cos,
         )
     }
@@ -113,12 +111,12 @@ impl MPLPose {
             let bone_name_jp =
                 with_bone_db(|db| db.japanese_name(&bone).unwrap_or(&bone).to_string());
 
-            states.push(MPLBoneState {
-                bone_name_en: bone,
+            states.push(MPLBoneState::new(
+                bone,
                 bone_name_jp,
                 position,
-                quaternion: combined_quaternion,
-            });
+                combined_quaternion,
+            ));
         }
 
         states

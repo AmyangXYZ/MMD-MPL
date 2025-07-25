@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
-use crate::{animation::MPLAnimation, pose::MPLPose};
+use crate::{animation::MPLAnimation, pose::MPLPose, MPLBoneState};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MPLScript {
@@ -35,7 +35,7 @@ impl MPLCompiler {
         Self {}
     }
 
-    pub fn compile(&self, text: &str) -> Result<MPLScript, String> {
+    pub fn compile(&self, text: &str) -> Result<Vec<MPLBoneState>, String> {
         let mut in_block = false;
         let mut brace_count = 0;
         let mut current_block = String::new();
@@ -159,7 +159,11 @@ impl MPLCompiler {
             return Err("Unclosed block".to_string());
         }
 
-        Ok(script)
+        let mut bone_states = vec![];
+        for pose in script.poses.values() {
+            bone_states.extend(pose.to_bone_states());
+        }
+        Ok(bone_states)
     }
 
     fn parse_pose(&self, text: &str) -> Result<MPLPose, String> {

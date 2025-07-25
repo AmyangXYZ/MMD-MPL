@@ -2,7 +2,7 @@ use mmd_mpl::MPLCompiler;
 
 fn main() {
     let compiler = MPLCompiler::new();
-    let script = compiler.compile(
+    let bone_states = compiler.compile(
         "@pose bend {
     head bend forward 30;
     head turn right 15;
@@ -28,7 +28,5 @@ main {
     bb;
 }",
     );
-    let script = script.unwrap();
-    println!("{:?}", script);
-    println!("{:?}", script.poses["bend"].to_bone_states());
+    println!("{:?}", bone_states);
 }

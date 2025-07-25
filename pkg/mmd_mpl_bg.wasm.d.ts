@@ -1,0 +1,32 @@
+/* tslint:disable */
+/* eslint-disable */
+export const memory: WebAssembly.Memory;
+export const __wbg_mplbonestate_free: (a: number, b: number) => void;
+export const mplbonestate_new: (a: number, b: number, c: number, d: number, e: number, f: number) => number;
+export const mplbonestate_bone_name_en: (a: number, b: number) => void;
+export const mplbonestate_bone_name_jp: (a: number, b: number) => void;
+export const mplbonestate_position: (a: number) => number;
+export const mplbonestate_quaternion: (a: number) => number;
+export const __wbg_quaternion_free: (a: number, b: number) => void;
+export const __wbg_get_quaternion_x: (a: number) => number;
+export const __wbg_set_quaternion_x: (a: number, b: number) => void;
+export const __wbg_get_quaternion_y: (a: number) => number;
+export const __wbg_set_quaternion_y: (a: number, b: number) => void;
+export const __wbg_get_quaternion_z: (a: number) => number;
+export const __wbg_set_quaternion_z: (a: number, b: number) => void;
+export const __wbg_get_quaternion_w: (a: number) => number;
+export const __wbg_set_quaternion_w: (a: number, b: number) => void;
+export const __wbg_vector3_free: (a: number, b: number) => void;
+export const __wbg_set_vector3_x: (a: number, b: number) => void;
+export const __wbg_set_vector3_y: (a: number, b: number) => void;
+export const __wbg_set_vector3_z: (a: number, b: number) => void;
+export const __wbg_get_vector3_x: (a: number) => number;
+export const __wbg_get_vector3_y: (a: number) => number;
+export const __wbg_get_vector3_z: (a: number) => number;
+export const __wbg_wasmmplcompiler_free: (a: number, b: number) => void;
+export const wasmmplcompiler_new: () => number;
+export const wasmmplcompiler_compile: (a: number, b: number, c: number, d: number) => void;
+export const __wbindgen_malloc: (a: number, b: number) => number;
+export const __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
+export const __wbindgen_add_to_stack_pointer: (a: number) => number;
+export const __wbindgen_free: (a: number, b: number, c: number) => void;
