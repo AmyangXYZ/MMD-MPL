@@ -42,8 +42,8 @@ import { IMmdRuntimeLinkedBone } from "babylon-mmd/esm/Runtime/IMmdRuntimeLinked
 
 import { MmdWasmPhysicsRuntimeImpl } from "babylon-mmd/esm/Runtime/Optimized/Physics/mmdWasmPhysicsRuntimeImpl"
 import MPLInput from "./mpl-input"
-import { BoneRotationQuaternion, BONES, Pose } from "@/lib/mpl"
-import { MPLBoneState } from "mmd-mpl"
+import { MPLBoneState, Quaternion as MPLQuaternion, Vector3 as MPLVector3 } from "mmd-mpl"
+import { BONES } from "@/lib/mpl"
 
 interface TargetRotation {
   quaternion: Quaternion
@@ -148,47 +148,63 @@ export default function MainScene() {
   }, [])
 
   const loadVpd = useCallback(
-    async (vpdUrl: string): Promise<Pose | null> => {
+    async (vpdUrl: string): Promise<MPLBoneState[] | null> => {
       if (!vpdLoaderRef.current || !modelRef.current) return null
 
       const vpd = await vpdLoaderRef.current.loadAsync("vpd_pose", vpdUrl)
       // modelRef.current.addAnimation(vpd)
       // modelRef.current.setAnimation("vpd_pose")
       // modelRef.current.currentAnimation?.animate(0)
-      const poseVpd = {
-        description: "",
-        morphs: {},
-        bones: {} as { [key: string]: BoneRotationQuaternion },
-      }
+      const boneStates: MPLBoneState[] = []
       for (const boneTrack of vpd.boneTracks) {
-        const boneName = boneTrack.name
-
-        if (!Object.values(BONES).includes(boneName)) {
+        const boneNameJp = boneTrack.name
+        if (!Object.values(BONES).includes(boneNameJp)) {
+          continue
+        }
+        const boneNameEn = Object.keys(BONES).find((key) => BONES[key] === boneNameJp)
+        if (!boneNameEn) {
           continue
         }
 
-        const rotations = boneTrack.rotations
-        if (rotations.length === 0) continue
-        const rotation: BoneRotationQuaternion = [...rotations] as BoneRotationQuaternion
+        const rotation = boneTrack.rotations
+        if (rotation.length === 0) continue
 
         if (!(rotation[0] === 0 && rotation[1] === 0 && rotation[2] === 0 && rotation[3] === 1)) {
-          poseVpd.bones[boneName] = rotation
+          boneStates.push(
+            new MPLBoneState(
+              boneNameEn,
+              boneNameJp,
+              new MPLVector3(0, 0, 0),
+              new MPLQuaternion(rotation[0], rotation[1], rotation[2], rotation[3])
+            )
+          )
         }
       }
 
       for (const boneTrack of vpd.movableBoneTracks) {
-        const boneName = boneTrack.name
-        if (!Object.values(BONES).includes(boneName)) {
+        const boneNameJp = boneTrack.name
+        if (!Object.values(BONES).includes(boneNameJp)) {
+          continue
+        }
+        const boneNameEn = Object.keys(BONES).find((key) => BONES[key] === boneNameJp)
+        if (!boneNameEn) {
           continue
         }
 
         if (boneTrack.rotations && boneTrack.rotations.length > 0) {
-          const rotation: BoneRotationQuaternion = [...boneTrack.rotations] as BoneRotationQuaternion
-          poseVpd.bones[boneName] = rotation
+          const rotation = boneTrack.rotations
+          boneStates.push(
+            new MPLBoneState(
+              boneNameEn,
+              boneNameJp,
+              new MPLVector3(0, 0, 0),
+              new MPLQuaternion(rotation[0], rotation[1], rotation[2], rotation[3])
+            )
+          )
         }
       }
 
-      return poseVpd
+      return boneStates
     },
     [vpdLoaderRef, modelRef]
   )

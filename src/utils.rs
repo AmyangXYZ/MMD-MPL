@@ -10,7 +10,9 @@ pub struct Quaternion {
     pub w: f32,
 }
 
+#[wasm_bindgen]
 impl Quaternion {
+    #[wasm_bindgen(constructor)]
     pub fn new(x: f32, y: f32, z: f32, w: f32) -> Self {
         Self { x, y, z, w }
     }
@@ -64,7 +66,9 @@ pub struct Vector3 {
     pub z: f32,
 }
 
+#[wasm_bindgen]
 impl Vector3 {
+    #[wasm_bindgen(constructor)]
     pub fn new(x: f32, y: f32, z: f32) -> Self {
         Self { x, y, z }
     }

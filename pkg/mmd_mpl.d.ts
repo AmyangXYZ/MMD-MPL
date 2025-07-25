@@ -9,16 +9,27 @@ export class MPLBoneState {
   readonly quaternion: Quaternion;
 }
 export class Quaternion {
-  private constructor();
   free(): void;
+  constructor(x: number, y: number, z: number, w: number);
+  static identity(): Quaternion;
+  multiply(other: Quaternion): Quaternion;
+  dot(other: Quaternion): number;
+  similarity(other: Quaternion): number;
+  angular_distance(other: Quaternion): number;
+  static from_axis_angle(axis: Vector3, degrees: number): Quaternion;
   x: number;
   y: number;
   z: number;
   w: number;
 }
 export class Vector3 {
-  private constructor();
   free(): void;
+  constructor(x: number, y: number, z: number);
+  normalize(): Vector3;
+  /**
+   * Dot product with another vector
+   */
+  dot(other: Vector3): number;
   x: number;
   y: number;
   z: number;
@@ -27,6 +38,7 @@ export class WasmMPLCompiler {
   free(): void;
   constructor();
   compile(script: string): MPLBoneState[];
+  reverse_compile(name: string, states: MPLBoneState[]): string;
 }
 
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
@@ -48,16 +60,27 @@ export interface InitOutput {
   readonly __wbg_set_quaternion_z: (a: number, b: number) => void;
   readonly __wbg_get_quaternion_w: (a: number) => number;
   readonly __wbg_set_quaternion_w: (a: number, b: number) => void;
+  readonly quaternion_new: (a: number, b: number, c: number, d: number) => number;
+  readonly quaternion_identity: () => number;
+  readonly quaternion_multiply: (a: number, b: number) => number;
+  readonly quaternion_dot: (a: number, b: number) => number;
+  readonly quaternion_similarity: (a: number, b: number) => number;
+  readonly quaternion_angular_distance: (a: number, b: number) => number;
+  readonly quaternion_from_axis_angle: (a: number, b: number) => number;
   readonly __wbg_vector3_free: (a: number, b: number) => void;
+  readonly vector3_new: (a: number, b: number, c: number) => number;
+  readonly vector3_normalize: (a: number) => number;
+  readonly vector3_dot: (a: number, b: number) => number;
+  readonly __wbg_wasmmplcompiler_free: (a: number, b: number) => void;
+  readonly wasmmplcompiler_new: () => number;
+  readonly wasmmplcompiler_compile: (a: number, b: number, c: number, d: number) => void;
+  readonly wasmmplcompiler_reverse_compile: (a: number, b: number, c: number, d: number, e: number, f: number) => void;
   readonly __wbg_set_vector3_x: (a: number, b: number) => void;
   readonly __wbg_set_vector3_y: (a: number, b: number) => void;
   readonly __wbg_set_vector3_z: (a: number, b: number) => void;
   readonly __wbg_get_vector3_x: (a: number) => number;
   readonly __wbg_get_vector3_y: (a: number) => number;
   readonly __wbg_get_vector3_z: (a: number) => number;
-  readonly __wbg_wasmmplcompiler_free: (a: number, b: number) => void;
-  readonly wasmmplcompiler_new: () => number;
-  readonly wasmmplcompiler_compile: (a: number, b: number, c: number, d: number) => void;
   readonly __wbindgen_malloc: (a: number, b: number) => number;
   readonly __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
   readonly __wbindgen_add_to_stack_pointer: (a: number) => number;

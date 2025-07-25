@@ -15,6 +15,20 @@ function addHeapObject(obj) {
     return idx;
 }
 
+function getObject(idx) { return heap[idx]; }
+
+function dropObject(idx) {
+    if (idx < 132) return;
+    heap[idx] = heap_next;
+    heap_next = idx;
+}
+
+function takeObject(idx) {
+    const ret = getObject(idx);
+    dropObject(idx);
+    return ret;
+}
+
 const cachedTextDecoder = (typeof TextDecoder !== 'undefined' ? new TextDecoder('utf-8', { ignoreBOM: true, fatal: true }) : { decode: () => { throw Error('TextDecoder not available') } } );
 
 if (typeof TextDecoder !== 'undefined') { cachedTextDecoder.decode(); };
@@ -104,20 +118,6 @@ function getDataViewMemory0() {
     return cachedDataViewMemory0;
 }
 
-function getObject(idx) { return heap[idx]; }
-
-function dropObject(idx) {
-    if (idx < 132) return;
-    heap[idx] = heap_next;
-    heap_next = idx;
-}
-
-function takeObject(idx) {
-    const ret = getObject(idx);
-    dropObject(idx);
-    return ret;
-}
-
 function getArrayJsValueFromWasm0(ptr, len) {
     ptr = ptr >>> 0;
     const mem = getDataViewMemory0();
@@ -126,6 +126,16 @@ function getArrayJsValueFromWasm0(ptr, len) {
         result.push(takeObject(mem.getUint32(i, true)));
     }
     return result;
+}
+
+function passArrayJsValueToWasm0(array, malloc) {
+    const ptr = malloc(array.length * 4, 4) >>> 0;
+    const mem = getDataViewMemory0();
+    for (let i = 0; i < array.length; i++) {
+        mem.setUint32(ptr + 4 * i, addHeapObject(array[i]), true);
+    }
+    WASM_VECTOR_LEN = array.length;
+    return ptr;
 }
 
 const MPLBoneStateFinalization = (typeof FinalizationRegistry === 'undefined')
@@ -140,6 +150,13 @@ export class MPLBoneState {
         obj.__wbg_ptr = ptr;
         MPLBoneStateFinalization.register(obj, obj.__wbg_ptr, obj);
         return obj;
+    }
+
+    static __unwrap(jsValue) {
+        if (!(jsValue instanceof MPLBoneState)) {
+            return 0;
+        }
+        return jsValue.__destroy_into_raw();
     }
 
     __destroy_into_raw() {
@@ -304,6 +321,72 @@ export class Quaternion {
     set w(arg0) {
         wasm.__wbg_set_quaternion_w(this.__wbg_ptr, arg0);
     }
+    /**
+     * @param {number} x
+     * @param {number} y
+     * @param {number} z
+     * @param {number} w
+     */
+    constructor(x, y, z, w) {
+        const ret = wasm.quaternion_new(x, y, z, w);
+        this.__wbg_ptr = ret >>> 0;
+        QuaternionFinalization.register(this, this.__wbg_ptr, this);
+        return this;
+    }
+    /**
+     * @returns {Quaternion}
+     */
+    static identity() {
+        const ret = wasm.quaternion_identity();
+        return Quaternion.__wrap(ret);
+    }
+    /**
+     * @param {Quaternion} other
+     * @returns {Quaternion}
+     */
+    multiply(other) {
+        _assertClass(other, Quaternion);
+        const ret = wasm.quaternion_multiply(this.__wbg_ptr, other.__wbg_ptr);
+        return Quaternion.__wrap(ret);
+    }
+    /**
+     * @param {Quaternion} other
+     * @returns {number}
+     */
+    dot(other) {
+        _assertClass(other, Quaternion);
+        const ret = wasm.quaternion_dot(this.__wbg_ptr, other.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @param {Quaternion} other
+     * @returns {number}
+     */
+    similarity(other) {
+        _assertClass(other, Quaternion);
+        const ret = wasm.quaternion_similarity(this.__wbg_ptr, other.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @param {Quaternion} other
+     * @returns {number}
+     */
+    angular_distance(other) {
+        _assertClass(other, Quaternion);
+        const ret = wasm.quaternion_angular_distance(this.__wbg_ptr, other.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @param {Vector3} axis
+     * @param {number} degrees
+     * @returns {Quaternion}
+     */
+    static from_axis_angle(axis, degrees) {
+        _assertClass(axis, Vector3);
+        var ptr0 = axis.__destroy_into_raw();
+        const ret = wasm.quaternion_from_axis_angle(ptr0, degrees);
+        return Quaternion.__wrap(ret);
+    }
 }
 
 const Vector3Finalization = (typeof FinalizationRegistry === 'undefined')
@@ -370,6 +453,34 @@ export class Vector3 {
     set z(arg0) {
         wasm.__wbg_set_quaternion_z(this.__wbg_ptr, arg0);
     }
+    /**
+     * @param {number} x
+     * @param {number} y
+     * @param {number} z
+     */
+    constructor(x, y, z) {
+        const ret = wasm.vector3_new(x, y, z);
+        this.__wbg_ptr = ret >>> 0;
+        Vector3Finalization.register(this, this.__wbg_ptr, this);
+        return this;
+    }
+    /**
+     * @returns {Vector3}
+     */
+    normalize() {
+        const ret = wasm.vector3_normalize(this.__wbg_ptr);
+        return Vector3.__wrap(ret);
+    }
+    /**
+     * Dot product with another vector
+     * @param {Vector3} other
+     * @returns {number}
+     */
+    dot(other) {
+        _assertClass(other, Vector3);
+        const ret = wasm.vector3_dot(this.__wbg_ptr, other.__wbg_ptr);
+        return ret;
+    }
 }
 
 const WasmMPLCompilerFinalization = (typeof FinalizationRegistry === 'undefined')
@@ -419,6 +530,31 @@ export class WasmMPLCompiler {
             wasm.__wbindgen_add_to_stack_pointer(16);
         }
     }
+    /**
+     * @param {string} name
+     * @param {MPLBoneState[]} states
+     * @returns {string}
+     */
+    reverse_compile(name, states) {
+        let deferred3_0;
+        let deferred3_1;
+        try {
+            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+            const ptr0 = passStringToWasm0(name, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+            const len0 = WASM_VECTOR_LEN;
+            const ptr1 = passArrayJsValueToWasm0(states, wasm.__wbindgen_malloc);
+            const len1 = WASM_VECTOR_LEN;
+            wasm.wasmmplcompiler_reverse_compile(retptr, this.__wbg_ptr, ptr0, len0, ptr1, len1);
+            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
+            deferred3_0 = r0;
+            deferred3_1 = r1;
+            return getStringFromWasm0(r0, r1);
+        } finally {
+            wasm.__wbindgen_add_to_stack_pointer(16);
+            wasm.__wbindgen_free(deferred3_0, deferred3_1, 1);
+        }
+    }
 }
 
 async function __wbg_load(module, imports) {
@@ -458,6 +594,10 @@ function __wbg_get_imports() {
     imports.wbg.__wbg_mplbonestate_new = function(arg0) {
         const ret = MPLBoneState.__wrap(arg0);
         return addHeapObject(ret);
+    };
+    imports.wbg.__wbg_mplbonestate_unwrap = function(arg0) {
+        const ret = MPLBoneState.__unwrap(takeObject(arg0));
+        return ret;
     };
     imports.wbg.__wbindgen_string_new = function(arg0, arg1) {
         const ret = getStringFromWasm0(arg0, arg1);
