@@ -38,12 +38,10 @@ import {
   MmdPlayerControl,
 } from "babylon-mmd"
 
-
 import { MmdWasmPhysicsRuntimeImpl } from "babylon-mmd/esm/Runtime/Optimized/Physics/mmdWasmPhysicsRuntimeImpl"
 import MPLInput from "./mpl-input"
 import { MPLBoneFrame, Quaternion as MPLQuaternion, Vector3 as MPLVector3 } from "mmd-mpl"
 import { useMPLCompiler } from "@/hooks/useMPLCompiler"
-
 
 export default function MainScene() {
   const mplCompiler = useMPLCompiler()
@@ -60,7 +58,6 @@ export default function MainScene() {
   const modelRef = useRef<MmdWasmModel>(null)
 
   const [modelLoaded, setModelLoaded] = useState(false)
-
 
   const loadModel = useCallback(async (): Promise<void> => {
     if (!sceneRef.current || !mmdWasmInstanceRef.current || !mmdRuntimeRef.current || !mplCompiler) return
@@ -142,20 +139,22 @@ export default function MainScene() {
         if (!boneNameEn) {
           continue
         }
+        let position = new MPLVector3(0, 0, 0)
+        let rotation = new MPLQuaternion(0, 0, 0, 1)
+        if (boneTrack.positions && boneTrack.positions.length > 0) {
+          position = new MPLVector3(boneTrack.positions[0], boneTrack.positions[1], boneTrack.positions[2])
+        }
 
         if (boneTrack.rotations && boneTrack.rotations.length > 0) {
-          const rotation = boneTrack.rotations
-          boneStates.push(
-            new MPLBoneFrame(
-              boneNameEn,
-              boneNameJp,
-              new MPLVector3(0, 0, 0),
-              new MPLQuaternion(rotation[0], rotation[1], rotation[2], rotation[3])
-            )
+          rotation = new MPLQuaternion(
+            boneTrack.rotations[0],
+            boneTrack.rotations[1],
+            boneTrack.rotations[2],
+            boneTrack.rotations[3]
           )
         }
+        boneStates.push(new MPLBoneFrame(boneNameEn, boneNameJp, position, rotation))
       }
-
       return boneStates
     },
     [vpdLoaderRef, modelRef, mplCompiler]
@@ -197,7 +196,7 @@ export default function MainScene() {
       hemisphericLight.specular = new Color3(0, 0, 0)
       hemisphericLight.groundColor = new Color3(1, 1, 1)
 
-      const directionalLight = new DirectionalLight("directionalLight", new Vector3(2, -19.15, 4), scene)
+      const directionalLight = new DirectionalLight("directionalLight", new Vector3(2, -30, 4), scene)
       directionalLight.intensity = 0.9
 
       const shadowGenerator = new ShadowGenerator(2048, directionalLight)

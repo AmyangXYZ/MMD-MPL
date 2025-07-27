@@ -8,8 +8,8 @@ mod vmd;
 
 pub use bone::*;
 pub use compiler::MPLCompiler;
-use mpl::MPLBoneFrame;
-use pose::MPLPose;
+pub use mpl::MPLBoneFrame;
+pub use pose::MPLPose;
 pub use vmd::VMDWriter;
 
 use wasm_bindgen::prelude::*;

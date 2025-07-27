@@ -1,4 +1,4 @@
-use mmd_mpl::{MPLCompiler, VMDWriter};
+use mmd_mpl::{MPLCompiler, MPLPose, VMDWriter};
 
 fn main() {
     let compiler = MPLCompiler::new();
@@ -11,6 +11,9 @@ fn main() {
 }
 
         @pose look_left {
+               base move forward 2;
+               base move left 2;
+               base move up 2;
                head turn left 20;
                head sway left 20;
 }
@@ -21,7 +24,9 @@ fn main() {
 }
 
        @pose bend_over {
-               waist bend forward 90;
+                      base turn right 90;
+
+               base move forward 10;
 }
                       @pose stand {
                waist bend forward 0;
@@ -43,6 +48,7 @@ fn main() {
 
     @animation default1 {
         0.5: bend_over;
+        1.0: look_left;
     }
 
   main {
@@ -55,6 +61,10 @@ fn main() {
         for key_frame in key_frames.iter() {
             println!("{:?}", key_frame);
         }
+        println!(
+            "{:?}",
+            MPLPose::from_bone_frames("default", key_frames[0].bone_frames.clone()).to_string()
+        );
         let vmd = VMDWriter::new(key_frames);
         let vmd_data = vmd.create_vmd().unwrap();
 

@@ -11,7 +11,7 @@ const mplPatterns = [
     className: "cm-mpl-bone",
   },
   { regex: /@(pose|animation|main)\b/g, className: "cm-mpl-directive" },
-  { regex: /\b(bend|turn|sway)\b/g, className: "cm-mpl-action" },
+  { regex: /\b(bend|turn|sway|move)\b/g, className: "cm-mpl-action" },
   { regex: /\b(forward|backward|left|right|up|down)\b/g, className: "cm-mpl-direction" },
   { regex: /\b\d+(\.\d+)?\b/g, className: "cm-mpl-degrees" },
   { regex: /[{}]/g, className: "cm-mpl-brace" },

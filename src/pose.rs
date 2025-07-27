@@ -13,7 +13,7 @@ pub struct MPLPoseStatement {
     pub bone: String,
     pub action: String,
     pub direction: String,
-    pub degrees: f32,
+    pub amount: f32,
 }
 
 impl MPLPoseStatement {
@@ -29,26 +29,72 @@ impl MPLPoseStatement {
         let bone = parts[0].to_string();
         let action = parts[1].to_string();
         let direction = parts[2].to_string();
-        let degrees: f32 = parts[3]
+        let amount: f32 = parts[3]
             .trim()
             .parse()
             .map_err(|_| "Invalid degrees number".to_string())?;
 
-        with_bone_db(|db| db.validate(&bone, &action, &direction, degrees))?;
+        with_bone_db(|db| db.validate(&bone, &action, &direction, amount))?;
 
         Ok(Self {
             bone,
             action,
             direction,
-            degrees,
+            amount,
         })
     }
 
     pub fn to_string(&self) -> String {
         format!(
             "{} {} {} {:.0};",
-            self.bone, self.action, self.direction, self.degrees
+            self.bone, self.action, self.direction, self.amount
         )
+    }
+
+    pub fn to_vector(&self) -> Vector3 {
+        let rule = with_bone_db(|db| {
+            db.get_rule(&self.bone, &self.action, &self.direction)
+                .cloned()
+        });
+
+        let rule = match rule {
+            Some(r) => r,
+            None => return Vector3::new(0.0, 0.0, 0.0),
+        };
+
+        let normalized_axis = rule.axis.normalize();
+        normalized_axis.multiply_by_scalar(self.amount)
+    }
+
+    pub fn from_vector(bone: &str, target_vector: Vector3) -> Vec<Self> {
+        let bone = bone.to_string();
+        let mut statements = vec![];
+
+        // Map vector components to move directions
+        let direction_mappings = [
+            (target_vector.x, "right", "left"),
+            (target_vector.y, "up", "down"),
+            (target_vector.z, "backward", "forward"),
+        ];
+
+        for (component, pos_dir, neg_dir) in direction_mappings {
+            if component.abs() > 0.01 {
+                let direction = if component > 0.0 { pos_dir } else { neg_dir };
+                let amount = component.abs();
+
+                // Check if this bone supports this move direction
+                let has_rule = with_bone_db(|db| db.get_rule(&bone, "move", direction).is_some());
+                if has_rule {
+                    statements.push(Self {
+                        bone: bone.clone(),
+                        action: "move".to_string(),
+                        direction: direction.to_string(),
+                        amount,
+                    });
+                }
+            }
+        }
+        statements
     }
 
     pub fn to_quaternion(&self) -> Quaternion {
@@ -64,7 +110,7 @@ impl MPLPoseStatement {
 
         let normalized_axis = rule.axis.normalize();
 
-        let radians = self.degrees * (std::f32::consts::PI / 180.0);
+        let radians = self.amount * (std::f32::consts::PI / 180.0);
         let half_angle = radians / 2.0;
         let sin = half_angle.sin();
         let cos = half_angle.cos();
@@ -81,10 +127,13 @@ impl MPLPoseStatement {
         let bone = bone.to_string();
 
         // Gather all possible (action, direction) rules for this bone
-        let possible_actions: Vec<(String, String, ActionRule)> = crate::with_bone_db(|db| {
+        let possible_actions: Vec<(String, String, ActionRule)> = with_bone_db(|db| {
             let mut vec = Vec::new();
             if let Some(actions) = db.actions(&bone) {
                 for action in actions {
+                    if action == "move" {
+                        continue;
+                    }
                     if let Some(directions) = db.directions(&bone, action) {
                         for direction in directions {
                             if let Some(rule) = db.get_rule(&bone, action, direction) {
@@ -96,7 +145,6 @@ impl MPLPoseStatement {
             }
             vec
         });
-
         if possible_actions.is_empty() {
             return vec![];
         }
@@ -310,7 +358,7 @@ impl MPLPoseStatement {
                             bone: bone.clone(),
                             action: action.clone(),
                             direction: net_direction.to_string(),
-                            degrees: net_degrees,
+                            amount: net_degrees,
                         });
                     }
 
@@ -326,17 +374,18 @@ impl MPLPoseStatement {
                         bone: bone.clone(),
                         action: action.clone(),
                         direction: direction.clone(),
-                        degrees: *degrees,
+                        amount: *degrees,
                     });
                 }
             }
         }
 
         // Format statements to match TypeScript output format
-        statements
+        let s = statements
             .into_iter()
-            .filter(|stmt| !format!("{:.0}", stmt.degrees).ends_with("0"))
-            .collect()
+            .filter(|stmt| stmt.amount.abs() > 0.01)
+            .collect();
+        return s;
     }
 }
 
@@ -376,21 +425,26 @@ impl MPLPose {
         }
 
         for (bone, bone_statements) in bone_groups {
+            let mut combined_position = Vector3::new(0.0, 0.0, 0.0);
             let mut combined_quaternion = Quaternion::identity();
 
             for statement in bone_statements {
-                let quaternion = statement.to_quaternion();
-                combined_quaternion = combined_quaternion.multiply(&quaternion);
+                if statement.action == "move" {
+                    let vector = statement.to_vector();
+                    combined_position = combined_position.add(&vector);
+                } else {
+                    let quaternion = statement.to_quaternion();
+                    combined_quaternion = combined_quaternion.multiply(&quaternion);
+                }
             }
 
-            let position = Vector3::new(0.0, 0.0, 0.0);
             let bone_name_jp =
                 with_bone_db(|db| db.japanese_name(&bone).unwrap_or(&bone).to_string());
 
             frames.push(MPLBoneFrame::new(
                 bone,
                 bone_name_jp,
-                position,
+                combined_position,
                 combined_quaternion,
             ));
         }
@@ -401,6 +455,10 @@ impl MPLPose {
     pub fn from_bone_frames(name: &str, frames: Vec<MPLBoneFrame>) -> Self {
         let mut statements = vec![];
         for frame in frames.iter() {
+            statements.extend(MPLPoseStatement::from_vector(
+                &frame.name_en(),
+                frame.position(),
+            ));
             statements.extend(MPLPoseStatement::from_quaternion(
                 &frame.name_en(),
                 frame.rotation(),
