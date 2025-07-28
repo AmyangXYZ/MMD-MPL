@@ -1,6 +1,6 @@
 import { useCallback, useState, useEffect } from "react"
 import { Button } from "./ui/button"
-import { Import, RefreshCw } from "lucide-react"
+import { Download, Import, RefreshCw, Upload } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import { useMPLCompiler } from "@/hooks/useMPLCompiler"
@@ -17,6 +17,7 @@ export default function MPLInput({
   modelLoaded: boolean
 }) {
   const mplCompiler = useMPLCompiler()
+  const [vmdUrl, setVmdUrl] = useState<string | null>(null)
 
   const [statement, setStatement] = useState(`@pose welcome {
     upper_body bend forward 12;
@@ -121,20 +122,20 @@ main {
     [setStatement, loadVPD, mplCompiler]
   )
 
-
-
   useEffect(() => {
     if (modelLoaded && mplCompiler) {
       try {
         const vmdBytes = mplCompiler.compile(statement)
         if (vmdBytes.length === 0) {
           loadVMD("")
+          setVmdUrl(null)
           return
         }
         // Create a blob from the raw VMD bytes
-        const vmdBlob = new Blob([vmdBytes], { type: 'application/octet-stream' })
+        const vmdBlob = new Blob([vmdBytes], { type: "application/octet-stream" })
         const vmdUrl = URL.createObjectURL(vmdBlob)
         loadVMD(vmdUrl)
+        setVmdUrl(vmdUrl)
 
         // Clean up the URL when component unmounts or statement changes
         return () => {
@@ -149,9 +150,7 @@ main {
   return (
     <div className="flex flex-col gap-1 w-full h-full">
       <div className="flex flex-row gap-2 px-6 pt-2 z-100 items-center justify-between">
-        <h3 className="scroll-m-20 text-xl font-semibold tracking-tight hidden md:block">
-          MMD Pose Language (MPL) Editor
-        </h3>
+        <h3 className="scroll-m-20 text-xl font-semibold tracking-tight hidden md:block">MMD Pose Language Editor</h3>
         <h3 className="scroll-m-20 text-lg font-semibold tracking-tight md:hidden">MPL Editor</h3>
         <div className="flex flex-row gap-2">
           <div className="relative hidden md:block">
@@ -169,10 +168,26 @@ main {
               className="flex"
               size="sm"
             >
-              <Import className="size-4" />
-              <span className="text-xs">Import VPD</span>
+              <Upload className="size-4" />
+              <span className="text-xs">Upload VPD</span>
             </Button>
           </div>
+
+          <Button
+            onClick={() => {
+              if (vmdUrl) {
+                const a = document.createElement("a")
+                a.href = vmdUrl
+                a.download = "animation.vmd"
+                a.click()
+              }
+            }}
+            className="flex"
+            size="sm"
+          >
+            <Download className="size-4" />
+            <span className="text-xs">Download VMD</span>
+          </Button>
 
           <Button
             onClick={() => {
@@ -198,10 +213,7 @@ main {
       </div>
 
       <div className="flex-1 py-2 px-6">
-        <CodeEditor
-          value={statement}
-          onChange={setStatement}
-        />
+        <CodeEditor value={statement} onChange={setStatement} />
       </div>
     </div>
   )
