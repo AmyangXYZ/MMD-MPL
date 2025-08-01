@@ -101,6 +101,8 @@ impl VMDWriter {
         Self {
             key_frames,
             ik_disabled_bones: vec![
+                "右足IK親".to_string(),
+                "左足IK親".to_string(),
                 "右足ＩＫ".to_string(),
                 "左足ＩＫ".to_string(),
                 "右つま先ＩＫ".to_string(),
