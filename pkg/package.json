@@ -1,0 +1,21 @@
+{
+  "name": "mmd-mpl",
+  "type": "module",
+  "description": "MPL is a rule-based Domain-Specific Language for creating MMD poses and animations using natural semantic syntax",
+  "version": "0.2.4",
+  "license": "GPL-3.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AmyangXYZ/MMD-MPL"
+  },
+  "files": [
+    "mmd_mpl_bg.wasm",
+    "mmd_mpl.js",
+    "mmd_mpl.d.ts"
+  ],
+  "main": "mmd_mpl.js",
+  "types": "mmd_mpl.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}

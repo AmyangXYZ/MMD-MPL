@@ -2,6 +2,8 @@
 
 MPL is a rule-based Domain-Specific Language for controlling MMD bones and creating animations using natural language commands.
 
+![](./screenshots/1.png)
+
 ## Why MPL?
 
 Instead of manually calculating quaternions and dealing with bone direction complexities, MPL provides intuitive pose descriptions and structured animation creation.
@@ -49,10 +51,10 @@ main {
 
 ## Bone Command Format
 
-**Format:** `bone action direction degrees`
+**Format:** `bone action direction amount`
 
-**Actions:** `bend`, `turn`, `sway`  
-**Directions:** `forward`, `backward`, `left`, `right`
+**Actions:** `bend`, `turn`, `sway`, `move`  
+**Directions:** `forward`, `backward`, `left`, `right`, `up`, `down`
 
 ## Built-in Safety
 
