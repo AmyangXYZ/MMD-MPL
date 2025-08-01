@@ -5,6 +5,7 @@ edition = "2021"
 license = "GPL-3.0"
 description = "MPL is a rule-based Domain-Specific Language for creating MMD poses and animations using natural semantic syntax"
 repository = "https://github.com/AmyangXYZ/MMD-MPL"
+exclude = ["web/"]
 
 [dependencies]
 wasm-bindgen = "0.2.100"
