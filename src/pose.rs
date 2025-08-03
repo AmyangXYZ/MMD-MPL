@@ -468,6 +468,41 @@ impl MPLPose {
                 frame.rotation(),
             ));
         }
-        Self::new(name.to_string(), statements.into_iter().collect())
+
+        // Group statements by bone
+        let mut bone_groups: std::collections::HashMap<String, Vec<MPLPoseStatement>> =
+            std::collections::HashMap::new();
+        for stmt in statements {
+            bone_groups
+                .entry(stmt.bone.clone())
+                .or_insert_with(Vec::new)
+                .push(stmt);
+        }
+
+        // Sort statements within each bone by action type (bend, turn, sway, move)
+        let action_order = ["bend", "turn", "sway", "move"];
+        for statements in bone_groups.values_mut() {
+            statements.sort_by(|a, b| {
+                let a_idx = action_order
+                    .iter()
+                    .position(|&x| x == a.action)
+                    .unwrap_or(999);
+                let b_idx = action_order
+                    .iter()
+                    .position(|&x| x == b.action)
+                    .unwrap_or(999);
+                a_idx.cmp(&b_idx)
+            });
+        }
+
+        // Sort bones according to BONES array order and flatten
+        let mut sorted_statements = Vec::new();
+        for bone in crate::bone::BONES {
+            if let Some(bone_statements) = bone_groups.get(*bone) {
+                sorted_statements.extend(bone_statements.clone());
+            }
+        }
+
+        Self::new(name.to_string(), sorted_statements)
     }
 }

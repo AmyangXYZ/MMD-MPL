@@ -1,6 +1,16 @@
 /* tslint:disable */
 /* eslint-disable */
 export const memory: WebAssembly.Memory;
+export const __wbg_wasmmplcompiler_free: (a: number, b: number) => void;
+export const wasmmplcompiler_new: () => number;
+export const wasmmplcompiler_compile: (a: number, b: number, c: number, d: number) => void;
+export const wasmmplcompiler_reverse_compile: (a: number, b: number, c: number, d: number, e: number, f: number) => void;
+export const wasmmplcompiler_get_all_bones: (a: number, b: number) => void;
+export const wasmmplcompiler_get_bone_actions: (a: number, b: number, c: number, d: number) => void;
+export const wasmmplcompiler_get_bone_directions: (a: number, b: number, c: number, d: number, e: number, f: number) => void;
+export const wasmmplcompiler_get_bone_degree_limit: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => number;
+export const wasmmplcompiler_get_bone_japanese_name: (a: number, b: number, c: number, d: number) => void;
+export const wasmmplcompiler_get_bone_english_name: (a: number, b: number, c: number, d: number) => void;
 export const __wbg_quaternion_free: (a: number, b: number) => void;
 export const __wbg_get_quaternion_x: (a: number) => number;
 export const __wbg_set_quaternion_x: (a: number, b: number) => void;
@@ -35,17 +45,7 @@ export const mplboneframe_name_en: (a: number, b: number) => void;
 export const mplboneframe_name_jp: (a: number, b: number) => void;
 export const mplboneframe_position: (a: number) => number;
 export const mplboneframe_rotation: (a: number) => number;
-export const __wbg_wasmmplcompiler_free: (a: number, b: number) => void;
-export const wasmmplcompiler_new: () => number;
-export const wasmmplcompiler_compile: (a: number, b: number, c: number, d: number) => void;
-export const wasmmplcompiler_reverse_compile: (a: number, b: number, c: number, d: number, e: number, f: number) => void;
-export const wasmmplcompiler_get_all_bones: (a: number, b: number) => void;
-export const wasmmplcompiler_get_bone_actions: (a: number, b: number, c: number, d: number) => void;
-export const wasmmplcompiler_get_bone_directions: (a: number, b: number, c: number, d: number, e: number, f: number) => void;
-export const wasmmplcompiler_get_bone_degree_limit: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => number;
-export const wasmmplcompiler_get_bone_japanese_name: (a: number, b: number, c: number, d: number) => void;
-export const wasmmplcompiler_get_bone_english_name: (a: number, b: number, c: number, d: number) => void;
+export const __wbindgen_add_to_stack_pointer: (a: number) => number;
 export const __wbindgen_malloc: (a: number, b: number) => number;
 export const __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
-export const __wbindgen_add_to_stack_pointer: (a: number) => number;
 export const __wbindgen_free: (a: number, b: number, c: number) => void;
