@@ -10,9 +10,9 @@ fn create_ease_in_out_interpolation() -> [u8; 64] {
     let mut interpolation = [0u8; 64];
 
     // Ease-in-out control points - using (20, 107) for pronounced curve
-    let x1 = 42u8;
+    let x1 = 64u8;
     let y1 = 0u8;
-    let x2 = 85u8;
+    let x2 = 63u8;
     let y2 = 127u8;
 
     // Block 1: X_x1,Y_x1,phy1,phy2, X_y1,Y_y1,Z_y1,R_y1, X_x2,Y_x2,Z_x2,R_x2, X_y2,Y_y2,Z_y2,R_y2
