@@ -383,7 +383,11 @@ impl MPLPoseStatement {
         // Format statements to match TypeScript output format
         let s = statements
             .into_iter()
-            .filter(|stmt| stmt.amount.abs() > 0.01)
+            .map(|stmt| MPLPoseStatement {
+                amount: (stmt.amount / 5.0).round() * 5.0,
+                ..stmt
+            })
+            .filter(|stmt| stmt.amount.abs() > 0.0)
             .collect();
         return s;
     }

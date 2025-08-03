@@ -81,6 +81,12 @@ export interface InitOutput {
   readonly __wbg_get_vector3_x: (a: number) => number;
   readonly __wbg_get_vector3_y: (a: number) => number;
   readonly __wbg_get_vector3_z: (a: number) => number;
+  readonly __wbg_mplboneframe_free: (a: number, b: number) => void;
+  readonly mplboneframe_new: (a: number, b: number, c: number, d: number, e: number, f: number) => number;
+  readonly mplboneframe_name_en: (a: number, b: number) => void;
+  readonly mplboneframe_name_jp: (a: number, b: number) => void;
+  readonly mplboneframe_position: (a: number) => number;
+  readonly mplboneframe_rotation: (a: number) => number;
   readonly __wbg_wasmmplcompiler_free: (a: number, b: number) => void;
   readonly wasmmplcompiler_new: () => number;
   readonly wasmmplcompiler_compile: (a: number, b: number, c: number, d: number) => void;
@@ -91,15 +97,9 @@ export interface InitOutput {
   readonly wasmmplcompiler_get_bone_degree_limit: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => number;
   readonly wasmmplcompiler_get_bone_japanese_name: (a: number, b: number, c: number, d: number) => void;
   readonly wasmmplcompiler_get_bone_english_name: (a: number, b: number, c: number, d: number) => void;
-  readonly __wbg_mplboneframe_free: (a: number, b: number) => void;
-  readonly mplboneframe_new: (a: number, b: number, c: number, d: number, e: number, f: number) => number;
-  readonly mplboneframe_name_en: (a: number, b: number) => void;
-  readonly mplboneframe_name_jp: (a: number, b: number) => void;
-  readonly mplboneframe_position: (a: number) => number;
-  readonly mplboneframe_rotation: (a: number) => number;
-  readonly __wbindgen_add_to_stack_pointer: (a: number) => number;
   readonly __wbindgen_malloc: (a: number, b: number) => number;
   readonly __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
+  readonly __wbindgen_add_to_stack_pointer: (a: number) => number;
   readonly __wbindgen_free: (a: number, b: number, c: number) => void;
 }
 
