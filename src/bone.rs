@@ -209,7 +209,7 @@ impl BoneActionDatabase {
             "index_0_l" => "左人指１",
             "index_1_l" => "左人指２",
             "index_2_l" => "左人指３",
-            "middle_0_l" => "左中指０",
+            "middle_0_l" => "左中指１",
             "middle_1_l" => "左中指２",
             "middle_2_l" => "左中指３",
             "ring_0_l" => "左薬指１",
@@ -634,16 +634,6 @@ impl BoneActionDatabase {
                 "bend" => {
                     "forward" => [0.0, 0.0, -1.0], 90.0,
                     "backward" => [0.0, 0.0, 1.0], 15.0,
-                },
-            },
-            "middle_0_l" => {
-                "bend" => {
-                    "forward" => [0.0, 0.0, -1.0], 90.0,
-                    "backward" => [0.0, 0.0, 1.0], 15.0,
-                },
-                "sway" => {
-                    "left" => [0.0, 0.0, 1.0], 45.0,
-                    "right" => [0.0, 0.0, -1.0], 45.0,
                 },
             },
             "middle_0_l" => {
