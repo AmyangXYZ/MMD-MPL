@@ -19,88 +19,11 @@ export default function MPLInput({
   const mplCompiler = useMPLCompiler()
   const [vmdUrl, setVmdUrl] = useState<string | null>(null)
 
-  const [statement, setStatement] = useState(`@pose welcome {
-    upper_body bend forward 12;
-    upper_body sway left 9;
-    shoulder_r bend backward 13;
-    shoulder_r sway left 4;
-    ankle_r bend forward 60;
-    ankle_r turn left 4;
-    ankle_r sway left 5;
-    knee_l bend backward 34;
-    ankle_l bend forward 43;
-    ankle_l turn right 2;
-    ankle_l sway right 1;
-    upper_body2 bend backward 9;
-    upper_body2 turn left 1;
-    upper_body2 sway right 14;
-    neck bend forward 9;
-    neck turn right 7;
-    neck sway right 13;
-    arm_twist_r turn right 5;
-    elbow_r bend forward 135;
-    wrist_twist_r turn right 27;
-    wrist_r bend backward 30;
-    thumb_0_r bend backward 3;
-    thumb_0_r sway left 6;
-    pinky_0_r bend backward 15;
-    pinky_0_r sway right 3;
-    pinky_1_r bend forward 18;
-    ring_0_r bend backward 13;
-    ring_0_r sway right 1;
-    ring_1_r bend forward 18;
-    middle_1_r bend forward 23;
-    index_0_r bend forward 17;
-    index_0_r sway right 3;
-    index_1_r bend forward 21;
-    shoulder_l bend backward 14;
-    shoulder_l sway left 2;
-    arm_l bend forward 6;
-    arm_twist_l turn left 18;
-    elbow_l bend forward 135;
-    wrist_twist_l turn left 16;
-    wrist_l sway left 12;
-    thumb_2_l bend forward 20;
-    pinky_1_l bend forward 32;
-    ring_1_l bend forward 32;
-    middle_1_l bend forward 42;
-    index_1_l bend forward 54;
-    leg_r bend forward 19;
-    leg_r turn right 8;
-    leg_r sway left 1;
-    leg_l bend forward 32;
-    leg_l turn left 3;
-    leg_l sway left 1;
-}
-
-@pose kick_left {
-    leg_l bend forward 30;
-    knee_l bend backward 0;
-    leg_r bend backward 20;
-    knee_r bend backward 15;
-}
-
-@pose kick_right {
-    leg_r bend forward 30;
-    knee_r bend backward 0;
-    leg_l bend backward 20;
-    knee_l bend backward 15;
-}
-
-@animation walk {
-    0: kick_left;
-    0.3: kick_right;
-    0.6: kick_left;
-    0.9: kick_right;
-}
-    
-@animation love {
-    1.2: welcome;
-}
-    
+  const [statement, setStatement] = useState(`@pose a {
+    arm_r turn left 60;
+}  
 main {
-    walk;
-    love;
+    a;
 }`)
 
   const handleFileUpload = useCallback(
