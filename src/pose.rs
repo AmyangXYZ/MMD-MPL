@@ -417,6 +417,18 @@ impl MPLPose {
         )
     }
 
+    pub fn to_block(&self) -> String {
+        format!(
+            "@pose {} {{\n{}\n}}\n",
+            self.name,
+            self.statements
+                .iter()
+                .map(|s| format!("    {}", s.to_string()))
+                .collect::<Vec<String>>()
+                .join("\n")
+        )
+    }
+
     pub fn to_bone_frames(&self) -> Vec<MPLBoneFrame> {
         let mut frames = vec![];
 

@@ -235,9 +235,9 @@ impl MPLCompiler {
             return Err("No pose declaration found".to_string());
         }
 
-        if statements.is_empty() {
-            return Err("Pose must contain at least one statement".to_string());
-        }
+        // if statements.is_empty() {
+        //     return Err("Pose must contain at least one statement".to_string());
+        // }
 
         Ok(MPLPose::new(pose_name, statements))
     }

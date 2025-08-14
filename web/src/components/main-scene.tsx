@@ -59,6 +59,23 @@ export default function MainScene() {
 
   const [modelLoaded, setModelLoaded] = useState(false)
 
+  const loadVMD = useCallback(
+    async (vmdUrl: string) => {
+      if (!vmdLoaderRef.current || !modelRef.current || !mplCompiler) return null
+      if (vmdUrl === "") {
+        modelRef.current.removeAnimation(0)
+        return
+      }
+      const vmd = await vmdLoaderRef.current.loadAsync("vmd_animation", vmdUrl)
+      console.log(vmd)
+      modelRef.current.addAnimation(vmd)
+      modelRef.current.setAnimation("vmd_animation")
+      mmdRuntimeRef.current!.seekAnimation(0, true)
+      mmdRuntimeRef.current!.playAnimation()
+    },
+    [vmdLoaderRef, modelRef, mplCompiler]
+  )
+
   const loadModel = useCallback(async (): Promise<void> => {
     if (!sceneRef.current || !mmdWasmInstanceRef.current || !mmdRuntimeRef.current || !mplCompiler) return
     if (modelRef.current) {
@@ -82,25 +99,12 @@ export default function MainScene() {
       })
 
       result.addAllToScene()
+      loadVMD("/Stand.vmd")
       setModelLoaded(true)
     })
-  }, [mplCompiler])
+  }, [mplCompiler, loadVMD])
 
-  const loadVMD = useCallback(
-    async (vmdUrl: string) => {
-      if (!vmdLoaderRef.current || !modelRef.current || !mplCompiler) return null
-      if (vmdUrl === "") {
-        modelRef.current.removeAnimation(0)
-        return
-      }
-      const vmd = await vmdLoaderRef.current.loadAsync("vmd_animation", vmdUrl)
-      modelRef.current.addAnimation(vmd)
-      modelRef.current.setAnimation("vmd_animation")
-      mmdRuntimeRef.current!.seekAnimation(0, true)
-      mmdRuntimeRef.current!.playAnimation()
-    },
-    [vmdLoaderRef, modelRef, mplCompiler]
-  )
+
 
   const loadVPD = useCallback(
     async (vpdUrl: string): Promise<MPLBoneFrame[] | null> => {

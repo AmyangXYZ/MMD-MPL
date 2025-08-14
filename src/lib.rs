@@ -10,7 +10,7 @@ pub use bone::*;
 pub use compiler::MPLCompiler;
 pub use mpl::MPLBoneFrame;
 pub use pose::MPLPose;
-pub use vmd::VMDWriter;
+pub use vmd::{VMDReader, VMDWriter};
 
 use wasm_bindgen::prelude::*;
 
@@ -32,7 +32,7 @@ impl WasmMPLCompiler {
     pub fn compile(&self, script: &str) -> Result<Vec<u8>, String> {
         let key_frames = self.compiler.compile(script)?;
         let vmd = VMDWriter::new(key_frames);
-        match vmd.create_vmd() {
+        match vmd.write() {
             Ok(vmd) => Ok(vmd),
             Err(e) => Err(e.to_string()),
         }

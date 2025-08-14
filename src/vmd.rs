@@ -3,8 +3,11 @@ use encoding_rs::SHIFT_JIS;
 use crate::{
     mpl::MPLKeyFrame,
     utils::{Quaternion, Vector3},
+    with_bone_db,
 };
-use std::io::{Cursor, Write};
+use std::io::{Cursor, Read, Write};
+
+const FRAME_RATE: f32 = 30.0;
 
 fn create_ease_in_out_interpolation() -> [u8; 64] {
     let mut interpolation = [0u8; 64];
@@ -211,8 +214,8 @@ impl VMDWriter {
         Ok(())
     }
 
-    /// Create VMD file data from recorded frames
-    pub fn create_vmd(&self) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
+    /// Write VMD file data from recorded frames to bytes
+    pub fn write(&self) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
         if self.key_frames.is_empty() {
             return Ok(Vec::new());
         }
@@ -275,7 +278,7 @@ impl VMDWriter {
 
         // Write bone frames
         for frame in &self.key_frames {
-            let frame_number = (frame.time * 60.0) as u32; // Convert seconds to frame at 60 fps
+            let frame_number = (frame.time * FRAME_RATE) as u32;
             for bone_frame in &frame.bone_frames {
                 Self::write_bone_frame(
                     &mut cursor,
@@ -292,7 +295,7 @@ impl VMDWriter {
 
         // Write morph frames
         for frame in &self.key_frames {
-            let frame_number = (frame.time * 60.0) as u32; // Convert seconds to frame at 60 fps
+            let frame_number = (frame.time * FRAME_RATE) as u32;
             for morph_frame in &frame.morph_frames {
                 Self::write_morph_frame(
                     &mut cursor,
@@ -323,5 +326,160 @@ impl VMDWriter {
         }
 
         Ok(cursor.into_inner())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct VMDReader;
+
+impl VMDReader {
+    pub fn new() -> Self {
+        Self
+    }
+
+    /// Read a bone frame from the buffer
+    fn read_bone_frame(
+        cursor: &mut Cursor<Vec<u8>>,
+    ) -> Result<(String, u32, Vector3, Quaternion), Box<dyn std::error::Error>> {
+        // Read bone name (15 bytes)
+        let mut name_buffer = [0u8; 15];
+        cursor.read_exact(&mut name_buffer)?;
+
+        // Decode Shift-JIS bone name
+        let name = SHIFT_JIS.decode(&name_buffer).0;
+        let bone_name = name.trim_matches('\0').to_string();
+
+        // Read frame number (4 bytes, little endian)
+        let mut frame_buffer = [0u8; 4];
+        cursor.read_exact(&mut frame_buffer)?;
+        let frame = u32::from_le_bytes(frame_buffer);
+
+        // Read position (12 bytes: 3 x f32, little endian)
+        let mut pos_x_buffer = [0u8; 4];
+        let mut pos_y_buffer = [0u8; 4];
+        let mut pos_z_buffer = [0u8; 4];
+        cursor.read_exact(&mut pos_x_buffer)?;
+        cursor.read_exact(&mut pos_y_buffer)?;
+        cursor.read_exact(&mut pos_z_buffer)?;
+
+        let pos_x = f32::from_le_bytes(pos_x_buffer);
+        let pos_y = f32::from_le_bytes(pos_y_buffer);
+        let pos_z = f32::from_le_bytes(pos_z_buffer);
+        let position = Vector3::new(pos_x, pos_y, pos_z);
+
+        // Read rotation quaternion (16 bytes: 4 x f32, little endian)
+        let mut rot_x_buffer = [0u8; 4];
+        let mut rot_y_buffer = [0u8; 4];
+        let mut rot_z_buffer = [0u8; 4];
+        let mut rot_w_buffer = [0u8; 4];
+        cursor.read_exact(&mut rot_x_buffer)?;
+        cursor.read_exact(&mut rot_y_buffer)?;
+        cursor.read_exact(&mut rot_z_buffer)?;
+        cursor.read_exact(&mut rot_w_buffer)?;
+
+        let rot_x = f32::from_le_bytes(rot_x_buffer);
+        let rot_y = f32::from_le_bytes(rot_y_buffer);
+        let rot_z = f32::from_le_bytes(rot_z_buffer);
+        let rot_w = f32::from_le_bytes(rot_w_buffer);
+        let rotation = Quaternion::new(rot_x, rot_y, rot_z, rot_w);
+
+        // Skip interpolation parameters (64 bytes)
+        let mut interpolation_buffer = [0u8; 64];
+        cursor.read_exact(&mut interpolation_buffer)?;
+
+        Ok((bone_name, frame, position, rotation))
+    }
+
+    /// Read VMD file and extract bone keyframes
+    pub fn read(&self, vmd_data: &[u8]) -> Result<Vec<MPLKeyFrame>, Box<dyn std::error::Error>> {
+        let mut cursor = Cursor::new(vmd_data.to_vec());
+
+        // Read header (30 bytes)
+        let mut header_buffer = [0u8; 30];
+        cursor.read_exact(&mut header_buffer)?;
+        let header = String::from_utf8_lossy(&header_buffer);
+        if !header.starts_with("Vocaloid Motion Data") {
+            return Err("Invalid VMD file header".into());
+        }
+
+        // Skip model name (20 bytes)
+        let mut model_name_buffer = [0u8; 20];
+        cursor.read_exact(&mut model_name_buffer)?;
+
+        // Read bone frame count
+        let mut bone_count_buffer = [0u8; 4];
+        cursor.read_exact(&mut bone_count_buffer)?;
+        let bone_frame_count = u32::from_le_bytes(bone_count_buffer);
+
+        // Read all bone frames
+        let mut all_bone_frames: Vec<(f32, crate::mpl::MPLBoneFrame)> = Vec::new();
+
+        for _ in 0..bone_frame_count {
+            let (bone_name_jp, frame_number, position, rotation) =
+                Self::read_bone_frame(&mut cursor)?;
+
+            // Convert frame number to time
+            let time = frame_number as f32 / FRAME_RATE;
+
+            // Convert Japanese bone name to English
+            let bone_name_en = self.convert_bone_name_jp_to_en(&bone_name_jp);
+
+            let bone_frame =
+                crate::mpl::MPLBoneFrame::new(bone_name_en, bone_name_jp, position, rotation);
+
+            all_bone_frames.push((time, bone_frame));
+        }
+
+        // Group by time and convert to MPLKeyFrame format
+        let mut key_frames = Vec::new();
+        all_bone_frames.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
+
+        let mut current_time = -1.0;
+        let mut current_bone_frames = Vec::new();
+
+        for (time, bone_frame) in all_bone_frames {
+            if (time - current_time).abs() > 0.001 {
+                // New time frame
+                if !current_bone_frames.is_empty() {
+                    key_frames.push(MPLKeyFrame::new(current_time, current_bone_frames, vec![]));
+                }
+                current_time = time;
+                current_bone_frames = vec![bone_frame];
+            } else {
+                // Same time frame
+                current_bone_frames.push(bone_frame);
+            }
+        }
+
+        // Add the last frame
+        if !current_bone_frames.is_empty() {
+            key_frames.push(MPLKeyFrame::new(current_time, current_bone_frames, vec![]));
+        }
+
+        Ok(key_frames)
+    }
+
+    /// Convert Japanese bone name to English using the bone database
+    fn convert_bone_name_jp_to_en(&self, jp_name: &str) -> String {
+        let clean_name = jp_name.trim_matches('\0');
+
+        // Try to find the bone in the database
+        if let Some(english_name) = with_bone_db(|db| {
+            // Search through all bones to find one with matching Japanese name
+            for bone in db.bones() {
+                if let Some(jp_bone_name) = db.japanese_name(bone) {
+                    if jp_bone_name == clean_name {
+                        return Some(bone.to_string());
+                    }
+                }
+            }
+            None
+        }) {
+            return english_name;
+        }
+
+        println!("Bone not found in database: {}", clean_name);
+        // Fallback to original name if not found in database
+        clean_name.to_string()
     }
 }
