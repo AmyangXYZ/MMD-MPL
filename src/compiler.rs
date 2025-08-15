@@ -200,19 +200,43 @@ impl MPLCompiler {
         let reader = VMDReader::new();
         let read_key_frames = reader.read(vmd_data).map_err(|e| e.to_string())?;
 
-        let mut poses = Vec::new();
+        let mut pose_map: std::collections::HashMap<String, MPLPose> =
+            std::collections::HashMap::new(); // statements_content -> pose
         let mut animation_statements = Vec::new();
+        let mut pose_counter = 0;
+        let mut total_poses_processed = 0;
+        let mut empty_poses_skipped = 0;
 
         for (i, keyframe) in read_key_frames.iter().enumerate() {
-            let pose_name = format!("pose_{}", i);
-            let pose = MPLPose::from_bone_frames(&pose_name, keyframe.bone_frames.clone());
-            poses.push(pose);
+            let pose =
+                MPLPose::from_bone_frames(&format!("pose_{}", i), keyframe.bone_frames.clone());
+
+            total_poses_processed += 1;
+
+            // Skip empty poses
+            if pose.statements.is_empty() {
+                empty_poses_skipped += 1;
+                continue;
+            }
+
+            let statements_content = pose.to_string(); // Just the statements, no pose name
+            let pose_name = if let Some(existing_pose) = pose_map.get(&statements_content) {
+                existing_pose.name.clone()
+            } else {
+                pose_counter += 1;
+                let new_pose_name = format!("pose_{}", pose_counter - 1);
+                let new_pose = MPLPose::new(new_pose_name.clone(), pose.statements.clone());
+                pose_map.insert(statements_content, new_pose);
+                new_pose_name
+            };
 
             // Create animation statement
             animation_statements.push(format!("    {:.2}: {};\n", keyframe.time, pose_name));
         }
 
-        for pose in poses {
+        // Add unique poses to script using to_block()
+        let unique_poses_count = pose_map.len();
+        for (_, pose) in pose_map {
             script.push_str(&pose.to_block());
             script.push_str("\n");
         }
@@ -226,6 +250,26 @@ impl MPLCompiler {
         script.push_str("main {\n");
         script.push_str("    extracted_animation;\n");
         script.push_str("}\n");
+
+        println!("=== VMD to MPL Conversion Stats ===");
+        println!("Total keyframes processed: {}", total_poses_processed);
+        println!("Empty poses skipped: {}", empty_poses_skipped);
+        println!(
+            "Non-empty poses before deduplication: {}",
+            total_poses_processed - empty_poses_skipped
+        );
+        println!("Unique poses after deduplication: {}", unique_poses_count);
+        println!(
+            "Deduplication reduction: {:.1}%",
+            if total_poses_processed - empty_poses_skipped > 0 {
+                (1.0 - unique_poses_count as f32
+                    / (total_poses_processed - empty_poses_skipped) as f32)
+                    * 100.0
+            } else {
+                0.0
+            }
+        );
+
         Ok(script)
     }
 
@@ -234,7 +278,7 @@ impl MPLCompiler {
         match reader.read(vpd_data) {
             Ok(bone_frames) => {
                 let pose = MPLPose::from_bone_frames(&"pose_1", bone_frames.clone());
-                Ok(pose.to_string())
+                Ok(pose.to_script())
             }
             Err(e) => Err(e.to_string()),
         }

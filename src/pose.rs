@@ -430,6 +430,17 @@ impl MPLPose {
 
     pub fn to_string(&self) -> String {
         format!(
+            "{{\n{}\n}}",
+            self.statements
+                .iter()
+                .map(|s| format!("    {}", s.to_string()))
+                .collect::<Vec<String>>()
+                .join("\n")
+        )
+    }
+
+    pub fn to_script(&self) -> String {
+        format!(
             "@pose {} {{\n{}\n}}\n\nmain {{\n    {};\n}}",
             self.name,
             self.statements
