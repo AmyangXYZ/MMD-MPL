@@ -149,6 +149,30 @@ impl MPLPoseStatement {
             return vec![];
         }
 
+        // Special case: if target quaternion is identity (0,0,0,1),
+        // return one direction per action with 0 degrees to ensure proper interpolation
+        if target_quat.x == 0.0
+            && target_quat.y == 0.0
+            && target_quat.z == 0.0
+            && target_quat.w == 1.0
+        {
+            let mut statements = Vec::new();
+            let mut seen_actions = std::collections::HashSet::new();
+
+            for (action, direction, _) in &possible_actions {
+                if !seen_actions.contains(action) {
+                    statements.push(Self {
+                        bone: bone.clone(),
+                        action: action.clone(),
+                        direction: direction.clone(),
+                        amount: 0.0,
+                    });
+                    seen_actions.insert(action.clone());
+                }
+            }
+            return statements;
+        }
+
         // Ensure deterministic order independent of HashMap iteration
         let mut possible_actions = possible_actions;
         possible_actions.sort_by(|a, b| {
@@ -387,7 +411,7 @@ impl MPLPoseStatement {
                 amount: (stmt.amount / 5.0).round() * 5.0,
                 ..stmt
             })
-            .filter(|stmt| stmt.amount.abs() > 0.0)
+            .filter(|stmt| stmt.amount.abs() >= 0.0)
             .collect();
         return s;
     }

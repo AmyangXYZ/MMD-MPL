@@ -478,7 +478,7 @@ impl VMDReader {
             return english_name;
         }
 
-        println!("Bone not found in database: {}", clean_name);
+        // println!("Bone not found in database: {}", clean_name);
         // Fallback to original name if not found in database
         clean_name.to_string()
     }
