@@ -41,7 +41,7 @@ main {
 
     // Read VMD data from file
     println!("=== VMD Reading Test ===");
-    let vmd_data = std::fs::read("vmd/Miku.vmd").unwrap();
+    let vmd_data = std::fs::read("vmd/Stand.vmd").unwrap();
 
     let vmd_script = compiler.from_vmd(&vmd_data).unwrap();
     println!("{}", vmd_script);
