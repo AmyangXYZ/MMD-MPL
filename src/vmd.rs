@@ -345,9 +345,18 @@ impl VMDReader {
         let mut name_buffer = [0u8; 15];
         cursor.read_exact(&mut name_buffer)?;
 
+        // Find the actual length of the bone name (stop at first null byte)
+        let name_length = name_buffer.iter().position(|&b| b == 0).unwrap_or(15);
+        let name_slice = &name_buffer[..name_length];
+
         // Decode Shift-JIS bone name
-        let name = SHIFT_JIS.decode(&name_buffer).0;
-        let bone_name = name.trim_matches('\0').to_string();
+        let (decoded, _, had_errors) = SHIFT_JIS.decode(name_slice);
+        let bone_name = if had_errors {
+            // Fallback to lossy decoding if there were encoding errors
+            String::from_utf8_lossy(name_slice).to_string()
+        } else {
+            decoded.to_string()
+        };
 
         // Read frame number (4 bytes, little endian)
         let mut frame_buffer = [0u8; 4];
@@ -461,11 +470,10 @@ impl VMDReader {
 
     /// Convert Japanese bone name to English using the bone database
     fn convert_bone_name_jp_to_en(&self, jp_name: &str) -> String {
-        let clean_name = jp_name.trim_matches('\0');
+        let clean_name = jp_name.trim_matches('\0').trim();
 
         // Try to find the bone in the database
         if let Some(english_name) = with_bone_db(|db| {
-            // Search through all bones to find one with matching Japanese name
             for bone in db.bones() {
                 if let Some(jp_bone_name) = db.japanese_name(bone) {
                     if jp_bone_name == clean_name {
@@ -478,8 +486,11 @@ impl VMDReader {
             return english_name;
         }
 
-        // println!("Bone not found in database: {}", clean_name);
-        // Fallback to original name if not found in database
+        // Only print warning for non-empty names to reduce noise
+        // if !clean_name.is_empty() {
+        //     println!("Bone not found in database: {}", clean_name);
+        // }
+
         clean_name.to_string()
     }
 }

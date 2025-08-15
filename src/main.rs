@@ -1,4 +1,4 @@
-use mmd_mpl::{MPLCompiler, MPLPose, VMDReader, VMDWriter};
+use mmd_mpl::{MPLCompiler, VMDWriter};
 
 fn main() {
     let compiler = MPLCompiler::new();
@@ -37,46 +37,18 @@ main {
 
         std::fs::write("vmd/output.vmd", &vmd_data).unwrap();
         println!("VMD saved to output.vmd");
-
-        // Read VMD data from file
-        println!("Reading VMD data from file...");
-        let file_vmd_data = std::fs::read("vmd/Stand.vmd").unwrap();
-        println!("Read {} bytes from file", file_vmd_data.len());
-
-        // Test VMD reading from file
-        let reader = VMDReader::new();
-        let read_key_frames = reader.read(&file_vmd_data).unwrap();
-        println!("Read {} keyframes from VMD file", read_key_frames.len());
-
-        // Demonstrate VMD to MPL animation conversion
-        println!("\n=== VMD to MPL Animation Conversion ===");
-        let mut poses = Vec::new();
-        let mut animation_statements = Vec::new();
-
-        for (i, keyframe) in read_key_frames.iter().enumerate() {
-            let pose_name = format!("pose_{}", i);
-            let pose = MPLPose::from_bone_frames(&pose_name, keyframe.bone_frames.clone());
-            poses.push(pose);
-
-            // Create animation statement
-            animation_statements.push(format!("    {:.2}: {};", keyframe.time, pose_name));
-        }
-
-        // Generate MPL script
-        println!("Generated MPL script:");
-
-        for pose in poses {
-            println!("{}", pose.to_block());
-        }
-
-        println!("@animation extracted_animation {{");
-        for statement in animation_statements {
-            println!("{}", statement);
-        }
-        println!("}}\n");
-
-        println!("main {{");
-        println!("    extracted_animation;");
-        println!("}}");
     }
+
+    // Read VMD data from file
+    println!("=== VMD Reading Test ===");
+    let vmd_data = std::fs::read("vmd/Miku.vmd").unwrap();
+
+    let vmd_script = compiler.from_vmd(&vmd_data).unwrap();
+    println!("{}", vmd_script);
+
+    // // Test VPD reading
+    // println!("=== VPD Reading Test ===");
+    // let vpd_data = std::fs::read("vpd/1.vpd").unwrap();
+    // let vpd_script = compiler.from_vpd(&vpd_data).unwrap();
+    // println!("{}", vpd_script);
 }

@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-use crate::{animation::MPLAnimation, mpl::MPLKeyFrame, pose::MPLPose};
+use crate::{animation::MPLAnimation, mpl::MPLKeyFrame, pose::MPLPose, VMDReader, VPDReader};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MPLScript {
@@ -193,6 +193,51 @@ impl MPLCompiler {
         }
 
         Ok(script.to_key_frames())
+    }
+
+    pub fn from_vmd(&self, vmd_data: &[u8]) -> Result<String, String> {
+        let mut script = String::new();
+        let reader = VMDReader::new();
+        let read_key_frames = reader.read(vmd_data).map_err(|e| e.to_string())?;
+
+        let mut poses = Vec::new();
+        let mut animation_statements = Vec::new();
+
+        for (i, keyframe) in read_key_frames.iter().enumerate() {
+            let pose_name = format!("pose_{}", i);
+            let pose = MPLPose::from_bone_frames(&pose_name, keyframe.bone_frames.clone());
+            poses.push(pose);
+
+            // Create animation statement
+            animation_statements.push(format!("    {:.2}: {};\n", keyframe.time, pose_name));
+        }
+
+        for pose in poses {
+            script.push_str(&pose.to_block());
+            script.push_str("\n");
+        }
+
+        script.push_str("@animation extracted_animation {\n");
+        for statement in animation_statements {
+            script.push_str(&statement);
+        }
+        script.push_str("}\n\n");
+
+        script.push_str("main {\n");
+        script.push_str("    extracted_animation;\n");
+        script.push_str("}\n");
+        Ok(script)
+    }
+
+    pub fn from_vpd(&self, vpd_data: &[u8]) -> Result<String, String> {
+        let reader = VPDReader::new();
+        match reader.read(vpd_data) {
+            Ok(bone_frames) => {
+                let pose = MPLPose::from_bone_frames(&"pose_1", bone_frames.clone());
+                Ok(pose.to_string())
+            }
+            Err(e) => Err(e.to_string()),
+        }
     }
 
     fn parse_pose(&self, text: &str) -> Result<MPLPose, String> {

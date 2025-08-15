@@ -5,12 +5,14 @@ mod mpl;
 mod pose;
 mod utils;
 mod vmd;
+mod vpd;
 
 pub use bone::*;
 pub use compiler::MPLCompiler;
 pub use mpl::MPLBoneFrame;
 pub use pose::MPLPose;
 pub use vmd::{VMDReader, VMDWriter};
+pub use vpd::VPDReader;
 
 use wasm_bindgen::prelude::*;
 
@@ -39,8 +41,12 @@ impl WasmMPLCompiler {
     }
 
     #[wasm_bindgen]
-    pub fn reverse_compile(&self, name: &str, frames: Vec<MPLBoneFrame>) -> String {
-        MPLPose::from_bone_frames(name, frames).to_string()
+    pub fn reverse_compile(&self, source: &str, data: &[u8]) -> Result<String, String> {
+        match source {
+            "vmd" => self.compiler.from_vmd(data),
+            "vpd" => self.compiler.from_vpd(data),
+            _ => Err("Invalid source".into()),
+        }
     }
 
     #[wasm_bindgen]
