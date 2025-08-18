@@ -1,6 +1,6 @@
 # MPL - MMD Pose Language
 
-MPL is a rule-based Domain-Specific Language for controlling MMD bones and creating animations using natural language commands.
+MPL is a domain-specific language that makes 3D pose and animation accessible through code-like syntax and natural language style. It also enables LLMs to understand and generate animations by providing structured, semantic commands instead of complex quaternion calculations.
 
 ![](./screenshots/1.png)
 
@@ -8,11 +8,14 @@ MPL is a rule-based Domain-Specific Language for controlling MMD bones and creat
 
 ## Why MPL?
 
-Instead of manually calculating quaternions and dealing with bone direction complexities, MPL provides intuitive pose descriptions and structured animation creation.
+MPL bridges natural language and 3D animation with:
 
-## Latest Syntax
+- **Semantic commands**: Write poses like code, not math
+- **LLM-friendly syntax**: Predictable structure for AI generation
+- **Built-in safety**: Prevents impossible poses automatically
+- **Composable poses**: Reuse and combine animation components
 
-MPL now supports structured pose definitions and animation sequences:
+## Syntax
 
 ### Pose Definitions
 
@@ -43,7 +46,7 @@ MPL now supports structured pose definitions and animation sequences:
 }
 ```
 
-### Main Execution Block
+### Main Execution
 
 ```
 main {
@@ -51,19 +54,12 @@ main {
 }
 ```
 
-## Bone Command Format
+## Bone Commands
 
 **Format:** `bone action direction amount`
 
 **Actions:** `bend`, `turn`, `sway`, `move`  
 **Directions:** `forward`, `backward`, `left`, `right`, `up`, `down`
-
-## Built-in Safety
-
-- **Anatomical constraints**: Prevents impossible poses (elbows can't bend backward)
-- **Range limits**: Automatically clamps values to realistic human movement ranges
-- **Action validation**: Only allows anatomically correct bone movements
-- **Quaternion mathematics**: Properly combines multiple rotations on the same bone
 
 ## Supported Bones
 
@@ -71,6 +67,14 @@ main {
 **Arms:** `shoulder_l/r`, `arm_l/r`, `arm_twist_l/r`, `elbow_l/r`, `wrist_l/r`, `wrist_twist_l/r`  
 **Legs:** `leg_l/r`, `knee_l/r`, `ankle_l/r`, `toe_l/r`  
 **Fingers:** `thumb_0/1/2_l/r`, `index_0/1/2_l/r`, `middle_0/1/2_l/r`, `ring_0/1/2_l/r`, `pinky_0/1/2_l/r`
+
+## Use Cases
+
+- Convert natural language to animations ("wave hello")
+- Modify existing poses and sequences
+- Generate new poses by combining components
+- Create complex animation timelines
+- Validate and fix pose errors
 
 ## 📄 License
 
