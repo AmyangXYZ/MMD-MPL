@@ -32,12 +32,7 @@ impl WasmMPLCompiler {
 
     #[wasm_bindgen]
     pub fn compile(&self, script: &str) -> Result<Vec<u8>, String> {
-        let key_frames = self.compiler.compile(script)?;
-        let vmd = VMDWriter::new(key_frames);
-        match vmd.write() {
-            Ok(vmd) => Ok(vmd),
-            Err(e) => Err(e.to_string()),
-        }
+        self.compiler.compile(script)
     }
 
     #[wasm_bindgen]

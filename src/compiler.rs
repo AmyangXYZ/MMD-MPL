@@ -1,7 +1,9 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-use crate::{animation::MPLAnimation, mpl::MPLKeyFrame, pose::MPLPose, VMDReader, VPDReader};
+use crate::{
+    animation::MPLAnimation, mpl::MPLKeyFrame, pose::MPLPose, VMDReader, VMDWriter, VPDReader,
+};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MPLScript {
@@ -63,7 +65,7 @@ impl MPLCompiler {
         Self {}
     }
 
-    pub fn compile(&self, text: &str) -> Result<Vec<MPLKeyFrame>, String> {
+    pub fn compile(&self, text: &str) -> Result<Vec<u8>, String> {
         let mut in_block = false;
         let mut brace_count = 0;
         let mut current_block = String::new();
@@ -192,7 +194,12 @@ impl MPLCompiler {
             return Err("Unclosed block".to_string());
         }
 
-        Ok(script.to_key_frames())
+        let key_frames = script.to_key_frames();
+        let vmd_bytes = VMDWriter::new(key_frames);
+        match vmd_bytes.write() {
+            Ok(bytes) => Ok(bytes),
+            Err(e) => Err(e.to_string()),
+        }
     }
 
     pub fn from_vmd(&self, vmd_data: &[u8]) -> Result<String, String> {
@@ -205,7 +212,6 @@ impl MPLCompiler {
         let mut animation_statements = Vec::new();
         let mut pose_counter = 0;
         let mut total_poses_processed = 0;
-        let mut empty_poses_skipped = 0;
 
         for (i, keyframe) in read_key_frames.iter().enumerate() {
             let pose =
@@ -215,7 +221,6 @@ impl MPLCompiler {
 
             // Skip empty poses
             if pose.statements.is_empty() {
-                empty_poses_skipped += 1;
                 continue;
             }
 
@@ -251,24 +256,8 @@ impl MPLCompiler {
         script.push_str("    extracted_animation;\n");
         script.push_str("}\n");
 
-        println!("=== VMD to MPL Conversion Stats ===");
-        println!("Total keyframes processed: {}", total_poses_processed);
-        println!("Empty poses skipped: {}", empty_poses_skipped);
-        println!(
-            "Non-empty poses before deduplication: {}",
-            total_poses_processed - empty_poses_skipped
-        );
-        println!("Unique poses after deduplication: {}", unique_poses_count);
-        println!(
-            "Deduplication reduction: {:.1}%",
-            if total_poses_processed - empty_poses_skipped > 0 {
-                (1.0 - unique_poses_count as f32
-                    / (total_poses_processed - empty_poses_skipped) as f32)
-                    * 100.0
-            } else {
-                0.0
-            }
-        );
+        println!("Read {} keyframes", total_poses_processed);
+        println!("Reversed to {} poses", unique_poses_count);
 
         Ok(script)
     }

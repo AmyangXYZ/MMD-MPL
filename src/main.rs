@@ -1,54 +1,141 @@
-use mmd_mpl::{MPLCompiler, VMDWriter};
+use clap::{Parser, Subcommand};
+use mmd_mpl::MPLCompiler;
+use std::path::Path;
+
+#[derive(Parser)]
+#[command(name = "mpl")]
+#[command(about = "MPL - Rule-based Domain-Specific Language for MMD poses and animations")]
+#[command(version)]
+struct Cli {
+    #[command(subcommand)]
+    command: Commands,
+}
+
+#[derive(Subcommand)]
+enum Commands {
+    /// Compile MPL script to VMD file
+    #[command(short_flag = 'c')]
+    Compile {
+        /// Input MPL file
+        input: String,
+        /// Output VMD file (optional, auto-detected from input)
+        #[arg(short, long)]
+        output: Option<String>,
+    },
+    /// Reverse compile VMD/VPD file to MPL script
+    #[command(short_flag = 'r')]
+    ReverseCompile {
+        /// Input VMD or VPD file
+        input: String,
+        /// Output MPL file (optional, auto-detected from input)
+        #[arg(short, long)]
+        output: Option<String>,
+    },
+}
 
 fn main() {
+    let cli = Cli::parse();
     let compiler = MPLCompiler::new();
-    let key_frames = compiler.compile(
-        "
- @pose kick_left {
-    leg_l bend forward 30;
-    knee_l bend backward 0;
-    leg_r bend backward 20;
-    knee_r bend backward 15;
+
+    match cli.command {
+        Commands::Compile { input, output } => {
+            compile(&compiler, &input, output);
+        }
+        Commands::ReverseCompile { input, output } => {
+            reverse_compile(&compiler, &input, output);
+        }
+    }
 }
 
-@pose kick_right {
-    leg_r bend forward 30;
-    knee_r bend backward 0;
-    leg_l bend backward 20;
-    knee_l bend backward 15;
-}
+fn compile(compiler: &MPLCompiler, input: &str, output: Option<String>) {
+    // Read MPL script from file
+    let mpl_script = match std::fs::read_to_string(input) {
+        Ok(content) => content,
+        Err(e) => {
+            eprintln!("Error reading input file '{}': {}", input, e);
+            std::process::exit(1);
+        }
+    };
 
-@animation walk {
-    0: kick_left;
-    0.3: kick_right;
-    0.6: kick_left;
-    0.9: kick_right;
-}
+    // Compile MPL to key frames
+    let vmd_bytes = match compiler.compile(&mpl_script) {
+        Ok(bytes) => bytes,
+        Err(e) => {
+            eprintln!("Compilation error: {}", e);
+            std::process::exit(1);
+        }
+    };
 
-    
-main {
-    walk;
-}
-",
-    );
-    if let Ok(key_frames) = key_frames {
-        let writer = VMDWriter::new(key_frames);
-        let vmd_data = writer.write().unwrap();
+    // Determine output filename
+    let output_path = output.unwrap_or_else(|| {
+        let input_path = Path::new(input);
+        let stem = input_path.file_stem().unwrap_or_default();
+        format!("{}.vmd", stem.to_string_lossy())
+    });
 
-        std::fs::write("vmd/output.vmd", &vmd_data).unwrap();
-        println!("VMD saved to output.vmd");
+    // Write output file
+    if let Err(e) = std::fs::write(&output_path, &vmd_bytes) {
+        eprintln!("Error writing output file '{}': {}", output_path, e);
+        std::process::exit(1);
     }
 
-    // Read VMD data from file
-    println!("=== VMD Reading Test ===");
-    let vmd_data = std::fs::read("vmd/Stand.vmd").unwrap();
+    println!("Successfully compiled '{}' to '{}'", input, output_path);
+}
 
-    let vmd_script = compiler.from_vmd(&vmd_data).unwrap();
-    println!("{}", vmd_script);
+fn reverse_compile(compiler: &MPLCompiler, input: &str, output: Option<String>) {
+    // Read input file
+    let input_data = match std::fs::read(input) {
+        Ok(data) => data,
+        Err(e) => {
+            eprintln!("Error reading input file '{}': {}", input, e);
+            std::process::exit(1);
+        }
+    };
 
-    // // Test VPD reading
-    // println!("=== VPD Reading Test ===");
-    // let vpd_data = std::fs::read("vpd/1.vpd").unwrap();
-    // let vpd_script = compiler.from_vpd(&vpd_data).unwrap();
-    // println!("{}", vpd_script);
+    // Determine file type and reverse compile using WASM API pattern
+    let input_path = Path::new(input);
+    let extension = input_path
+        .extension()
+        .and_then(|ext| ext.to_str())
+        .unwrap_or("")
+        .to_lowercase();
+
+    let mpl_script = match extension.as_str() {
+        "vmd" => match compiler.from_vmd(&input_data) {
+            Ok(script) => script,
+            Err(e) => {
+                eprintln!("Error reverse compiling VMD: {}", e);
+                std::process::exit(1);
+            }
+        },
+        "vpd" => match compiler.from_vpd(&input_data) {
+            Ok(script) => script,
+            Err(e) => {
+                eprintln!("Error reverse compiling VPD: {}", e);
+                std::process::exit(1);
+            }
+        },
+        _ => {
+            eprintln!(
+                "Unknown file extension '{}'. Please use .vmd or .vpd files.",
+                extension
+            );
+            std::process::exit(1);
+        }
+    };
+
+    // Determine output filename
+    let output_path = output.unwrap_or_else(|| {
+        let input_path = Path::new(input);
+        let stem = input_path.file_stem().unwrap_or_default();
+        format!("{}.mpl", stem.to_string_lossy())
+    });
+
+    // Write output file
+    if let Err(e) = std::fs::write(&output_path, mpl_script) {
+        eprintln!("Error writing output file '{}': {}", output_path, e);
+        std::process::exit(1);
+    }
+
+    println!("Successfully reversed '{}' to '{}'", input, output_path);
 }
