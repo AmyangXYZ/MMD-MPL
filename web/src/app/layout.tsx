@@ -15,20 +15,54 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "MPL - MMD Pose Language",
-  description: "Use plain text to control MMD poses and facial morphs, no more brain-hurting quaternions",
-  keywords: ["MMD", "MikuMikuDance", "AI pose", "text to pose", "MMD pose language"],
+  title: "MPL - Motion Programming Language | AI-Powered 3D Animation",
+  description:
+    "Revolutionary semantic language for 3D motion and animation. Transform natural language into 3D movements with AI-friendly syntax. Perfect for LLM training, motion synthesis, and creative animation workflows.",
+  keywords: [
+    "motion programming language",
+    "3D animation",
+    "AI motion synthesis",
+    "LLM training",
+    "text to motion",
+    "semantic animation",
+    "motion generation",
+    "3D pose programming",
+    "MMD",
+    "MikuMikuDance",
+    "large motion models",
+    "procedural animation",
+    "motion capture",
+    "animation AI",
+    "natural language animation",
+    "cross-modal AI",
+    "motion language model",
+  ],
+  authors: [{ name: "MPL Team" }],
+  creator: "MPL Team",
+  publisher: "MPL",
+  category: "Technology",
   openGraph: {
-    title: "MPL - MMD Pose Language",
-    description: "Use plain text to control MMD poses and facial morphs, no more brain-hurting quaternions",
-    url: "https://mpl.love",
-    siteName: "MPL",
+    title: "MPL - Motion Programming Language | AI-Powered 3D Animation",
+    description:
+      "Revolutionary semantic language for 3D motion and animation. Transform natural language into 3D movements with AI-friendly syntax. Perfect for LLM training and motion synthesis.",
+    url: "https://mmd-mpl.vercel.app",
+    siteName: "MPL - Motion Programming Language",
     type: "website",
+    locale: "en_US",
   },
-  twitter: {
-    card: "summary_large_image",
-    title: "MPL - MMD Pose Language",
-    description: "Use plain text to control MMD poses and facial morphs, no more brain-hurting quaternions",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  alternates: {
+    canonical: "https://mpl.love",
   },
 }
 

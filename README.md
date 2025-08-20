@@ -1,6 +1,8 @@
-# MPL - MMD Pose Language
+# MPL - Motion Programming Language
 
-MPL is a domain-specific language that makes 3D pose and animation accessible through code-like syntax and natural language style. It also enables LLMs to understand and generate animations by providing structured, semantic commands instead of complex quaternion calculations.
+MPL is a domain-specific language that revolutionizes 3D motion and animation through human-readable, semantic syntax. Designed to bridge the gap between natural language and 3D movement, MPL transforms complex mathematical representations into intuitive, code-like commands that both humans and AI systems can easily understand and generate.
+
+**Current Implementation:** MMD (MikuMikuDance) format support with plans for broader 3D animation ecosystems.
 
 ![](./screenshots/1.png)
 
@@ -8,12 +10,26 @@ MPL is a domain-specific language that makes 3D pose and animation accessible th
 
 ## Why MPL?
 
-MPL bridges natural language and 3D animation with:
+MPL democratizes 3D motion creation and unlocks powerful AI capabilities:
 
-- **Semantic commands**: Write poses like code, not math
-- **LLM-friendly syntax**: Predictable structure for AI generation
-- **Built-in safety**: Prevents impossible poses automatically
-- **Composable poses**: Reuse and combine animation components
+### 🎯 **Human-Centric Design**
+
+- **Semantic commands**: Express complex 3D movements through intuitive, readable syntax
+- **Natural language alignment**: Bridge the gap between human intent and 3D mathematics
+- **Built-in safety**: Anatomically-aware constraints prevent impossible poses automatically
+
+### 🤖 **AI & Machine Learning Ready**
+
+- **LLM-friendly syntax**: Structured, predictable grammar enables language models to understand and generate motion
+- **Training-optimized**: Semantic tokens create rich datasets for AI motion synthesis
+- **Compositional intelligence**: Modular pose components allow AI to learn and recombine movement patterns
+- **Cross-modal potential**: Text-to-motion, motion-to-text, and motion-to-motion transformations
+
+### 🔧 **Developer Benefits**
+
+- **Composable architecture**: Reuse and combine animation building blocks
+- **Version control friendly**: Text-based format integrates seamlessly with development workflows
+- **Extensible framework**: Domain-agnostic design supports future 3D animation formats
 
 ## Syntax
 
@@ -70,11 +86,41 @@ main {
 
 ## Use Cases
 
-- Convert natural language to animations ("wave hello")
-- Modify existing poses and sequences
-- Generate new poses by combining components
-- Create complex animation timelines
-- Validate and fix pose errors
+### 🎬 **Creative Applications**
+
+- **Natural language to motion**: Transform descriptions like "wave hello" or "sit down" into 3D animations
+- **Procedural animation**: Generate variations and combinations of existing movement patterns
+- **Interactive storytelling**: Create dynamic character animations through conversational interfaces
+
+### 🤖 **AI & Research Applications**
+
+- **Motion synthesis training**: Use MPL's semantic structure to train generative models for 3D animation
+- **Cross-modal learning**: Enable AI systems to understand relationships between language, motion, and visual content
+- **Behavioral modeling**: Research human movement patterns through structured, analyzable motion data
+- **Animation assistance**: AI-powered tools for pose correction, completion, and stylistic adaptation
+
+### 🛠️ **Development & Production**
+
+- **Rapid prototyping**: Quickly iterate on character animations without complex 3D software
+- **Automated content creation**: Generate animation assets programmatically for games and applications
+- **Motion capture enhancement**: Post-process and refine motion capture data using semantic editing
+- **Cross-platform compatibility**: Bridge different 3D animation formats through MPL's universal syntax
+
+### 📚 **Education & Accessibility**
+
+- **Animation learning**: Teach 3D animation concepts through intuitive, code-like syntax
+- **Accessibility tools**: Enable motion creation for users without traditional 3D animation expertise
+- **Documentation**: Create readable, maintainable animation specifications
+
+## 🚀 Future Vision
+
+MPL is designed as a foundational language for the next generation of AI-powered motion synthesis:
+
+- **Universal Motion Representation**: Expand beyond MMD to support industry-standard formats (FBX, BVH, USD, etc.)
+- **Large Motion Models (LMMs)**: Enable training of specialized AI models that understand human movement semantics
+- **Multimodal AI Integration**: Seamless integration with vision, language, and audio AI systems
+- **Real-time Motion Generation**: Live animation synthesis for gaming, VR/AR, and interactive media
+- **Collaborative AI Tools**: Human-AI partnerships in creative motion design and animation production
 
 ## 📄 License
 
