@@ -296,9 +296,51 @@ impl MPLCompiler {
             if trimmed.ends_with(';') {
                 let stmt_text = trimmed.trim_end_matches(';').trim();
                 if !stmt_text.is_empty() {
-                    match crate::pose::MPLPoseStatement::from_str(stmt_text) {
-                        Ok(stmt) => statements.push(stmt),
-                        Err(e) => return Err(format!("Line {}: {}", line_number + 1, e)),
+                    let parts: Vec<&str> = stmt_text.split(',').collect();
+
+                    if parts.len() > 1 {
+                        // Compound statement - extract bone from first part
+                        let first_parts: Vec<&str> = parts[0].trim().split_whitespace().collect();
+                        let bone_name = if first_parts.len() == 4 {
+                            first_parts[0]
+                        } else if first_parts.len() == 2 && first_parts[1] == "reset" {
+                            first_parts[0]
+                        } else {
+                            return Err(format!(
+                                "Line {} (statement 1): Invalid statement",
+                                line_number + 1
+                            ));
+                        };
+
+                        // Parse each part
+                        for (i, part) in parts.iter().enumerate() {
+                            let trimmed_part = part.trim();
+                            if !trimmed_part.is_empty() {
+                                let full_stmt = if i == 0 {
+                                    trimmed_part.to_string()
+                                } else {
+                                    format!("{} {}", bone_name, trimmed_part)
+                                };
+
+                                match crate::pose::MPLPoseStatement::from_str(&full_stmt) {
+                                    Ok(stmt) => statements.push(stmt),
+                                    Err(e) => {
+                                        return Err(format!(
+                                            "Line {} (statement {}): {}",
+                                            line_number + 1,
+                                            i + 1,
+                                            e
+                                        ))
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        // Single statement
+                        match crate::pose::MPLPoseStatement::from_str(stmt_text) {
+                            Ok(stmt) => statements.push(stmt),
+                            Err(e) => return Err(format!("Line {}: {}", line_number + 1, e)),
+                        }
                     }
                 }
             } else {

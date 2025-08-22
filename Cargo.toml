@@ -1,6 +1,6 @@
 [package]
 name = "mmd-mpl"
-version = "0.2.16"
+version = "0.3.0"
 edition = "2021"
 license = "GPL-3.0"
 description = "MPL is a rule-based Domain-Specific Language for creating MMD poses and animations using natural semantic syntax"

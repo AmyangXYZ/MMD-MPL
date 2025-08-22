@@ -1,6 +1,8 @@
-# MPL - MMD Pose Language
+# MPL - Motion Programming Language
 
-MPL is a rule-based Domain-Specific Language for controlling MMD bones and creating animations using natural language commands.
+MPL is a domain-specific language that revolutionizes 3D motion and animation through human-readable, semantic syntax. Designed to bridge the gap between natural language and 3D movement, MPL transforms complex mathematical representations into intuitive, code-like commands that both humans and AI systems can easily understand and generate.
+
+**Current Implementation:** MMD (MikuMikuDance) format support with plans for broader 3D animation ecosystems.
 
 ![](./screenshots/1.png)
 
@@ -8,11 +10,28 @@ MPL is a rule-based Domain-Specific Language for controlling MMD bones and creat
 
 ## Why MPL?
 
-Instead of manually calculating quaternions and dealing with bone direction complexities, MPL provides intuitive pose descriptions and structured animation creation.
+MPL democratizes 3D motion creation and unlocks powerful AI capabilities:
 
-## Latest Syntax
+### 🎯 **Human-Centric Design**
 
-MPL now supports structured pose definitions and animation sequences:
+- **Semantic commands**: Express complex 3D movements through intuitive, readable syntax
+- **Natural language alignment**: Bridge the gap between human intent and 3D mathematics
+- **Built-in safety**: Anatomically-aware constraints prevent impossible poses automatically
+
+### 🤖 **AI & Machine Learning Ready**
+
+- **LLM-friendly syntax**: Structured, predictable grammar enables language models to understand and generate motion
+- **Training-optimized**: Semantic tokens create rich datasets for AI motion synthesis
+- **Compositional intelligence**: Modular pose components allow AI to learn and recombine movement patterns
+- **Cross-modal potential**: Text-to-motion, motion-to-text, and motion-to-motion transformations
+
+### 🔧 **Developer Benefits**
+
+- **Composable architecture**: Reuse and combine animation building blocks
+- **Version control friendly**: Text-based format integrates seamlessly with development workflows
+- **Extensible framework**: Domain-agnostic design supports future 3D animation formats
+
+## Syntax
 
 ### Pose Definitions
 
@@ -43,7 +62,7 @@ MPL now supports structured pose definitions and animation sequences:
 }
 ```
 
-### Main Execution Block
+### Main Execution
 
 ```
 main {
@@ -51,19 +70,22 @@ main {
 }
 ```
 
-## Bone Command Format
+## Bone Commands
 
-**Format:** `bone action direction amount`
+**Format:** `bone action direction amount;` or `bone reset;`
 
-**Actions:** `bend`, `turn`, `sway`, `move`  
+**Actions:** `bend`, `turn`, `sway`, `move`, `reset`  
 **Directions:** `forward`, `backward`, `left`, `right`, `up`, `down`
 
-## Built-in Safety
+### Compound Statements
 
-- **Anatomical constraints**: Prevents impossible poses (elbows can't bend backward)
-- **Range limits**: Automatically clamps values to realistic human movement ranges
-- **Action validation**: Only allows anatomically correct bone movements
-- **Quaternion mathematics**: Properly combines multiple rotations on the same bone
+Multiple actions for the same bone can be combined on a single line using commas:
+
+```
+head turn left 30, bend forward 20, sway right 15;
+arm raise up 45, rotate right 15;
+neck reset;
+```
 
 ## Supported Bones
 
@@ -71,6 +93,44 @@ main {
 **Arms:** `shoulder_l/r`, `arm_l/r`, `arm_twist_l/r`, `elbow_l/r`, `wrist_l/r`, `wrist_twist_l/r`  
 **Legs:** `leg_l/r`, `knee_l/r`, `ankle_l/r`, `toe_l/r`  
 **Fingers:** `thumb_0/1/2_l/r`, `index_0/1/2_l/r`, `middle_0/1/2_l/r`, `ring_0/1/2_l/r`, `pinky_0/1/2_l/r`
+
+## Use Cases
+
+### 🎬 **Creative Applications**
+
+- **Natural language to motion**: Transform descriptions like "wave hello" or "sit down" into 3D animations
+- **Procedural animation**: Generate variations and combinations of existing movement patterns
+- **Interactive storytelling**: Create dynamic character animations through conversational interfaces
+
+### 🤖 **AI & Research Applications**
+
+- **Motion synthesis training**: Use MPL's semantic structure to train generative models for 3D animation
+- **Cross-modal learning**: Enable AI systems to understand relationships between language, motion, and visual content
+- **Behavioral modeling**: Research human movement patterns through structured, analyzable motion data
+- **Animation assistance**: AI-powered tools for pose correction, completion, and stylistic adaptation
+
+### 🛠️ **Development & Production**
+
+- **Rapid prototyping**: Quickly iterate on character animations without complex 3D software
+- **Automated content creation**: Generate animation assets programmatically for games and applications
+- **Motion capture enhancement**: Post-process and refine motion capture data using semantic editing
+- **Cross-platform compatibility**: Bridge different 3D animation formats through MPL's universal syntax
+
+### 📚 **Education & Accessibility**
+
+- **Animation learning**: Teach 3D animation concepts through intuitive, code-like syntax
+- **Accessibility tools**: Enable motion creation for users without traditional 3D animation expertise
+- **Documentation**: Create readable, maintainable animation specifications
+
+## 🚀 Future Vision
+
+MPL is designed as a foundational language for the next generation of AI-powered motion synthesis:
+
+- **Universal Motion Representation**: Expand beyond MMD to support industry-standard formats (FBX, BVH, USD, etc.)
+- **Large Motion Models (LMMs)**: Enable training of specialized AI models that understand human movement semantics
+- **Multimodal AI Integration**: Seamless integration with vision, language, and audio AI systems
+- **Real-time Motion Generation**: Live animation synthesis for gaming, VR/AR, and interactive media
+- **Collaborative AI Tools**: Human-AI partnerships in creative motion design and animation production
 
 ## 📄 License
 

@@ -72,10 +72,20 @@ main {
 
 ## Bone Commands
 
-**Format:** `bone action direction amount`
+**Format:** `bone action direction amount;` or `bone reset;`
 
-**Actions:** `bend`, `turn`, `sway`, `move`  
+**Actions:** `bend`, `turn`, `sway`, `move`, `reset`  
 **Directions:** `forward`, `backward`, `left`, `right`, `up`, `down`
+
+### Compound Statements
+
+Multiple actions for the same bone can be combined on a single line using commas:
+
+```
+head turn left 30, bend forward 20, sway right 15;
+arm raise up 45, rotate right 15;
+neck reset;
+```
 
 ## Supported Bones
 

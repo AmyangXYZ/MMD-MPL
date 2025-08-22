@@ -23,6 +23,14 @@ impl MPLPoseStatement {
         }
         let parts = text.split_whitespace().collect::<Vec<&str>>();
         if parts.len() != 4 {
+            if parts.len() == 2 && parts[1] == "reset" {
+                return Ok(Self {
+                    bone: parts[0].to_string(),
+                    action: "reset".to_string(),
+                    direction: "".to_string(),
+                    amount: 0.0,
+                });
+            }
             return Err("Invalid statement".to_string());
         }
 
@@ -45,9 +53,16 @@ impl MPLPoseStatement {
     }
 
     pub fn to_string(&self) -> String {
+        if self.action == "reset" {
+            return format!("{} reset;", self.bone);
+        }
+
         format!(
             "{} {} {} {:.0};",
-            self.bone, self.action, self.direction, self.amount
+            self.bone,
+            self.action,
+            self.direction,
+            self.amount.round()
         )
     }
 
@@ -98,6 +113,10 @@ impl MPLPoseStatement {
     }
 
     pub fn to_quaternion(&self) -> Quaternion {
+        if self.action == "reset" {
+            return Quaternion::identity();
+        }
+
         let rule = with_bone_db(|db| {
             db.get_rule(&self.bone, &self.action, &self.direction)
                 .cloned()
@@ -150,26 +169,19 @@ impl MPLPoseStatement {
         }
 
         // Special case: if target quaternion is identity (0,0,0,1),
-        // return one direction per action with 0 degrees to ensure proper interpolation
+        // return bone reset
         if target_quat.x == 0.0
             && target_quat.y == 0.0
             && target_quat.z == 0.0
             && target_quat.w == 1.0
         {
             let mut statements = Vec::new();
-            let mut seen_actions = std::collections::HashSet::new();
-
-            for (action, direction, _) in &possible_actions {
-                if !seen_actions.contains(action) {
-                    statements.push(Self {
-                        bone: bone.clone(),
-                        action: action.clone(),
-                        direction: direction.clone(),
-                        amount: 0.0,
-                    });
-                    seen_actions.insert(action.clone());
-                }
-            }
+            statements.push(Self {
+                bone: bone.clone(),
+                action: "reset".to_string(),
+                direction: "".to_string(),
+                amount: 0.0,
+            });
             return statements;
         }
 
@@ -429,39 +441,75 @@ impl MPLPose {
     }
 
     pub fn to_string(&self) -> String {
-        format!(
-            "{{\n{}\n}}",
-            self.statements
+        // Group statements by bone
+        let mut bone_groups: HashMap<String, Vec<&MPLPoseStatement>> = HashMap::new();
+        for statement in &self.statements {
+            bone_groups
+                .entry(statement.bone.clone())
+                .or_insert_with(Vec::new)
+                .push(statement);
+        }
+
+        // Sort bones according to BONES array order for consistent output
+        let mut sorted_bones: Vec<_> = bone_groups.into_iter().collect();
+        sorted_bones.sort_by(|(a, _), (b, _)| {
+            let a_idx = crate::bone::BONES
                 .iter()
-                .map(|s| format!("    {}", s.to_string()))
-                .collect::<Vec<String>>()
-                .join("\n")
-        )
+                .position(|&x| x == a)
+                .unwrap_or(999);
+            let b_idx = crate::bone::BONES
+                .iter()
+                .position(|&x| x == b)
+                .unwrap_or(999);
+            a_idx.cmp(&b_idx)
+        });
+
+        // Convert each bone's statements to compound format
+        let mut compound_statements = Vec::new();
+        for (bone, statements) in sorted_bones {
+            if statements.len() == 1 {
+                // Single statement - use as-is
+                compound_statements.push(format!("    {}", statements[0].to_string()));
+            } else {
+                // Multiple statements - combine into compound format
+                let compound_parts: Vec<String> = statements
+                    .iter()
+                    .map(|stmt| {
+                        if stmt.action == "reset" {
+                            "reset".to_string()
+                        } else {
+                            format!("{} {} {}", stmt.action, stmt.direction, stmt.amount.round())
+                        }
+                    })
+                    .collect();
+                compound_statements.push(format!("    {} {};", bone, compound_parts.join(", ")));
+            }
+        }
+
+        format!("{{\n{}\n}}", compound_statements.join("\n"))
     }
 
     pub fn to_script(&self) -> String {
+        // Filter out reset statements and zero-degree actions for static pose
+        let filtered_statements: Vec<MPLPoseStatement> = self
+            .statements
+            .iter()
+            .filter(|stmt| stmt.action != "reset" && stmt.amount.abs() > 0.01)
+            .cloned()
+            .collect();
+
+        let filtered_pose = MPLPose::new(self.name.clone(), filtered_statements);
+
         format!(
-            "@pose {} {{\n{}\n}}\n\nmain {{\n    {};\n}}",
+            "@pose {} {}\n\nmain {{\n    {};\n}}",
             self.name,
-            self.statements
-                .iter()
-                .map(|s| format!("    {}", s.to_string()))
-                .collect::<Vec<String>>()
-                .join("\n"),
+            filtered_pose.to_string(),
             self.name
         )
     }
 
     pub fn to_block(&self) -> String {
-        format!(
-            "@pose {} {{\n{}\n}}\n",
-            self.name,
-            self.statements
-                .iter()
-                .map(|s| format!("    {}", s.to_string()))
-                .collect::<Vec<String>>()
-                .join("\n")
-        )
+        format!("@pose {} {}\n", self.name, self.to_string())
     }
 
     pub fn to_bone_frames(&self) -> Vec<MPLBoneFrame> {
@@ -483,6 +531,8 @@ impl MPLPose {
                 if statement.action == "move" {
                     let vector = statement.to_vector();
                     combined_position = combined_position.add(&vector);
+                } else if statement.action == "reset" {
+                    combined_quaternion = Quaternion::identity();
                 } else {
                     let quaternion = statement.to_quaternion();
                     combined_quaternion = combined_quaternion.multiply(&quaternion);
@@ -516,40 +566,6 @@ impl MPLPose {
             ));
         }
 
-        // Group statements by bone
-        let mut bone_groups: std::collections::HashMap<String, Vec<MPLPoseStatement>> =
-            std::collections::HashMap::new();
-        for stmt in statements {
-            bone_groups
-                .entry(stmt.bone.clone())
-                .or_insert_with(Vec::new)
-                .push(stmt);
-        }
-
-        // Sort statements within each bone by action type (bend, turn, sway, move)
-        let action_order = ["bend", "turn", "sway", "move"];
-        for statements in bone_groups.values_mut() {
-            statements.sort_by(|a, b| {
-                let a_idx = action_order
-                    .iter()
-                    .position(|&x| x == a.action)
-                    .unwrap_or(999);
-                let b_idx = action_order
-                    .iter()
-                    .position(|&x| x == b.action)
-                    .unwrap_or(999);
-                a_idx.cmp(&b_idx)
-            });
-        }
-
-        // Sort bones according to BONES array order and flatten
-        let mut sorted_statements = Vec::new();
-        for bone in crate::bone::BONES {
-            if let Some(bone_statements) = bone_groups.get(*bone) {
-                sorted_statements.extend(bone_statements.clone());
-            }
-        }
-
-        Self::new(name.to_string(), sorted_statements)
+        Self::new(name.to_string(), statements)
     }
 }
