@@ -515,8 +515,19 @@ impl MPLPose {
     pub fn to_bone_frames(&self) -> Vec<MPLBoneFrame> {
         let mut frames = vec![];
 
-        let mut bone_groups: HashMap<String, Vec<&MPLPoseStatement>> = HashMap::new();
+        // Expand grouped finger statements into individual joint statements
+        let mut expanded_statements = Vec::new();
         for statement in &self.statements {
+            if Self::is_grouped_finger_bone(&statement.bone) {
+                expanded_statements.extend(Self::expand_grouped_finger_statement(statement));
+            } else {
+                expanded_statements.push(statement.clone());
+            }
+        }
+
+        // Process all statements (expanded and original)
+        let mut bone_groups: HashMap<String, Vec<&MPLPoseStatement>> = HashMap::new();
+        for statement in &expanded_statements {
             bone_groups
                 .entry(statement.bone.clone())
                 .or_insert_with(Vec::new)
@@ -566,6 +577,99 @@ impl MPLPose {
             ));
         }
 
-        Self::new(name.to_string(), statements)
+        // Consolidate individual finger joint statements into grouped finger statements
+        let consolidated_statements = Self::consolidate_finger_statements(&statements);
+
+        Self::new(name.to_string(), consolidated_statements)
+    }
+
+    fn expand_grouped_finger_statement(
+        stmt: &crate::pose::MPLPoseStatement,
+    ) -> Vec<crate::pose::MPLPoseStatement> {
+        let mut expanded_statements = Vec::new();
+
+        // Define finger joint mappings with ratios
+        // Based on natural finger movement: MCP (1.0) > PIP (0.85-0.95) > DIP (0.5-0.7)
+        let finger_mappings = match stmt.bone.as_str() {
+            "thumb_l" => vec![("thumb_0_l", 1.0), ("thumb_1_l", 0.85)], // Thumb has different joint structure
+            "index_l" => vec![("index_0_l", 1.0), ("index_1_l", 0.9), ("index_2_l", 0.65)],
+            "middle_l" => vec![
+                ("middle_0_l", 1.0),
+                ("middle_1_l", 0.9),
+                ("middle_2_l", 0.65),
+            ],
+            "ring_l" => vec![("ring_0_l", 1.0), ("ring_1_l", 0.88), ("ring_2_l", 0.6)], // Ring finger bends slightly less
+            "pinky_l" => vec![("pinky_0_l", 1.0), ("pinky_1_l", 0.85), ("pinky_2_l", 0.55)], // Pinky bends the least
+            "thumb_r" => vec![("thumb_1_r", 1.0), ("thumb_2_r", 0.85)],
+            "index_r" => vec![("index_0_r", 1.0), ("index_1_r", 0.9), ("index_2_r", 0.65)],
+            "middle_r" => vec![
+                ("middle_0_r", 1.0),
+                ("middle_1_r", 0.9),
+                ("middle_2_r", 0.65),
+            ],
+            "ring_r" => vec![("ring_0_r", 1.0), ("ring_1_r", 0.88), ("ring_2_r", 0.6)],
+            "pinky_r" => vec![("pinky_0_r", 1.0), ("pinky_1_r", 0.85), ("pinky_2_r", 0.55)],
+            _ => return vec![stmt.clone()], // Not a grouped finger bone, return original
+        };
+
+        // Create expanded statements for each joint
+        for (joint_bone, ratio) in finger_mappings {
+            let adjusted_amount = (stmt.amount * ratio).round();
+            if adjusted_amount.abs() >= 1.0 {
+                // Only add if amount is significant
+                expanded_statements.push(crate::pose::MPLPoseStatement {
+                    bone: joint_bone.to_string(),
+                    action: stmt.action.clone(),
+                    direction: stmt.direction.clone(),
+                    amount: adjusted_amount,
+                });
+            }
+        }
+
+        expanded_statements
+    }
+
+    fn is_grouped_finger_bone(bone: &str) -> bool {
+        bone == "thumb_l"
+            || bone == "index_l"
+            || bone == "middle_l"
+            || bone == "ring_l"
+            || bone == "pinky_l"
+            || bone == "thumb_r"
+            || bone == "index_r"
+            || bone == "middle_r"
+            || bone == "ring_r"
+            || bone == "pinky_r"
+    }
+
+    fn consolidate_finger_statements(statements: &[MPLPoseStatement]) -> Vec<MPLPoseStatement> {
+        let mut consolidated = Vec::new();
+
+        for stmt in statements {
+            // Only keep _0 joints and rename them to grouped form, ignore all others
+            if stmt.bone.ends_with("_0_l") || stmt.bone.ends_with("_0_r") {
+                let grouped_bone = if stmt.bone.ends_with("_0_l") {
+                    stmt.bone.replace("_0_l", "_l")
+                } else {
+                    stmt.bone.replace("_0_r", "_r")
+                };
+                consolidated.push(MPLPoseStatement {
+                    bone: grouped_bone,
+                    action: stmt.action.clone(),
+                    direction: stmt.direction.clone(),
+                    amount: stmt.amount,
+                });
+            } else if !stmt.bone.ends_with("_1_l")
+                && !stmt.bone.ends_with("_2_l")
+                && !stmt.bone.ends_with("_1_r")
+                && !stmt.bone.ends_with("_2_r")
+            {
+                // Keep non-finger joint statements as they are
+                consolidated.push(stmt.clone());
+            }
+            // Ignore all other individual joints (_1_l, _2_l, etc.)
+        }
+
+        consolidated
     }
 }

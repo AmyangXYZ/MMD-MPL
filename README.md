@@ -10,26 +10,24 @@ MPL is a domain-specific language that revolutionizes 3D motion and animation th
 
 ## Why MPL?
 
-MPL democratizes 3D motion creation and unlocks powerful AI capabilities:
-
 ### 🎯 **Human-Centric Design**
 
-- **Semantic commands**: Express complex 3D movements through intuitive, readable syntax
-- **Natural language alignment**: Bridge the gap between human intent and 3D mathematics
-- **Built-in safety**: Anatomically-aware constraints prevent impossible poses automatically
+- **Semantic commands**: Intuitive, readable syntax for complex 3D movements
+- **Natural language alignment**: Bridge human intent and 3D mathematics
+- **Built-in safety**: Anatomically-aware constraints prevent impossible poses
 
 ### 🤖 **AI & Machine Learning Ready**
 
-- **LLM-friendly syntax**: Structured, predictable grammar enables language models to understand and generate motion
-- **Training-optimized**: Semantic tokens create rich datasets for AI motion synthesis
-- **Compositional intelligence**: Modular pose components allow AI to learn and recombine movement patterns
-- **Cross-modal potential**: Text-to-motion, motion-to-text, and motion-to-motion transformations
+- **LLM-friendly syntax**: Structured grammar for language models
+- **Training-optimized**: Semantic tokens for AI motion synthesis
+- **Compositional intelligence**: Modular components for pattern learning
+- **Cross-modal potential**: Text-to-motion and motion-to-text transformations
 
 ### 🔧 **Developer Benefits**
 
-- **Composable architecture**: Reuse and combine animation building blocks
-- **Version control friendly**: Text-based format integrates seamlessly with development workflows
-- **Extensible framework**: Domain-agnostic design supports future 3D animation formats
+- **Composable architecture**: Reusable animation building blocks
+- **Version control friendly**: Text-based format for development workflows
+- **Extensible framework**: Domain-agnostic design for future formats
 
 ## Syntax
 
@@ -92,45 +90,35 @@ neck reset;
 **Body Core:** `base`, `center`, `upper_body`, `waist`, `neck`, `head`  
 **Arms:** `shoulder_l/r`, `arm_l/r`, `arm_twist_l/r`, `elbow_l/r`, `wrist_l/r`, `wrist_twist_l/r`  
 **Legs:** `leg_l/r`, `knee_l/r`, `ankle_l/r`, `toe_l/r`  
-**Fingers:** `thumb_0/1/2_l/r`, `index_0/1/2_l/r`, `middle_0/1/2_l/r`, `ring_0/1/2_l/r`, `pinky_0/1/2_l/r`
+**Fingers:**
 
-## Use Cases
+- **Individual joints:** `thumb_0/1/2_l/r`, `index_0/1/2_l/r`, `middle_0/1/2_l/r`, `ring_0/1/2_l/r`, `pinky_0/1/2_l/r`
+- **Grouped shortcuts:** `thumb_l/r`, `index_l/r`, `middle_l/r`, `ring_l/r`, `pinky_l/r`
 
-### 🎬 **Creative Applications**
+### Finger Control Shortcuts
 
-- **Natural language to motion**: Transform descriptions like "wave hello" or "sit down" into 3D animations
-- **Procedural animation**: Generate variations and combinations of existing movement patterns
-- **Interactive storytelling**: Create dynamic character animations through conversational interfaces
+Grouped finger shortcuts automatically expand to individual joint movements with realistic ratios:
 
-### 🤖 **AI & Research Applications**
+```
+// Using grouped shortcuts (recommended for most cases)
+index_l bend forward 30;    // Expands to: index_0_l bend forward 30, index_1_l bend forward 27, index_2_l bend forward 20
+middle_l bend forward 25;   // Expands to: middle_0_l bend forward 25, middle_1_l bend forward 23, middle_2_l bend forward 16
+thumb_l bend forward 20;    // Expands to: thumb_0_l bend forward 20, thumb_1_l bend forward 17
 
-- **Motion synthesis training**: Use MPL's semantic structure to train generative models for 3D animation
-- **Cross-modal learning**: Enable AI systems to understand relationships between language, motion, and visual content
-- **Behavioral modeling**: Research human movement patterns through structured, analyzable motion data
-- **Animation assistance**: AI-powered tools for pose correction, completion, and stylistic adaptation
+// Using individual joints (for precise control)
+index_0_l bend forward 30;
+index_1_l bend forward 25;
+index_2_l bend forward 15;
+```
 
-### 🛠️ **Development & Production**
+**Finger Bending Ratios:**
 
-- **Rapid prototyping**: Quickly iterate on character animations without complex 3D software
-- **Automated content creation**: Generate animation assets programmatically for games and applications
-- **Motion capture enhancement**: Post-process and refine motion capture data using semantic editing
-- **Cross-platform compatibility**: Bridge different 3D animation formats through MPL's universal syntax
+- **Index/Middle:** 100% → 90% → 65%
+- **Ring:** 100% → 88% → 60%
+- **Pinky:** 100% → 85% → 55%
+- **Thumb:** 100% → 85%
 
-### 📚 **Education & Accessibility**
-
-- **Animation learning**: Teach 3D animation concepts through intuitive, code-like syntax
-- **Accessibility tools**: Enable motion creation for users without traditional 3D animation expertise
-- **Documentation**: Create readable, maintainable animation specifications
-
-## 🚀 Future Vision
-
-MPL is designed as a foundational language for the next generation of AI-powered motion synthesis:
-
-- **Universal Motion Representation**: Expand beyond MMD to support industry-standard formats (FBX, BVH, USD, etc.)
-- **Large Motion Models (LMMs)**: Enable training of specialized AI models that understand human movement semantics
-- **Multimodal AI Integration**: Seamless integration with vision, language, and audio AI systems
-- **Real-time Motion Generation**: Live animation synthesis for gaming, VR/AR, and interactive media
-- **Collaborative AI Tools**: Human-AI partnerships in creative motion design and animation production
+Both approaches can be mixed in the same pose.
 
 ## 📄 License
 
