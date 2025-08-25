@@ -469,7 +469,7 @@ impl BoneActionDatabase {
             },
             "elbow_l" => {
                 "bend" => {
-                    "forward" => [1.0, 1.0, 0.0], 135.0,
+                    "forward" => [0.6, 0.8, 0.0], 135.0,
                 },
             },
             "elbow_r" => {
@@ -519,7 +519,7 @@ impl BoneActionDatabase {
             },
             "leg_l" => {
                 "bend" => {
-                    "forward" => [1.0, 0.0, 0.0], 90.0,
+                    "forward" => [1.0, 0.0, 0.0], 150.0,
                     "backward" => [-1.0, 0.0, 0.0], 90.0,
                 },
                 "turn" => {
@@ -533,7 +533,7 @@ impl BoneActionDatabase {
             },
             "leg_r" => {
                 "bend" => {
-                    "forward" => [1.0, 0.0, 0.0], 90.0,
+                    "forward" => [1.0, 0.0, 0.0], 150.0,
                     "backward" => [-1.0, 0.0, 0.0], 90.0,
                 },
                 "turn" => {
