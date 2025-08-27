@@ -1,10 +1,12 @@
-import { useCallback, useState, useEffect } from "react"
+import { useCallback, useState, useEffect, useRef } from "react"
 import { Button } from "./ui/button"
 import { Download, RefreshCw, Upload } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import { useMPLCompiler } from "@/hooks/useMPLCompiler"
 import CodeEditor from "./code-editor"
+import { FilesetResolver, HolisticLandmarker } from "@mediapipe/tasks-vision"
+import { Solver } from "@/lib/mediapipe_solver"
 
 export default function MPLInput({
   modelLoaded,
@@ -75,6 +77,43 @@ main {
 }
 `)
 
+  const holisticLandmarkerRef = useRef<HolisticLandmarker | null>(null)
+  const imageRef = useRef<HTMLImageElement | null>(null)
+
+  const detectLandmarks = useCallback(async (): Promise<Blob | null> => {
+    if (!holisticLandmarkerRef.current) {
+      const vision = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm")
+      holisticLandmarkerRef.current = await HolisticLandmarker.createFromOptions(vision, {
+        baseOptions: {
+          modelAssetPath:
+            "https://storage.googleapis.com/mediapipe-models/holistic_landmarker/holistic_landmarker/float16/latest/holistic_landmarker.task",
+          delegate: "GPU",
+        },
+        runningMode: "IMAGE",
+      })
+    }
+
+    await holisticLandmarkerRef.current?.setOptions({ runningMode: "IMAGE" })
+
+    if (
+      imageRef.current &&
+      imageRef.current.src.length > 0 &&
+      imageRef.current.complete &&
+      imageRef.current.naturalWidth > 0
+    ) {
+      let vpdBlob: Blob | null = null
+      holisticLandmarkerRef.current!.detect(imageRef.current, (result) => {
+        if (result.poseWorldLandmarks.length > 0) {
+          const solver = new Solver()
+          solver.solve(result)
+          vpdBlob = solver.exportToVpdBlob("pose_from_image")
+        }
+      })
+      return vpdBlob
+    }
+    return null
+  }, [])
+
   const handleFileUpload = useCallback(
     async (event: React.ChangeEvent<HTMLInputElement>) => {
       const file = event.target.files?.[0]
@@ -98,11 +137,30 @@ main {
             console.error(error)
           }
         }
+      } else if (
+        file.name.endsWith(".png") ||
+        file.name.endsWith(".jpg") ||
+        file.name.endsWith(".jpeg") ||
+        file.name.endsWith(".webp")
+      ) {
+        const image = new window.Image()
+        image.src = URL.createObjectURL(file)
+        image.onload = async () => {
+          imageRef.current = image
+          const vpdBlob = await detectLandmarks()
+          if (vpdBlob && mplCompiler) {
+            try {
+              const statements = mplCompiler.reverse_compile("vpd", new Uint8Array(await vpdBlob.arrayBuffer()))
+              setStatement(statements)
+            } catch (error) {
+              console.error(error)
+            }
+          }
+        }
+        event.target.value = ""
       }
-
-      event.target.value = ""
     },
-    [setStatement, mplCompiler]
+    [setStatement, mplCompiler, detectLandmarks]
   )
 
   useEffect(() => {
@@ -134,13 +192,12 @@ main {
   return (
     <div className="flex flex-col gap-1 w-full h-full">
       <div className="flex flex-row gap-2 px-6 pt-2 z-100 items-center justify-between">
-        <h3 className="scroll-m-20 text-xl font-semibold tracking-tight hidden md:block">MMD Pose Language Editor</h3>
-        <h3 className="scroll-m-20 text-lg font-semibold tracking-tight md:hidden">MPL Editor</h3>
+        <h3 className="scroll-m-20 text-xl font-semibold tracking-tight">MPL Editor</h3>
         <div className="flex flex-row gap-2">
           <div className="relative hidden md:block">
             <input
               type="file"
-              accept=".vpd,.vmd"
+              accept=".vpd,.vmd, .png, .jpg, .jpeg, .webp"
               onChange={handleFileUpload}
               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
               id="pose-upload"
@@ -153,7 +210,7 @@ main {
               size="sm"
             >
               <Upload className="size-4" />
-              <span className="text-xs">Upload VPD/VMD</span>
+              <span className="text-xs">Upload Image/VPD/VMD</span>
             </Button>
           </div>
 
