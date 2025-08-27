@@ -8,6 +8,10 @@ MPL is a domain-specific language that revolutionizes 3D motion and animation th
 
 [Gallery](https://popo.love/gallery) and [playground](https://popo.love/playground)
 
+[npm](https://www.npmjs.com/package/mmd-mpl)
+
+[crates](https://crates.io/crates/mmd-mpl)
+
 ## Why MPL?
 
 ### 🎯 **Human-Centric Design**
