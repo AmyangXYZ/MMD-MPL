@@ -124,6 +124,15 @@ index_2_l bend forward 15;
 
 Both approaches can be mixed in the same pose.
 
+## 🚀 Command Line Tool
+
+The MPL compiler is available as a command-line tool (`mpl.exe` in `cmd/` directory) or build from source with `cargo build --release`.
+
+**Usage:**
+
+- **Compile MPL to VMD:** `mpl -c input.mpl -o output.vmd`
+- **Reverse compile VMD/VPD to MPL:** `mpl -r input.vmd -o output.mpl`
+
 ## 📄 License
 
 GPL-3.0 License - see LICENSE for details.
