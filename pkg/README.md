@@ -8,6 +8,10 @@ MPL is a domain-specific language that revolutionizes 3D motion and animation th
 
 [Gallery](https://popo.love/gallery) and [playground](https://popo.love/playground)
 
+[npm](https://www.npmjs.com/package/mmd-mpl)
+
+[crates](https://crates.io/crates/mmd-mpl)
+
 ## Why MPL?
 
 ### 🎯 **Human-Centric Design**
@@ -119,6 +123,15 @@ index_2_l bend forward 15;
 - **Thumb:** 100% → 85%
 
 Both approaches can be mixed in the same pose.
+
+## 🚀 Command Line Tool
+
+The MPL compiler is available as a command-line tool (`mpl.exe` in `cmd/` directory) or build from source with `cargo build --release`.
+
+**Usage:**
+
+- **Compile MPL to VMD:** `mpl -c input.mpl -o output.vmd`
+- **Reverse compile VMD/VPD to MPL:** `mpl -r input.vmd -o output.mpl`
 
 ## 📄 License
 
