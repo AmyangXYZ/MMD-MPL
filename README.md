@@ -72,6 +72,13 @@ main {
 }
 ```
 
+## Supported Bones
+
+**Body Core:** `base`, `center`, `upper_body`, `lower_body`, `waist`, `neck`, `head`  
+**Arms:** `shoulder_l/r`, `arm_l/r`, `elbow_l/r`, `wrist_l/r`  
+**Legs:** `leg_l/r`, `knee_l/r`, `ankle_l/r`, `toe_l/r`  
+**Fingers:** `thumb_l/r`, `index_l/r`, `middle_l/r`, `ring_l/r`, `pinky_l/r`
+
 ## Bone Commands
 
 **Format:** `bone action direction amount;` or `bone reset;`
@@ -88,13 +95,6 @@ head turn left 30, bend forward 20, sway right 15;
 arm raise up 45, rotate right 15;
 neck reset;
 ```
-
-## Supported Bones
-
-**Body Core:** `base`, `center`, `upper_body`, `waist`, `neck`, `head`  
-**Arms:** `shoulder_l/r`, `arm_l/r`, `elbow_l/r`, `wrist_l/r`  
-**Legs:** `leg_l/r`, `knee_l/r`, `ankle_l/r`, `toe_l/r`  
-**Fingers:** `thumb_l/r`, `index_l/r`, `middle_l/r`, `ring_l/r`, `pinky_l/r`
 
 ## 🚀 Command Line Tool
 
