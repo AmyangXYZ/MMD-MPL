@@ -92,37 +92,9 @@ neck reset;
 ## Supported Bones
 
 **Body Core:** `base`, `center`, `upper_body`, `waist`, `neck`, `head`  
-**Arms:** `shoulder_l/r`, `arm_l/r`, `arm_twist_l/r`, `elbow_l/r`, `wrist_l/r`, `wrist_twist_l/r`  
+**Arms:** `shoulder_l/r`, `arm_l/r`, `elbow_l/r`, `wrist_l/r`  
 **Legs:** `leg_l/r`, `knee_l/r`, `ankle_l/r`, `toe_l/r`  
-**Fingers:**
-
-- **Individual joints:** `thumb_0/1/2_l/r`, `index_0/1/2_l/r`, `middle_0/1/2_l/r`, `ring_0/1/2_l/r`, `pinky_0/1/2_l/r`
-- **Grouped shortcuts:** `thumb_l/r`, `index_l/r`, `middle_l/r`, `ring_l/r`, `pinky_l/r`
-
-### Finger Control Shortcuts
-
-Grouped finger shortcuts automatically expand to individual joint movements with realistic ratios:
-
-```
-// Using grouped shortcuts (recommended for most cases)
-index_l bend forward 30;    // Expands to: index_0_l bend forward 30, index_1_l bend forward 27, index_2_l bend forward 20
-middle_l bend forward 25;   // Expands to: middle_0_l bend forward 25, middle_1_l bend forward 23, middle_2_l bend forward 16
-thumb_l bend forward 20;    // Expands to: thumb_0_l bend forward 20, thumb_1_l bend forward 17
-
-// Using individual joints (for precise control)
-index_0_l bend forward 30;
-index_1_l bend forward 25;
-index_2_l bend forward 15;
-```
-
-**Finger Bending Ratios:**
-
-- **Index/Middle:** 100% → 90% → 65%
-- **Ring:** 100% → 88% → 60%
-- **Pinky:** 100% → 85% → 55%
-- **Thumb:** 100% → 85%
-
-Both approaches can be mixed in the same pose.
+**Fingers:** `thumb_l/r`, `index_l/r`, `middle_l/r`, `ring_l/r`, `pinky_l/r`
 
 ## 🚀 Command Line Tool
 

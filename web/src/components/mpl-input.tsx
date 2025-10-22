@@ -20,8 +20,8 @@ export default function MPLInput({
   const [compileError, setCompileError] = useState<string | null>(null)
 
   const [statement, setStatement] = useState(`@pose stand {
-    center move up 0, sway left 5, turn right 5, bend forward 5;
-    upper_body2 sway right 5, bend backward 5;
+    center sway left 5, turn right 5, bend forward 5;
+    upper_body sway right 5, bend backward 5;
     lower_body turn left 5;
     neck turn left 10, bend forward 10, sway right 5;
     head turn left 20, bend forward 20;
@@ -174,7 +174,7 @@ main {
         }
         setCompileError(null)
         // Create a blob from the raw VMD bytes
-        const vmdBlob = new Blob([vmdBytes], { type: "application/octet-stream" })
+        const vmdBlob = new Blob([new Uint8Array(vmdBytes)], { type: "application/octet-stream" })
         const vmdUrl = URL.createObjectURL(vmdBlob)
         loadVMD(vmdUrl)
         setVmdUrl(vmdUrl)

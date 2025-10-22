@@ -6,7 +6,6 @@ pub const BONES: &[&str] = &[
     "base",
     "center",
     "upper_body",
-    "upper_body2",
     "lower_body",
     "waist",
     "neck",
@@ -15,14 +14,10 @@ pub const BONES: &[&str] = &[
     "shoulder_r",
     "arm_l",
     "arm_r",
-    "arm_twist_l",
-    "arm_twist_r",
     "elbow_l",
     "elbow_r",
     "wrist_l",
     "wrist_r",
-    "wrist_twist_l",
-    "wrist_twist_r",
     "leg_l",
     "leg_r",
     "knee_l",
@@ -185,7 +180,6 @@ impl BoneActionDatabase {
             "base" => "全ての親",
             "center" => "センター",
             "upper_body" => "上半身",
-            "upper_body2" => "上半身2",
             "lower_body" => "下半身",
             "waist" => "腰",
             "neck" => "首",
@@ -194,14 +188,10 @@ impl BoneActionDatabase {
             "shoulder_r" => "右肩",
             "arm_l" => "左腕",
             "arm_r" => "右腕",
-            "arm_twist_l" => "左腕捩",
-            "arm_twist_r" => "右腕捩",
             "elbow_l" => "左ひじ",
             "elbow_r" => "右ひじ",
             "wrist_l" => "左手首",
             "wrist_r" => "右手首",
-            "wrist_twist_l" => "左手捩",
-            "wrist_twist_r" => "右手捩",
             "leg_l" => "左足",
             "leg_r" => "右足",
             "knee_l" => "左ひざ",
@@ -356,20 +346,6 @@ impl BoneActionDatabase {
                     "right" => [0.0, 0.0, 1.0], 90.0,
                 },
             },
-            "upper_body2" => {
-                "bend" => {
-                    "forward" => [-1.0, 0.0, 0.0], 90.0,
-                    "backward" => [1.0, 0.0, 0.0], 90.0,
-                },
-                "turn" => {
-                    "left" => [0.0, -1.0, 0.0], 90.0,
-                    "right" => [0.0, 1.0, 0.0], 90.0,
-                },
-                "sway" => {
-                    "left" => [0.0, 0.0, -1.0], 90.0,
-                    "right" => [0.0, 0.0, 1.0], 90.0,
-                },
-            },
             "lower_body" => {
                 "bend" => {
                     "forward" => [-1.0, 0.0, 0.0], 90.0,
@@ -455,18 +431,6 @@ impl BoneActionDatabase {
                     "right" => [0.8, 0.6, 0.0], 90.0,
                 },
             },
-            "arm_twist_l" => {
-                "turn" => {
-                    "left" => [0.0, -1.0, 0.0], 90.0,
-                    "right" => [0.0, 1.0, 0.0], 90.0,
-                },
-            },
-            "arm_twist_r" => {
-                "turn" => {
-                    "left" => [0.0, -1.0, 0.0], 90.0,
-                    "right" => [0.0, 1.0, 0.0], 90.0,
-                },
-            },
             "elbow_l" => {
                 "bend" => {
                     "forward" => [0.6, 0.8, 0.0], 180.0,
@@ -503,18 +467,6 @@ impl BoneActionDatabase {
                 "turn" => {
                     "left" => [-0.8, -0.6, 0.0], 90.0,
                     "right" => [0.8, 0.6, 0.0], 90.0,
-                },
-            },
-            "wrist_twist_l" => {
-                "turn" => {
-                    "left" => [0.0, -1.0, 0.0], 90.0,
-                    "right" => [0.0, 1.0, 0.0], 90.0,
-                },
-            },
-            "wrist_twist_r" => {
-                "turn" => {
-                    "left" => [0.0, -1.0, 0.0], 90.0,
-                    "right" => [0.0, 1.0, 0.0], 90.0,
                 },
             },
             "leg_l" => {
