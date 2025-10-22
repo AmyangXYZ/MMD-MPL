@@ -348,8 +348,8 @@ impl BoneActionDatabase {
             },
             "lower_body" => {
                 "bend" => {
-                    "forward" => [-1.0, 0.0, 0.0], 90.0,
-                    "backward" => [1.0, 0.0, 0.0], 90.0,
+                    "forward" => [1.0, 0.0, 0.0], 90.0,
+                    "backward" => [-1.0, 0.0, 0.0], 90.0,
                 },
                 "turn" => {
                     "left" => [0.0, -1.0, 0.0], 90.0,
