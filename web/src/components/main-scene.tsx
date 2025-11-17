@@ -22,9 +22,9 @@ export default function MainScene() {
       // Initialize engine
       try {
         const engine = new Engine(canvasRef.current, {
-          ambient: 0.96,
-          rimLightIntensity: 0.2,
-          bloomIntensity: 0.06,
+          ambient: 1.0,
+          rimLightIntensity: 0.0,
+          bloomIntensity: 0.0,
         })
         engineRef.current = engine
         await engine.init()
@@ -58,9 +58,9 @@ export default function MainScene() {
 
   return (
     <div className="w-full h-full flex flex-col md:flex-row">
-      <div className="w-full h-[70%] md:w-1/2 md:h-full order-1 md:order-2 bg-rose-400">
+      <div className="w-full h-[70%] md:w-1/2 md:h-full order-1 md:order-2 bg-[#fc70a8] relative">
+        {engineError && <div className="text-red-500 z-10 absolute top-0 left-0 w-full h-full flex items-center justify-center text-lg font-medium">{engineError}</div>}
         <canvas ref={canvasRef} className="w-full h-full z-1" />
-        {engineError && <div className="text-red-500 text-center">{engineError}</div>}
       </div>
       <div className="w-full h-[30%] md:w-1/2 md:h-full order-2 md:order-1 border-t">
         <MPLInput modelLoaded={modelLoaded} loadVMD={loadVMD} />
