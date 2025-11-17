@@ -2,6 +2,8 @@
 
 MPL is a domain-specific language that revolutionizes 3D motion and animation through human-readable, semantic syntax. Designed to bridge the gap between natural language and 3D movement, MPL transforms complex mathematical representations into intuitive, code-like commands that both humans and AI systems can easily understand and generate.
 
+> Powered by [Reze Engine](https://github.com/AmyangXYZ/reze-engine)
+
 **Current Implementation:** MMD (MikuMikuDance) format support with plans for broader 3D animation ecosystems.
 
 ![](./screenshots/1.png)
