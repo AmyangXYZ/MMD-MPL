@@ -21,14 +21,10 @@ export default function MainScene() {
     if (canvasRef.current) {
       // Initialize engine
       try {
-        const engine = new Engine(canvasRef.current, {
-          ambient: 1.0,
-          rimLightIntensity: 0.0,
-          bloomIntensity: 0.0,
-        })
+        const engine = new Engine(canvasRef.current, {})
         engineRef.current = engine
         await engine.init()
-        await engine.loadModel("/models/深空之眼-梵天/深空之眼-梵天-short-hair.pmx")
+        await engine.loadModel("/models/深空之眼-梵天/深空之眼-梵天-short-hair-noik.pmx")
 
         engine.runRenderLoop(() => {
         })
